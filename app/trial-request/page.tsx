@@ -89,10 +89,16 @@ export default function TrialRequestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-x-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 inset-x-0 h-[500px] pointer-events-none z-0">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-grid-pattern opacity-30" />
+        <div className="absolute top-[15%] left-[25%] w-[250px] h-[250px] rounded-full bg-emerald-500/5 blur-[100px]" />
+      </div>
+
       <PublicNavbar />
 
-      <main className="flex-grow pt-24 pb-16 flex items-center justify-center">
+      <main className="flex-grow pt-32 pb-24 flex items-center justify-center relative z-10 animate-fade-in-up">
         <div className="mx-auto max-w-lg w-full px-4 sm:px-6">
           
           {/* Breadcrumbs */}
@@ -104,17 +110,17 @@ export default function TrialRequestPage() {
 
           {success ? (
             /* Success State */
-            <div className="rounded-2xl border border-emerald-500/20 bg-slate-900/60 p-8 text-center backdrop-blur-md shadow-xl shadow-emerald-950/5">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 mb-6">
-                <CheckCircle className="h-8 w-8" />
+            <div className="rounded-2xl border border-emerald-500/20 bg-slate-900/40 p-8 text-center backdrop-blur-md shadow-2xl shadow-emerald-950/5">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 mb-6 border border-emerald-500/25">
+                <CheckCircle className="h-8 w-8 animate-pulse" />
               </div>
-              <h2 className="text-xl font-bold text-white mb-3">Trial Reserved Successfully!</h2>
-              <p className="text-xs text-zinc-400 leading-relaxed mb-6 font-sans">
+              <h2 className="text-2xl font-bold text-white mb-3">Trial Reserved Successfully!</h2>
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed mb-8 font-sans font-light">
                 Jazakallah khair. Your request for a 3-day free trial on <strong className="text-emerald-400">{requestedDate}</strong> has been received. We will contact you at <strong className="text-white">{parentEmail}</strong> shortly to coordinate timings and set up your student login credentials.
               </p>
               <Link
                 href="/"
-                className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-3 text-xs font-bold text-white shadow hover:bg-emerald-500 active:scale-[0.98] transition-all"
+                className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 py-3.5 text-xs font-bold text-white shadow active:scale-[0.98] transition-all"
               >
                 Back to Home Page
                 <ArrowRight className="h-4 w-4" />
@@ -122,28 +128,28 @@ export default function TrialRequestPage() {
             </div>
           ) : (
             /* Form Panel */
-            <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 sm:p-8 backdrop-blur-md shadow-xl">
+            <div className="rounded-2xl border border-white/5 bg-slate-900/20 p-6 sm:p-10 backdrop-blur-md shadow-2xl">
               
-              <div className="text-center mb-6">
-                <h1 className="text-2xl font-extrabold tracking-tight font-sans bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent mb-2">
+              <div className="text-center mb-8 space-y-2">
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-sans bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
                   Book a Free Trial
                 </h1>
-                <p className="text-xs text-zinc-450 font-sans">
+                <p className="text-xs text-zinc-450 font-sans font-light">
                   Experience a 3-day class evaluation session with a scholar before enrolling.
                 </p>
               </div>
 
               {errorMsg && (
-                <div className="mb-5 p-4 rounded-xl bg-rose-500/15 border border-rose-500/25 text-rose-300 text-xs font-semibold">
+                <div className="mb-6 p-4 rounded-xl bg-rose-500/15 border border-rose-500/25 text-rose-300 text-xs font-semibold">
                   {errorMsg}
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 
                 {/* Student Name */}
                 <div>
-                  <label htmlFor="studentName" className="block text-xs font-bold text-zinc-300 mb-2">
+                  <label htmlFor="studentName" className="block text-xs font-bold text-zinc-300 mb-2.5">
                     Student Full Name *
                   </label>
                   <div className="relative">
@@ -157,14 +163,14 @@ export default function TrialRequestPage() {
                       onChange={(e) => setStudentName(e.target.value)}
                       placeholder="e.g. Muhammad Abdullah"
                       required
-                      className="w-full rounded-xl border border-white/10 bg-slate-950 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                      className="w-full rounded-xl border border-white/10 bg-slate-950 pl-10 pr-4 py-3.5 text-xs text-slate-100 placeholder-zinc-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
                     />
                   </div>
                 </div>
 
                 {/* Parent Email */}
                 <div>
-                  <label htmlFor="parentEmail" className="block text-xs font-bold text-zinc-300 mb-2">
+                  <label htmlFor="parentEmail" className="block text-xs font-bold text-zinc-300 mb-2.5">
                     Email Address *
                   </label>
                   <div className="relative">
@@ -178,14 +184,14 @@ export default function TrialRequestPage() {
                       onChange={(e) => setParentEmail(e.target.value)}
                       placeholder="your@email.com"
                       required
-                      className="w-full rounded-xl border border-white/10 bg-slate-950 pl-10 pr-4 py-3 text-xs text-slate-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                      className="w-full rounded-xl border border-white/10 bg-slate-950 pl-10 pr-4 py-3.5 text-xs text-slate-100 placeholder-zinc-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
                     />
                   </div>
                 </div>
 
                 {/* Requested Date */}
                 <div>
-                  <label htmlFor="requestedDate" className="block text-xs font-bold text-zinc-300 mb-2">
+                  <label htmlFor="requestedDate" className="block text-xs font-bold text-zinc-300 mb-2.5">
                     Preferred Starting Date *
                   </label>
                   <div className="relative">
@@ -199,14 +205,14 @@ export default function TrialRequestPage() {
                       onChange={(e) => setRequestedDate(e.target.value)}
                       min={getMinDate()}
                       required
-                      className="w-full rounded-xl border border-white/10 bg-slate-950 pl-10 pr-4 py-3 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                      className="w-full rounded-xl border border-white/10 bg-slate-950 pl-10 pr-4 py-3.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
                     />
                   </div>
                 </div>
 
                 {/* Preferred Teacher */}
                 <div>
-                  <label htmlFor="teacher" className="block text-xs font-bold text-zinc-300 mb-2">
+                  <label htmlFor="teacher" className="block text-xs font-bold text-zinc-300 mb-2.5">
                     Preferred Teacher (optional)
                   </label>
                   <div className="relative">
@@ -218,7 +224,7 @@ export default function TrialRequestPage() {
                       value={teacherId}
                       onChange={(e) => setTeacherId(e.target.value)}
                       disabled={loadingTeachers}
-                      className="w-full rounded-xl border border-white/10 bg-slate-950 pl-10 pr-4 py-3 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 disabled:opacity-55"
+                      className="w-full rounded-xl border border-white/10 bg-slate-950 pl-10 pr-4 py-3.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all disabled:opacity-55"
                     >
                       <option value="">
                         {loadingTeachers ? 'Loading teachers list...' : 'No preference'}
@@ -234,7 +240,7 @@ export default function TrialRequestPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 text-xs font-bold text-white shadow shadow-emerald-500/10 hover:bg-emerald-500 active:scale-[0.98] transition-all disabled:opacity-55 mt-2"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 py-3.5 text-xs font-bold text-white shadow shadow-emerald-500/10 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-55 mt-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -249,7 +255,7 @@ export default function TrialRequestPage() {
                   )}
                 </button>
 
-                <p className="text-[10px] text-zinc-500 text-center leading-relaxed mt-4">
+                <p className="text-[10px] text-zinc-500 text-center leading-relaxed mt-4 font-sans font-light">
                   No payment method required. Booking this trial creates a request in our scheduling queues. We will contact you via email shortly.
                 </p>
 

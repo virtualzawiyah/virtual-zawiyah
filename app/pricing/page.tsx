@@ -152,49 +152,55 @@ export default function PricingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-x-hidden">
+      {/* Background Grid Pattern */}
+      <div className="absolute top-0 inset-x-0 h-[600px] pointer-events-none z-0">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-grid-pattern opacity-30" />
+        <div className="absolute top-[10%] right-[15%] w-[350px] h-[350px] rounded-full bg-emerald-500/5 blur-[130px]" />
+      </div>
+
       <PublicNavbar />
 
-      <main className="flex-grow pt-24 pb-16">
+      <main className="flex-grow pt-32 pb-24 relative z-10 animate-fade-in-up">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
           {/* Breadcrumbs */}
-          <nav className="flex mb-6 text-xs text-zinc-500 uppercase tracking-wider font-semibold">
+          <nav className="flex mb-8 text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
             <Link href="/" className="hover:text-emerald-400 transition-colors">Home</Link>
             <span className="mx-2 text-zinc-700">/</span>
             <span className="text-emerald-400">Pricing</span>
           </nav>
 
           {/* Header Section */}
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
-              Transparent Pricing
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#c19b4c] bg-[#c19b4c]/10 border border-[#c19b4c]/20 px-3.5 py-1.5 rounded-full shadow">
+              TRANSPARENT PRICING
             </span>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight font-sans bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent mt-3 mb-4">
+            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight font-sans bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
               Tuition & Fees
             </h1>
-            <p className="text-sm text-zinc-400 leading-relaxed font-sans mb-8">
+            <p className="text-sm sm:text-base text-zinc-400 leading-relaxed font-sans font-light">
               Simple, affordable pricing with no hidden costs. Choose the plan that fits your schedule and learning goals — and start with a 3-day free trial.
             </p>
 
             {/* Currency Selector */}
-            <div className="inline-flex items-center p-1 rounded-xl bg-slate-900 border border-white/5 shadow-inner">
+            <div className="inline-flex items-center p-1.5 rounded-2xl bg-slate-900 border border-white/5 shadow-inner">
               <button
                 onClick={() => setCurrency('USD')}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
                   currency === 'USD'
-                    ? 'bg-emerald-600 text-white shadow'
-                    : 'text-zinc-400 hover:text-zinc-200'
+                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/10'
+                    : 'text-zinc-450 hover:text-zinc-200'
                 }`}
               >
                 USD ($)
               </button>
               <button
                 onClick={() => setCurrency('GBP')}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
                   currency === 'GBP'
-                    ? 'bg-emerald-600 text-white shadow'
-                    : 'text-zinc-400 hover:text-zinc-200'
+                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/10'
+                    : 'text-zinc-450 hover:text-zinc-200'
                 }`}
               >
                 GBP (£)
@@ -203,12 +209,12 @@ export default function PricingPage() {
           </div>
 
           {/* One-on-One Pricing Section */}
-          <div className="mb-20">
-            <div className="border-l-4 border-emerald-500 pl-4 mb-8">
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-sans">
+          <div className="mb-24">
+            <div className="border-l-4 border-emerald-500 pl-5 mb-10 space-y-1">
+              <h2 className="text-2xl font-bold tracking-tight text-white font-sans">
                 One-on-One Classes
               </h2>
-              <p className="text-xs text-zinc-400 mt-1 font-sans">
+              <p className="text-xs text-zinc-450 font-sans font-light">
                 Your dedicated teacher, your pace, your schedule. The most effective way to learn Quran and Islamic studies.
               </p>
             </div>
@@ -220,40 +226,40 @@ export default function PricingPage() {
                 return (
                   <div
                     key={plan.id}
-                    className={`relative flex flex-col justify-between rounded-2xl border bg-slate-900/40 p-6 backdrop-blur-sm transition-all hover:bg-slate-900/85 hover:shadow-xl ${
+                    className={`relative flex flex-col justify-between rounded-2xl border bg-slate-900/20 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
                       plan.popular
-                        ? 'border-amber-500/50 shadow-lg shadow-amber-500/[0.02]'
-                        : 'border-white/5 hover:border-emerald-500/20'
+                        ? 'border-amber-500/40 bg-slate-900/40 shadow-xl shadow-amber-500/[0.02]'
+                        : 'border-white/5 hover:border-emerald-500/20 hover:bg-slate-900/60'
                     }`}
                   >
                     {plan.popular && (
-                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[9px] font-extrabold uppercase tracking-widest text-slate-950 bg-gradient-to-r from-amber-400 to-amber-600 px-3 py-1 rounded-full shadow-md">
+                      <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-[9px] font-extrabold uppercase tracking-widest text-slate-950 bg-gradient-to-r from-amber-400 to-amber-600 px-3.5 py-1 rounded-full shadow-lg">
                         Most Popular
                       </span>
                     )}
 
                     <div>
                       {/* Plan Spec */}
-                      <div className="flex items-baseline justify-between mb-4 border-b border-white/5 pb-3">
+                      <div className="flex items-baseline justify-between mb-5 border-b border-white/5 pb-3.5">
                         <span className="text-xs font-bold text-emerald-400">{plan.duration}</span>
-                        <span className="text-[10px] text-zinc-400 uppercase font-semibold">{plan.lessonsPerWeek}</span>
+                        <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">{plan.lessonsPerWeek}</span>
                       </div>
 
                       {/* Pricing */}
-                      <div className="mb-6">
+                      <div className="mb-8">
                         <div className="flex items-baseline text-white">
-                          <span className="text-3xl font-extrabold tracking-tight">{currencySymbol}{priceVal}</span>
+                          <span className="text-4xl font-extrabold tracking-tight">{currencySymbol}{priceVal}</span>
                           <span className="text-xs text-zinc-500 ml-1">/ month</span>
                         </div>
-                        <span className="text-[10px] text-zinc-500 italic block mt-1">
+                        <span className="text-[9px] text-zinc-550 italic block mt-1.5 font-sans font-light">
                           Approx. {currencySymbol}{perLessonVal} per lesson
                         </span>
                       </div>
 
                       {/* Features */}
-                      <ul className="space-y-2.5 mb-8">
+                      <ul className="space-y-3 mb-8">
                         {plan.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-start gap-2 text-xs text-zinc-400">
+                          <li key={idx} className="flex items-start gap-2 text-xs text-zinc-400 font-light">
                             <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                             <span>{feature}</span>
                           </li>
@@ -266,7 +272,7 @@ export default function PricingPage() {
                       href="/enrollment"
                       className={`w-full flex items-center justify-center gap-1.5 rounded-xl py-3 text-xs font-bold transition-all active:scale-[0.98] ${
                         plan.popular
-                          ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-extrabold hover:from-amber-400 hover:to-amber-500'
+                          ? 'bg-[#c19b4c] hover:bg-[#b08b3e] text-slate-950 font-bold shadow-lg shadow-[#c19b4c]/10'
                           : 'border border-white/10 bg-white/5 text-zinc-300 hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/20'
                       }`}
                     >
@@ -280,33 +286,33 @@ export default function PricingPage() {
           </div>
 
           {/* Group & Weekend Pricing Section */}
-          <div className="grid gap-8 md:grid-cols-2 mb-20">
+          <div className="grid gap-8 md:grid-cols-2 mb-24">
             {/* Group Classes Card */}
-            <div>
-              <div className="border-l-4 border-teal-500 pl-4 mb-6">
-                <h3 className="text-lg font-bold text-white font-sans">Group Classes</h3>
-                <p className="text-xs text-zinc-400">Learn together with a structured academy syllabus.</p>
+            <div className="space-y-6">
+              <div className="border-l-4 border-teal-500 pl-5 space-y-1">
+                <h3 className="text-xl font-bold text-white font-sans">Group Classes</h3>
+                <p className="text-xs text-zinc-450">Learn together with a structured academy syllabus.</p>
               </div>
 
-              <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 backdrop-blur-sm hover:border-teal-500/20 transition-all hover:bg-slate-900/80">
-                <div className="flex justify-between items-baseline mb-4 border-b border-white/5 pb-3">
+              <div className="rounded-2xl border border-white/5 bg-slate-900/20 p-6 backdrop-blur-sm hover:border-teal-500/20 transition-all duration-300 hover:bg-slate-900/60 hover:-translate-y-0.5">
+                <div className="flex justify-between items-baseline mb-5 border-b border-white/5 pb-3.5">
                   <span className="text-xs font-bold text-teal-400">{groupPlan.duration}</span>
-                  <span className="text-[10px] text-zinc-400 uppercase font-semibold">{groupPlan.lessonsPerWeek}</span>
+                  <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">{groupPlan.lessonsPerWeek}</span>
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-8">
                   <div className="flex items-baseline text-white">
-                    <span className="text-3xl font-extrabold tracking-tight">{currencySymbol}{groupPlan.price[currency]}</span>
+                    <span className="text-4xl font-extrabold tracking-tight">{currencySymbol}{groupPlan.price[currency]}</span>
                     <span className="text-xs text-zinc-500 ml-1">/ month</span>
                   </div>
-                  <span className="text-[10px] text-zinc-500 italic block mt-1">
+                  <span className="text-[9px] text-zinc-550 italic block mt-1.5 font-sans font-light">
                     Group tuition format · Daily schedule
                   </span>
                 </div>
 
-                <ul className="space-y-2.5 mb-8">
+                <ul className="space-y-3 mb-8">
                   {groupPlan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-xs text-zinc-400">
+                    <li key={idx} className="flex items-start gap-2 text-xs text-zinc-400 font-light">
                       <Check className="h-4 w-4 text-teal-400 shrink-0 mt-0.5" />
                       <span>{feature}</span>
                     </li>
@@ -315,7 +321,7 @@ export default function PricingPage() {
 
                 <Link
                   href="/enrollment"
-                  className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-3 text-xs font-semibold text-zinc-300 hover:bg-teal-500/10 hover:text-teal-400 hover:border-teal-500/20 active:scale-[0.98] transition-all"
+                  className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-3.5 text-xs font-bold text-zinc-300 hover:bg-teal-500/10 hover:text-teal-400 hover:border-teal-500/20 active:scale-[0.98] transition-all"
                 >
                   Apply Now
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -324,31 +330,31 @@ export default function PricingPage() {
             </div>
 
             {/* Weekend Classes Card */}
-            <div>
-              <div className="border-l-4 border-indigo-500 pl-4 mb-6">
-                <h3 className="text-lg font-bold text-white font-sans">Weekend Classes</h3>
-                <p className="text-xs text-zinc-400">Dedicated weekend schedule for busy pupils.</p>
+            <div className="space-y-6">
+              <div className="border-l-4 border-indigo-500 pl-5 space-y-1">
+                <h3 className="text-xl font-bold text-white font-sans">Weekend Classes</h3>
+                <p className="text-xs text-zinc-450">Dedicated weekend schedule for busy pupils.</p>
               </div>
 
-              <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 backdrop-blur-sm hover:border-indigo-500/20 transition-all hover:bg-slate-900/80">
-                <div className="flex justify-between items-baseline mb-4 border-b border-white/5 pb-3">
+              <div className="rounded-2xl border border-white/5 bg-slate-900/20 p-6 backdrop-blur-sm hover:border-indigo-500/20 transition-all duration-300 hover:bg-slate-900/60 hover:-translate-y-0.5">
+                <div className="flex justify-between items-baseline mb-5 border-b border-white/5 pb-3.5">
                   <span className="text-xs font-bold text-indigo-400">{weekendPlan.name}</span>
-                  <span className="text-[10px] text-zinc-400 uppercase font-semibold">{weekendPlan.type}</span>
+                  <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">{weekendPlan.type}</span>
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-8">
                   <div className="flex items-baseline text-white">
-                    <span className="text-3xl font-extrabold tracking-tight">{currencySymbol}{weekendPlan.price[currency]}</span>
+                    <span className="text-4xl font-extrabold tracking-tight">{currencySymbol}{weekendPlan.price[currency]}</span>
                     <span className="text-xs text-zinc-500 ml-1">/ month</span>
                   </div>
-                  <span className="text-[10px] text-zinc-500 italic block mt-1">
+                  <span className="text-[9px] text-zinc-550 italic block mt-1.5 font-sans font-light">
                     {weekendPlan.duration}
                   </span>
                 </div>
 
-                <ul className="space-y-2.5 mb-8">
+                <ul className="space-y-3 mb-8">
                   {weekendPlan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-xs text-zinc-400">
+                    <li key={idx} className="flex items-start gap-2 text-xs text-zinc-400 font-light">
                       <Check className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
                       <span>{feature}</span>
                     </li>
@@ -357,7 +363,7 @@ export default function PricingPage() {
 
                 <Link
                   href="/enrollment"
-                  className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-3 text-xs font-bold text-white shadow hover:bg-emerald-500 active:scale-[0.98] transition-all"
+                  className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white py-3.5 px-6 text-xs font-bold shadow hover:bg-emerald-500 active:scale-[0.98] transition-all"
                 >
                   Apply for Weekend Classes
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -368,11 +374,11 @@ export default function PricingPage() {
 
           {/* Good to Know Section */}
           <div className="mb-12">
-            <div className="text-center max-w-3xl mx-auto mb-10">
-              <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-sans">
+            <div className="text-center max-w-3xl mx-auto mb-12 space-y-1">
+              <h3 className="text-2xl font-bold tracking-tight text-white font-sans">
                 Good to Know
               </h3>
-              <p className="text-xs text-zinc-400 mt-1.5">
+              <p className="text-xs text-zinc-400 font-sans font-light">
                 Answers to frequently asked pricing, schedule, and policy questions.
               </p>
             </div>
@@ -383,7 +389,7 @@ export default function PricingPage() {
                 return (
                   <div
                     key={idx}
-                    className="flex gap-4 rounded-2xl border border-white/5 bg-slate-900/20 p-5 backdrop-blur-sm"
+                    className="flex gap-4 rounded-2xl border border-white/5 bg-slate-900/10 p-5 backdrop-blur-sm hover:border-emerald-500/10 transition-colors"
                   >
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border text-base ${item.iconColor}`}>
                       <Icon className="h-5 w-5" />
@@ -392,7 +398,7 @@ export default function PricingPage() {
                       <h4 className="text-sm font-bold text-white mb-1.5">
                         {item.title}
                       </h4>
-                      <p className="text-xs text-zinc-450 leading-relaxed font-sans">
+                      <p className="text-xs text-zinc-400 leading-relaxed font-sans font-light">
                         {item.description}
                       </p>
                     </div>
@@ -403,24 +409,25 @@ export default function PricingPage() {
           </div>
 
           {/* CTA Banner */}
-          <div className="mt-16 rounded-3xl border border-white/5 bg-gradient-to-r from-emerald-950/40 to-slate-900/60 p-8 text-center backdrop-blur-sm">
-            <h3 className="text-lg font-bold text-white mb-2">
+          <div className="mt-20 rounded-3xl border border-white/5 bg-gradient-to-r from-emerald-950/40 to-slate-900/60 p-8 sm:p-12 text-center backdrop-blur-sm relative overflow-hidden">
+            <div className="absolute bottom-0 right-0 w-44 h-44 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+            <h3 className="text-xl font-bold text-white mb-2">
               Start with 3 Days Free
             </h3>
-            <p className="text-xs text-zinc-400 max-w-xl mx-auto mb-6">
-              No payment details needed to begin. Apply today, try your chosen tuition plan for 3 full days, and enrol with absolute confidence.
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto mb-8 font-sans font-light">
+              No payment details needed to begin. Apply today, try your chosen plan for 3 days, and enrol with confidence.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/enrollment"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 px-6 text-sm font-bold text-white shadow hover:bg-emerald-500 active:scale-[0.98] transition-all"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#c19b4c] hover:bg-[#b08b3e] text-slate-950 py-3.5 px-8 text-xs font-bold shadow-lg shadow-[#c19b4c]/10 active:scale-[0.98] transition-all"
               >
                 Apply for Free Trial
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/contact"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 px-6 text-sm font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3.5 px-8 text-xs font-bold text-zinc-200 hover:bg-white/10 hover:text-white transition-all active:scale-[0.98]"
               >
                 Have a Question?
               </Link>

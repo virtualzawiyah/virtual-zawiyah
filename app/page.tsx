@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import PublicNavbar from '@/components/PublicNavbar'
 import PublicFooter from '@/components/PublicFooter'
-import { Sparkles, ArrowRight, GraduationCap, Calendar, ShieldCheck, BookOpen, Moon, Target, Compass } from 'lucide-react'
+import { Sparkles, ArrowRight, GraduationCap, Calendar, ShieldCheck, BookOpen, Moon, Target, Compass, ChevronRight } from 'lucide-react'
 
 export default function Home() {
   const stats = [
@@ -146,76 +146,80 @@ export default function Home() {
   ]
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans relative overflow-x-hidden">
+      {/* Glow backgrounds */}
+      <div className="absolute top-0 inset-x-0 h-[800px] pointer-events-none z-0">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-grid-pattern opacity-40" />
+        <div className="absolute top-[10%] left-[10%] w-[350px] h-[350px] rounded-full bg-emerald-500/10 blur-[130px]" />
+        <div className="absolute top-[20%] right-[10%] w-[350px] h-[350px] rounded-full bg-amber-500/5 blur-[120px]" />
+      </div>
+
       <PublicNavbar />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
-        {/* Background Gradients */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[100px]" />
-          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-teal-500/5 rounded-full blur-[80px]" />
-        </div>
-
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+      <section className="relative pt-36 pb-24 lg:pt-44 lg:pb-36 z-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-12 items-center">
             
             {/* Left Column: Hero Text */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider mx-auto lg:mx-0">
+            <div className="lg:col-span-7 space-y-8 text-center lg:text-left animate-fade-in-up">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider mx-auto lg:mx-0 shadow-lg shadow-emerald-950/20">
                 <Sparkles className="h-3.5 w-3.5" />
                 Authentic Islamic Education Online
               </div>
-              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent font-sans leading-tight">
-                Learn the Quran From Anywhere in the World
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-sans leading-tight">
+                Learn the Quran From <br className="hidden sm:inline" />
+                <span className="bg-gradient-to-r from-white via-slate-100 to-emerald-400 bg-clip-text text-transparent">Anywhere in the World</span>
               </h1>
-              <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-xl mx-auto lg:mx-0">
+              <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-xl mx-auto lg:mx-0 font-sans font-light">
                 Virtual Zawiyah offers live, structured Islamic education with qualified scholars — accessible to every Muslim, wherever they are.
               </p>
               
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
                 <Link
                   href="/enrollment"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 px-8 text-xs font-bold text-white shadow shadow-emerald-500/10 hover:bg-emerald-500 active:scale-[0.98] transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#c19b4c] hover:bg-[#b08b3e] text-slate-950 py-3.5 px-8 text-xs font-bold shadow-lg shadow-[#c19b4c]/10 active:scale-[0.98] transition-all"
                 >
                   Apply Now
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/courses"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3.5 px-8 text-xs font-bold text-zinc-205 hover:bg-white/10 hover:text-white transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3.5 px-8 text-xs font-bold text-zinc-200 hover:bg-white/10 hover:text-white transition-all active:scale-[0.98]"
                 >
                   Explore Courses
                 </Link>
               </div>
 
-              <div className="flex items-center justify-center lg:justify-start gap-2 text-xs text-zinc-500">
-                <span>🌟 3 Days Free Trial</span>
-                <span className="text-zinc-700">•</span>
-                <span>Gender-Segregated Staff</span>
-                <span className="text-zinc-700">•</span>
-                <span>One-on-One Focus</span>
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 text-xs text-zinc-500 pt-2 font-medium">
+                <span className="flex items-center gap-1.5"><span className="text-[#c19b4c]">★</span> 3 Days Free Trial</span>
+                <span className="hidden sm:inline text-zinc-800">•</span>
+                <span className="flex items-center gap-1.5"><span className="text-emerald-500">✔</span> Gender-Segregated Staff</span>
+                <span className="hidden sm:inline text-zinc-800">•</span>
+                <span className="flex items-center gap-1.5"><span className="text-teal-400">⚡</span> One-on-One Focus</span>
               </div>
             </div>
 
-            {/* Right Column: Compliant Abstract Graphics instead of Female Imagery */}
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-full max-w-[380px] aspect-square rounded-3xl border border-white/5 bg-gradient-to-br from-slate-900/60 to-slate-950 p-6 flex flex-col justify-between shadow-2xl shadow-emerald-950/10 overflow-hidden">
-                <div className="absolute -top-16 -right-16 w-36 h-36 bg-emerald-500/10 rounded-full blur-2xl" />
-                
-                {/* Visual Accent Quran/Islam Emblem */}
-                <div className="flex-grow flex flex-col items-center justify-center space-y-4">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                    <Compass className="h-10 w-10 animate-spin-slow" />
+            {/* Right Column: Premium Geometric Compliant Widget */}
+            <div className="lg:col-span-5 flex justify-center lg:justify-end animate-float">
+              <div className="relative w-full max-w-[380px] aspect-square rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/60 to-slate-950 p-8 flex flex-col justify-between shadow-2xl shadow-emerald-950/20 overflow-hidden group hover:border-emerald-500/20 transition-all duration-300">
+                <div className="absolute -top-20 -right-20 w-44 h-44 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/15 transition-all" />
+                <div className="absolute -bottom-20 -left-20 w-44 h-44 bg-[#c19b4c]/5 rounded-full blur-3xl pointer-events-none" />
+
+                {/* Vector Ornament / Islamic Star shape */}
+                <div className="flex-grow flex flex-col items-center justify-center space-y-6">
+                  <div className="relative flex h-24 w-24 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 group-hover:scale-105 transition-all duration-500">
+                    <div className="absolute inset-0.5 border border-dashed border-emerald-500/30 rounded-xl" />
+                    <Compass className="h-12 w-12 animate-spin-slow text-emerald-400" />
                   </div>
-                  <div className="text-center">
-                    <h3 className="text-sm font-serif font-bold text-white tracking-wide">الزاوية الافتراضية</h3>
-                    <p className="text-[10px] text-emerald-400 uppercase tracking-widest font-semibold mt-1">Virtual Zawiyah</p>
+                  <div className="text-center space-y-1">
+                    <h3 className="text-xl font-serif font-bold text-white tracking-wider">الزاوية الافتراضية</h3>
+                    <p className="text-[10px] text-[#c19b4c] uppercase tracking-widest font-bold">Virtual Zawiyah</p>
                   </div>
                 </div>
 
-                <div className="border-t border-white/5 pt-4 text-center">
-                  <p className="text-[10px] text-zinc-500 leading-relaxed font-sans">
+                <div className="border-t border-white/5 pt-5 text-center">
+                  <p className="text-[11px] text-zinc-450 leading-relaxed font-sans font-light">
                     Structured Tajweed, Fiqh, and Arabic grammar. Taught by verified Alims & Alimahs.
                   </p>
                 </div>
@@ -227,13 +231,13 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-emerald-900/40 border-y border-emerald-800/30 py-8 backdrop-blur-sm relative z-10">
+      <section className="bg-emerald-950/30 border-y border-white/5 py-12 backdrop-blur-md relative z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x-0 md:divide-x divide-white/5">
             {stats.map((stat, idx) => (
               <div key={idx} className="space-y-1">
-                <div className="text-2xl sm:text-3xl font-extrabold text-white">{stat.value}</div>
-                <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-emerald-300">{stat.label}</div>
+                <div className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">{stat.value}</div>
+                <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#c19b4c]">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -241,14 +245,14 @@ export default function Home() {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-20">
+      <section className="py-24 relative z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
-              Why Choose Us
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+              WHY CHOOSE US
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mt-2">
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
               Why Virtual Zawiyah
             </h2>
           </div>
@@ -257,12 +261,15 @@ export default function Home() {
             {corePillars.map((pillar, idx) => {
               const Icon = pillar.icon
               return (
-                <div key={idx} className="rounded-2xl border border-white/5 bg-slate-900/30 p-6 transition-all hover:border-emerald-500/20 hover:bg-slate-900/60">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg border mb-4 ${pillar.color}`}>
-                    <Icon className="h-5 w-5" />
+                <div 
+                  key={idx} 
+                  className="group rounded-2xl border border-white/5 bg-slate-900/20 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/25 hover:bg-slate-900/60 hover:shadow-xl hover:shadow-emerald-500/[0.01]"
+                >
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-xl border mb-5 transition-transform duration-500 group-hover:scale-105 ${pillar.color}`}>
+                    <Icon className="h-5.5 w-5.5" />
                   </div>
-                  <h3 className="text-sm font-bold text-white mb-2">{pillar.title}</h3>
-                  <p className="text-xs text-zinc-450 leading-relaxed font-sans">{pillar.description}</p>
+                  <h3 className="text-sm font-bold text-white mb-2.5 group-hover:text-emerald-400 transition-colors">{pillar.title}</h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed font-sans font-light">{pillar.description}</p>
                 </div>
               )
             })}
@@ -272,24 +279,26 @@ export default function Home() {
       </section>
 
       {/* Curriculum Highlight Section */}
-      <section className="py-20 border-t border-white/5 bg-slate-900/10">
+      <section className="py-24 border-t border-white/5 bg-slate-900/10 relative z-10">
+        <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-emerald-500/[0.02] blur-[150px] pointer-events-none" />
+
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
-          <div className="flex flex-col sm:flex-row items-center justify-between mb-12 gap-4">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
-                Our Curriculum
+          <div className="flex flex-col sm:flex-row items-center justify-between mb-16 gap-4">
+            <div className="text-center sm:text-left space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#c19b4c]">
+                OUR CURRICULUM
               </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mt-2">
+              <h2 className="text-3xl font-extrabold tracking-tight text-white font-sans">
                 Explore Our Courses
               </h2>
             </div>
             <Link
               href="/courses"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-2.5 px-5 text-xs font-bold text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 px-6 text-xs font-bold text-zinc-200 hover:bg-white/10 hover:text-white transition-all active:scale-[0.98]"
             >
               View All Courses
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
@@ -297,27 +306,30 @@ export default function Home() {
             {featuredCourses.map((course, idx) => {
               const Icon = course.icon
               return (
-                <div key={idx} className="group rounded-2xl border border-white/5 bg-slate-900/40 p-6 transition-all hover:border-emerald-500/20 hover:bg-slate-900/80">
-                  <div className="flex justify-between items-center mb-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                      <Icon className="h-5 w-5" />
+                <div 
+                  key={idx} 
+                  className="group rounded-2xl border border-white/5 bg-slate-900/30 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/20 hover:bg-slate-900/70 hover:shadow-xl hover:shadow-emerald-500/[0.01]"
+                >
+                  <div className="flex justify-between items-center mb-5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+                      <Icon className="h-5.5 w-5.5" />
                     </div>
-                    <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white/5 text-zinc-400 border border-white/5">
+                    <span className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded bg-white/5 text-zinc-400 border border-white/5">
                       {course.badge}
                     </span>
                   </div>
-                  <h3 className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors mb-2">
+                  <h3 className="text-base font-bold text-white group-hover:text-emerald-400 transition-colors mb-2.5">
                     {course.title}
                   </h3>
-                  <p className="text-xs text-zinc-450 leading-relaxed font-sans mb-4 min-h-[48px]">
+                  <p className="text-xs text-zinc-400 leading-relaxed font-sans font-light mb-5 min-h-[48px]">
                     {course.description}
                   </p>
                   <Link
                     href="/courses"
-                    className="inline-flex items-center gap-1 text-xs text-emerald-400 font-semibold hover:text-emerald-300"
+                    className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-bold hover:text-emerald-300 transition-all group-hover:translate-x-1"
                   >
                     Learn More
-                    <ArrowRight className="h-3 w-3" />
+                    <ChevronRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
               )
@@ -328,24 +340,27 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 bg-emerald-950/20 border-y border-white/5">
+      <section className="py-24 bg-slate-900/10 border-t border-white/5 relative z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
-              Simple Process
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#c19b4c]">
+              SIMPLE PROCESS
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mt-2">
+            <h2 className="text-3xl font-extrabold tracking-tight text-white font-sans">
               How It Works
             </h2>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
             {howItWorks.map((item, idx) => (
-              <div key={idx} className="relative rounded-2xl border border-white/5 bg-slate-900/30 p-6 transition-all hover:bg-slate-900/60">
-                <div className="absolute top-4 right-4 text-3xl font-black text-emerald-500/10">{item.step}</div>
-                <h3 className="text-sm font-bold text-white mb-2">{item.title}</h3>
-                <p className="text-xs text-zinc-450 leading-relaxed font-sans">{item.description}</p>
+              <div 
+                key={idx} 
+                className="relative rounded-2xl border border-white/5 bg-slate-900/20 p-6 transition-all duration-300 hover:border-emerald-500/10"
+              >
+                <div className="absolute top-4 right-4 text-4xl font-black text-emerald-500/5 select-none">{item.step}</div>
+                <h3 className="text-base font-bold text-white mb-2.5">{item.title}</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed font-sans font-light">{item.description}</p>
               </div>
             ))}
           </div>
@@ -353,7 +368,7 @@ export default function Home() {
           <div className="text-center mt-12">
             <Link
               href="/enrollment"
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 py-3.5 px-8 text-xs font-bold text-white shadow hover:bg-emerald-500 active:scale-[0.98] transition-all"
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white py-3.5 px-8 text-xs font-bold shadow-lg shadow-emerald-950/15 active:scale-[0.98] transition-all"
             >
               Start with a Free Trial
               <ArrowRight className="h-4 w-4" />
@@ -364,34 +379,37 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20">
+      <section className="py-24 border-t border-white/5 relative z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
-              Student Stories
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+              STUDENT STORIES
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mt-2">
+            <h2 className="text-3xl font-extrabold tracking-tight text-white">
               What Our Students Say
             </h2>
-            <p className="text-xs text-zinc-400 mt-2">
+            <p className="text-xs text-zinc-400 font-sans font-light">
               Families from across the globe trust Virtual Zawiyah with their Islamic education.
             </p>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             {testimonials.map((test, idx) => (
-              <div key={idx} className="rounded-2xl border border-white/5 bg-slate-900/35 p-6 flex flex-col justify-between">
-                <p className="text-xs text-zinc-350 leading-relaxed font-sans italic mb-6">
+              <div 
+                key={idx} 
+                className="group rounded-2xl border border-white/5 bg-slate-900/30 p-6 flex flex-col justify-between hover:border-emerald-500/10 transition-all duration-300"
+              >
+                <p className="text-xs sm:text-sm text-zinc-350 leading-relaxed font-sans italic mb-6 font-light">
                   &ldquo;{test.quote}&rdquo;
                 </p>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-extrabold text-xs">
+                <div className="flex items-center gap-3 border-t border-white/5 pt-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-extrabold text-xs group-hover:bg-[#c19b4c] group-hover:text-slate-950 group-hover:border-transparent transition-all duration-500">
                     {test.letter}
                   </div>
                   <div>
                     <span className="block text-xs font-bold text-white">{test.author}</span>
-                    <span className="block text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">{test.country}</span>
+                    <span className="block text-[9px] text-[#c19b4c] uppercase tracking-widest font-bold mt-0.5">{test.country}</span>
                   </div>
                 </div>
               </div>
@@ -402,29 +420,32 @@ export default function Home() {
       </section>
 
       {/* Featured Teachers Section */}
-      <section className="py-20 border-t border-white/5 bg-slate-900/10">
+      <section className="py-24 border-t border-white/5 bg-slate-900/10 relative z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
-              Meet The Faculty
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#c19b4c]">
+              MEET THE FACULTY
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mt-2">
+            <h2 className="text-3xl font-extrabold tracking-tight text-white">
               Featured Teachers
             </h2>
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
             {featuredTeachers.map((teacher, idx) => (
-              <div key={idx} className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 text-center">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-extrabold text-sm mb-4">
+              <div 
+                key={idx} 
+                className="group rounded-2xl border border-white/5 bg-slate-900/40 p-6 text-center hover:border-emerald-500/20 transition-all duration-300"
+              >
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-extrabold text-sm mb-4 group-hover:scale-105 transition-transform duration-500">
                   {teacher.letter}
                 </div>
-                <h3 className="text-sm font-bold text-white mb-1">{teacher.name}</h3>
-                <span className="block text-[10px] font-bold uppercase tracking-wider text-emerald-500 mb-3">
+                <h3 className="text-sm font-bold text-white mb-1 group-hover:text-emerald-400 transition-colors">{teacher.name}</h3>
+                <span className="block text-[10px] font-extrabold uppercase tracking-widest text-[#c19b4c] mb-3">
                   {teacher.role}
                 </span>
-                <p className="text-xs text-zinc-450 leading-normal font-sans">
+                <p className="text-xs text-zinc-400 leading-normal font-sans font-light">
                   {teacher.qualifications}
                 </p>
               </div>
@@ -434,10 +455,10 @@ export default function Home() {
           <div className="text-center mt-12">
             <Link
               href="/courses"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-2.5 px-6 text-xs font-bold text-zinc-350 hover:bg-white/10 hover:text-white transition-all"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 px-6 text-xs font-bold text-zinc-200 hover:bg-white/10 hover:text-white transition-all active:scale-[0.98]"
             >
               View All Courses & syllabus
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
@@ -445,28 +466,30 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 border-t border-white/5 bg-gradient-to-b from-slate-950 to-emerald-950/20 relative overflow-hidden">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
-            Begin Today
+      <section className="py-24 border-t border-white/5 bg-gradient-to-b from-slate-950 via-slate-950 to-emerald-950/20 relative z-10 overflow-hidden">
+        <div className="absolute bottom-0 right-1/4 w-[350px] h-[350px] rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none" />
+
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center space-y-6">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1.5 rounded-full shadow-lg">
+            BEGIN TODAY
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mt-4 mb-3">
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
             Ready to Begin Your Journey?
           </h2>
-          <p className="text-xs sm:text-sm text-zinc-450 leading-relaxed max-w-xl mx-auto mb-8">
+          <p className="text-xs sm:text-sm text-zinc-450 leading-relaxed max-w-xl mx-auto font-sans font-light">
             Apply for a free 3-day trial today and experience authentic Islamic education from qualified scholars — wherever you are in the world.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
             <Link
               href="/enrollment"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 px-6 text-xs font-bold text-white shadow hover:bg-emerald-500 active:scale-[0.98] transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#c19b4c] hover:bg-[#b08b3e] text-slate-950 py-3.5 px-8 text-xs font-bold shadow-lg shadow-[#c19b4c]/10 active:scale-[0.98] transition-all"
             >
               Apply for Free Trial
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/courses"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3.5 px-6 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3.5 px-8 text-xs font-bold text-zinc-200 hover:bg-white/10 hover:text-white transition-all active:scale-[0.98]"
             >
               Browse Courses
             </Link>

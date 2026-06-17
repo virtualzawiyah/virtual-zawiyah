@@ -148,43 +148,49 @@ export default function EnrollmentPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-x-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 inset-x-0 h-[600px] pointer-events-none z-0">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-grid-pattern opacity-30" />
+        <div className="absolute top-[15%] left-[10%] w-[300px] h-[300px] rounded-full bg-emerald-500/5 blur-[120px]" />
+      </div>
+
       <PublicNavbar />
 
-      <main className="flex-grow pt-24 pb-16">
+      <main className="flex-grow pt-32 pb-24 relative z-10 animate-fade-in-up">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           
           {/* Breadcrumbs */}
-          <nav className="flex mb-6 text-xs text-zinc-500 uppercase tracking-wider font-semibold">
+          <nav className="flex mb-8 text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
             <Link href="/" className="hover:text-emerald-400 transition-colors">Home</Link>
             <span className="mx-2 text-zinc-700">/</span>
             <span className="text-emerald-400">Admission</span>
           </nav>
 
           {/* Header */}
-          <div className="text-center max-w-3xl mx-auto mb-10">
-            <h1 className="text-3xl font-extrabold tracking-tight font-sans bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent mb-3">
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight font-sans bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
               Admission Application
             </h1>
-            <p className="text-xs text-zinc-450 leading-relaxed font-sans">
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-sans font-light">
               Fill out the form below to apply. Our team will review your application and contact you within 24 hours via WhatsApp.
             </p>
           </div>
 
           {submitSuccess ? (
             /* Success State */
-            <div className="rounded-2xl border border-emerald-500/20 bg-slate-900/60 p-8 text-center backdrop-blur-md max-w-2xl mx-auto shadow-xl shadow-emerald-950/5">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 mb-6">
-                <CheckCircle2 className="h-8 w-8" />
+            <div className="rounded-2xl border border-emerald-500/20 bg-slate-900/40 p-8 sm:p-12 text-center backdrop-blur-md max-w-2xl mx-auto shadow-2xl shadow-emerald-950/5">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 mb-6 border border-emerald-500/20 shadow-inner">
+                <CheckCircle2 className="h-8 w-8 animate-pulse" />
               </div>
-              <h2 className="text-xl font-bold text-white mb-3">Application Submitted Successfully!</h2>
-              <p className="text-xs text-zinc-400 leading-relaxed mb-6 font-sans">
+              <h2 className="text-2xl font-bold text-white mb-4">Application Submitted Successfully!</h2>
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed mb-8 font-sans font-light">
                 Jazakallah khair. Your admission request has been received. Our support team will review the details and reach out to you via WhatsApp at <strong className="text-emerald-400">{parentWhatsapp}</strong> within 24 hours to match you with a teacher and schedule your trial classes.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   href="/"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-3 px-6 text-xs font-bold text-white shadow hover:bg-emerald-500 active:scale-[0.98] transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 py-3 px-6 text-xs font-bold text-white shadow hover:scale-[1.01] active:scale-[0.99] transition-all"
                 >
                   Return to Home
                   <ArrowRight className="h-4 w-4" />
@@ -193,7 +199,7 @@ export default function EnrollmentPage() {
                   href="https://wa.me/923355777312"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 py-3 px-6 text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 py-3 px-6 text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 transition-all active:scale-[0.99]"
                 >
                   Message Support on WhatsApp
                 </a>
@@ -201,26 +207,26 @@ export default function EnrollmentPage() {
             </div>
           ) : (
             /* Form Card */
-            <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 sm:p-8 backdrop-blur-md shadow-xl">
+            <div className="rounded-2xl border border-white/5 bg-slate-900/20 p-6 sm:p-10 backdrop-blur-md shadow-2xl">
               
               {errorMessage && (
-                <div className="mb-6 p-4 rounded-xl bg-rose-500/15 border border-rose-500/25 text-rose-300 text-xs font-semibold">
+                <div className="mb-8 p-4 rounded-xl bg-rose-500/15 border border-rose-500/25 text-rose-300 text-xs font-semibold">
                   {errorMessage}
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-8">
+              <form onSubmit={handleSubmit} className="space-y-10">
                 
                 {/* 1. Personal Information */}
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-400 border-b border-white/5 pb-2.5 mb-5">
+                <div className="space-y-6">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-[#c19b4c] border-b border-white/5 pb-3">
                     1. Personal Information
                   </h3>
                   <div className="grid gap-6 sm:grid-cols-2">
                     
                     {/* Student Name */}
                     <div>
-                      <label htmlFor="studentName" className="block text-xs font-bold text-zinc-300 mb-2">
+                      <label htmlFor="studentName" className="block text-xs font-bold text-zinc-300 mb-2.5">
                         Student Full Name *
                       </label>
                       <input
@@ -230,13 +236,13 @@ export default function EnrollmentPage() {
                         onChange={(e) => setStudentName(e.target.value)}
                         placeholder="e.g. Muhammad Abdullah"
                         required
-                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-xs text-slate-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3.5 text-xs text-slate-100 placeholder-zinc-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
                       />
                     </div>
 
                     {/* Student Age */}
                     <div>
-                      <label htmlFor="studentAge" className="block text-xs font-bold text-zinc-300 mb-2">
+                      <label htmlFor="studentAge" className="block text-xs font-bold text-zinc-300 mb-2.5">
                         Student Age
                       </label>
                       <input
@@ -245,13 +251,13 @@ export default function EnrollmentPage() {
                         value={studentAge}
                         onChange={(e) => setStudentAge(e.target.value)}
                         placeholder="Age in years"
-                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-xs text-slate-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3.5 text-xs text-slate-100 placeholder-zinc-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
                       />
                     </div>
 
                     {/* Father's Name / Parent Name */}
                     <div>
-                      <label htmlFor="parentName" className="block text-xs font-bold text-zinc-300 mb-2">
+                      <label htmlFor="parentName" className="block text-xs font-bold text-zinc-300 mb-2.5">
                         Father / Parent Name *
                       </label>
                       <input
@@ -261,20 +267,20 @@ export default function EnrollmentPage() {
                         onChange={(e) => setParentName(e.target.value)}
                         placeholder="Father's or Parent's full name"
                         required
-                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-xs text-slate-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3.5 text-xs text-slate-100 placeholder-zinc-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
                       />
                     </div>
 
                     {/* Guardian Relationship */}
                     <div>
-                      <label htmlFor="guardianRelationship" className="block text-xs font-bold text-zinc-300 mb-2">
+                      <label htmlFor="guardianRelationship" className="block text-xs font-bold text-zinc-300 mb-2.5">
                         Guardian Relationship
                       </label>
                       <select
                         id="guardianRelationship"
                         value={guardianRelationship}
                         onChange={(e) => setGuardianRelationship(e.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
                       >
                         <option value="">Select relationship</option>
                         <option value="father">Father</option>
@@ -287,7 +293,7 @@ export default function EnrollmentPage() {
 
                     {/* Student Gender */}
                     <div>
-                      <label htmlFor="studentGender" className="block text-xs font-bold text-zinc-300 mb-2">
+                      <label htmlFor="studentGender" className="block text-xs font-bold text-zinc-300 mb-2.5">
                         Student Gender *
                       </label>
                       <select
@@ -295,7 +301,7 @@ export default function EnrollmentPage() {
                         value={studentGender}
                         onChange={(e) => setStudentGender(e.target.value)}
                         required
-                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
                       >
                         <option value="">Select gender</option>
                         <option value="male">Male</option>
@@ -305,7 +311,7 @@ export default function EnrollmentPage() {
 
                     {/* Country */}
                     <div>
-                      <label htmlFor="country" className="block text-xs font-bold text-zinc-300 mb-2">
+                      <label htmlFor="country" className="block text-xs font-bold text-zinc-300 mb-2.5">
                         Country *
                       </label>
                       <select
@@ -313,7 +319,7 @@ export default function EnrollmentPage() {
                         value={country}
                         onChange={(e) => setCountry(e.target.value)}
                         required
-                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
                       >
                         <option value="">Select country</option>
                         {countriesList.map((c) => (
@@ -324,7 +330,7 @@ export default function EnrollmentPage() {
 
                     {/* State / Province */}
                     <div>
-                      <label htmlFor="stateProvince" className="block text-xs font-bold text-zinc-300 mb-2">
+                      <label htmlFor="stateProvince" className="block text-xs font-bold text-zinc-300 mb-2.5">
                         State / Province *
                       </label>
                       <input
@@ -334,13 +340,13 @@ export default function EnrollmentPage() {
                         onChange={(e) => setStateProvince(e.target.value)}
                         placeholder="e.g. Ontario, Punjab, Texas"
                         required
-                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-xs text-slate-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3.5 text-xs text-slate-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
                       />
                     </div>
 
                     {/* Email Address */}
                     <div>
-                      <label htmlFor="parentEmail" className="block text-xs font-bold text-zinc-300 mb-2">
+                      <label htmlFor="parentEmail" className="block text-xs font-bold text-zinc-300 mb-2.5">
                         Email Address *
                       </label>
                       <input
@@ -350,13 +356,13 @@ export default function EnrollmentPage() {
                         onChange={(e) => setParentEmail(e.target.value)}
                         placeholder="your@email.com"
                         required
-                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-xs text-slate-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3.5 text-xs text-slate-100 placeholder-zinc-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
                       />
                     </div>
 
                     {/* Parent WhatsApp Number */}
                     <div>
-                      <label htmlFor="parentWhatsapp" className="block text-xs font-bold text-zinc-300 mb-2">
+                      <label htmlFor="parentWhatsapp" className="block text-xs font-bold text-zinc-300 mb-2.5">
                         Parent WhatsApp Number *
                       </label>
                       <input
@@ -366,13 +372,13 @@ export default function EnrollmentPage() {
                         onChange={(e) => setParentWhatsapp(e.target.value)}
                         placeholder="e.g. +1 555 000 0000"
                         required
-                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-xs text-slate-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3.5 text-xs text-slate-100 placeholder-zinc-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
                       />
                     </div>
 
                     {/* Student WhatsApp Number */}
                     <div>
-                      <label htmlFor="studentWhatsapp" className="block text-xs font-bold text-zinc-300 mb-2">
+                      <label htmlFor="studentWhatsapp" className="block text-xs font-bold text-zinc-300 mb-2.5">
                         Student WhatsApp Number (optional)
                       </label>
                       <input
@@ -381,7 +387,7 @@ export default function EnrollmentPage() {
                         value={studentWhatsapp}
                         onChange={(e) => setStudentWhatsapp(e.target.value)}
                         placeholder="e.g. +1 555 000 0000"
-                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-xs text-slate-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3.5 text-xs text-slate-100 placeholder-zinc-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
                       />
                     </div>
 
@@ -389,15 +395,15 @@ export default function EnrollmentPage() {
                 </div>
 
                 {/* 2. Academic Information */}
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-400 border-b border-white/5 pb-2.5 mb-5">
+                <div className="space-y-6">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-[#c19b4c] border-b border-white/5 pb-3">
                     2. Academic Information
                   </h3>
                   <div className="grid gap-6 sm:grid-cols-2">
                     
                     {/* Course */}
                     <div>
-                      <label htmlFor="courseInterest" className="block text-xs font-bold text-zinc-300 mb-2">
+                      <label htmlFor="courseInterest" className="block text-xs font-bold text-zinc-300 mb-2.5">
                         Selected Course *
                       </label>
                       <select
@@ -405,7 +411,7 @@ export default function EnrollmentPage() {
                         value={courseInterest}
                         onChange={(e) => setCourseInterest(e.target.value)}
                         required
-                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
                       >
                         <option value="">Select a course</option>
                         {coursesList.map((course) => (
@@ -416,7 +422,7 @@ export default function EnrollmentPage() {
 
                     {/* Preferred Teacher */}
                     <div>
-                      <label htmlFor="preferredTeacher" className="block text-xs font-bold text-zinc-300 mb-2">
+                      <label htmlFor="preferredTeacher" className="block text-xs font-bold text-zinc-300 mb-2.5">
                         Preferred Teacher
                       </label>
                       <select
@@ -424,7 +430,7 @@ export default function EnrollmentPage() {
                         value={preferredTeacherId}
                         onChange={(e) => setPreferredTeacherId(e.target.value)}
                         disabled={loadingTeachers}
-                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 disabled:opacity-55"
+                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all disabled:opacity-55"
                       >
                         <option value="">
                           {loadingTeachers ? 'Loading teachers list...' : 'Select preferred teacher (optional)'}
@@ -439,7 +445,7 @@ export default function EnrollmentPage() {
 
                     {/* Timezone */}
                     <div>
-                      <label htmlFor="timezone" className="block text-xs font-bold text-zinc-300 mb-2 flex items-center justify-between">
+                      <label htmlFor="timezone" className="block text-xs font-bold text-zinc-300 mb-2.5 flex items-center justify-between">
                         <span>Timezone *</span>
                         <span className="text-[10px] text-emerald-400 font-semibold">(Auto-detected)</span>
                       </label>
@@ -448,7 +454,7 @@ export default function EnrollmentPage() {
                         value={timezone}
                         onChange={(e) => setTimezone(e.target.value)}
                         required
-                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
                       >
                         <option value={timezone}>{timezone} (Current)</option>
                         {timezonesList.filter(tz => tz !== timezone).map((tz) => (
@@ -459,10 +465,10 @@ export default function EnrollmentPage() {
 
                     {/* Format Preview */}
                     <div>
-                      <label className="block text-xs font-bold text-zinc-500 mb-2">
+                      <label className="block text-xs font-bold text-zinc-550 mb-2.5">
                         Class Format
                       </label>
-                      <div className="w-full rounded-xl border border-white/5 bg-slate-950/60 px-4 py-3 text-xs text-zinc-500">
+                      <div className="w-full rounded-xl border border-white/5 bg-slate-950/60 px-4 py-3.5 text-xs text-zinc-500">
                         {courseInterest 
                           ? (courseInterest.includes('Group') || courseInterest.includes('Dars-e-Nizami') 
                             ? 'Structured Group Format' 
@@ -475,15 +481,15 @@ export default function EnrollmentPage() {
                 </div>
 
                 {/* 3. Additional Information */}
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-400 border-b border-white/5 pb-2.5 mb-5">
+                <div className="space-y-6">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-[#c19b4c] border-b border-white/5 pb-3">
                     3. Additional Information
                   </h3>
                   <div className="space-y-6">
                     
                     {/* Additional Notes */}
                     <div>
-                      <label htmlFor="additionalNotes" className="block text-xs font-bold text-zinc-300 mb-2">
+                      <label htmlFor="additionalNotes" className="block text-xs font-bold text-zinc-300 mb-2.5">
                         Additional Notes / Special Needs
                       </label>
                       <textarea
@@ -492,7 +498,7 @@ export default function EnrollmentPage() {
                         value={additionalNotes}
                         onChange={(e) => setAdditionalNotes(e.target.value)}
                         placeholder="Please share any current Quran reading experience, preferred schedules, or special learning requirements."
-                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-xs text-slate-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 resize-y"
+                        className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3.5 text-xs text-slate-100 placeholder-zinc-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all resize-y font-sans font-light"
                       ></textarea>
                     </div>
 
@@ -500,14 +506,14 @@ export default function EnrollmentPage() {
                 </div>
 
                 {/* Submit Panel */}
-                <div className="border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <p className="text-[10px] text-zinc-500 max-w-md text-center sm:text-left leading-normal font-sans">
+                <div className="border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+                  <p className="text-[10px] text-zinc-550 max-w-md text-center sm:text-left leading-normal font-sans font-light">
                     By submitting this application, you agree to start a 3-day free trial. Our team will verify credentials and schedule your sessions via WhatsApp.
                   </p>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-8 py-3.5 text-xs font-bold text-white shadow shadow-emerald-500/10 hover:bg-emerald-500 active:scale-[0.98] transition-all disabled:opacity-55"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-8 py-4 text-xs font-bold text-white shadow shadow-emerald-500/10 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-55"
                   >
                     {isSubmitting ? (
                       <>
