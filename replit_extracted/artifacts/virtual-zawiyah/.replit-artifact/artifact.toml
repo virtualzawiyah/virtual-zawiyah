@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Virtual Zawiyah"
+version = "1.0.0"
+id = "artifacts/virtual-zawiyah"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18805
+
+[services.development]
+run = "pnpm --filter @workspace/virtual-zawiyah run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/virtual-zawiyah", "run", "build" ]
+publicDir = "artifacts/virtual-zawiyah/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18805"
+BASE_PATH = "/"

@@ -7,8 +7,27 @@
 :root {
   --background: #030712;
   --foreground: #f3f4f6;
-  --primary: #1b6b3a;
-  --secondary: #c19b4c;
+  --primary-color: #1b6b3a;
+  --primary-foreground: #f3f4f6;
+  --secondary-color: #c19b4c;
+  --secondary-foreground: #030712;
+  --card-color: #111827;
+  --card-foreground: #f3f4f6;
+}
+
+.public-page {
+  --background: #FAFAF7;
+  --foreground: #1A1A1A;
+  --primary-color: #1B6B3A;
+  --primary-foreground: #FAFAF7;
+  --secondary-color: #C9A84C;
+  --secondary-foreground: #FAFAF7;
+  --card-color: #E8F5EE;
+  --card-foreground: #1A1A1A;
+  
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', sans-serif;
 }
 
 body {
@@ -17,6 +36,7 @@ body {
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
 }
+
 
 /* Custom scrollbar styling */
 ::-webkit-scrollbar {
@@ -86,4 +106,25 @@ body {
 .animate-fade-in-up {
   animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(27, 107, 58, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(27, 107, 58, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(27, 107, 58, 0);
+  }
+}
+
+.pulse-ring {
+  box-shadow: 0 0 0 0 rgba(27, 107, 58, 0.7);
+  animation: pulse-ring 2s infinite;
+}
+
 

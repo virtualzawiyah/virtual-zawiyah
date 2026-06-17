@@ -11,9 +11,22 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        primary: {
+          DEFAULT: "var(--primary-color)",
+          foreground: "var(--primary-foreground)",
+        },
+        secondary: {
+          DEFAULT: "var(--secondary-color)",
+          foreground: "var(--secondary-foreground)",
+        },
+        card: {
+          DEFAULT: "var(--card-color)",
+          foreground: "var(--card-foreground)",
+        },
       },
     },
   },
   plugins: [],
 };
 export default config;
+

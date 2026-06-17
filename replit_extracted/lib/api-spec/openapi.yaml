@@ -1,0 +1,192 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Virtual Zawiyah API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: admission
+    description: Admission form submissions
+  - name: contact
+    description: Contact form submissions
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /admissions:
+    post:
+      operationId: submitAdmission
+      tags: [admission]
+      summary: Submit admission application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdmissionInput"
+      responses:
+        "201":
+          description: Application submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionResult"
+        "400":
+          description: Validation error
+
+  /contacts:
+    post:
+      operationId: submitContact
+      tags: [contact]
+      summary: Submit contact form
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactInput"
+      responses:
+        "201":
+          description: Message submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionResult"
+        "400":
+          description: Validation error
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    SubmissionResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        id:
+          type: integer
+      required:
+        - success
+        - message
+        - id
+
+    AdmissionInput:
+      type: object
+      required:
+        - studentFullName
+        - fathersName
+        - guardianRelationship
+        - studentGender
+        - studentAge
+        - country
+        - stateProvince
+        - guardianWhatsapp
+        - course
+        - classFormat
+        - preferredTeacherGender
+        - timezone
+        - daysAvailable
+      properties:
+        studentFullName:
+          type: string
+        fathersName:
+          type: string
+        guardianName:
+          type: ["string", "null"]
+        guardianRelationship:
+          type: string
+          enum: [Father, Mother, Brother, Other]
+        studentGender:
+          type: string
+          enum: [Male, Female]
+        studentAge:
+          type: integer
+        country:
+          type: string
+        stateProvince:
+          type: string
+        guardianWhatsapp:
+          type: string
+        studentWhatsapp:
+          type: ["string", "null"]
+        emailAddress:
+          type: ["string", "null"]
+        course:
+          type: string
+        darsENizamiYear:
+          type: ["integer", "null"]
+        classFormat:
+          type: string
+          enum: [One-on-One, Group]
+        preferredDuration:
+          type: ["string", "null"]
+          enum:
+            - "30min-3x-weekly"
+            - "30min-5x-weekly"
+            - "60min-3x-weekly"
+            - "60min-5x-weekly"
+            - "30min-weekend"
+            - "60min-5x-weekly-group"
+            - "120min-5x-weekly-group"
+            - null
+        preferredTeacherGender:
+          type: string
+          enum: [Male, Female]
+        currentLevel:
+          type: ["string", "null"]
+        preferredTime1:
+          type: ["string", "null"]
+        preferredTime2:
+          type: ["string", "null"]
+        timezone:
+          type: string
+        daysAvailable:
+          type: array
+          items:
+            type: string
+        specialNeeds:
+          type: ["string", "null"]
+        additionalNotes:
+          type: ["string", "null"]
+        howDidYouHear:
+          type: ["string", "null"]
+          enum: ["Social Media", "Friend", "Google", "Other", null]
+
+    ContactInput:
+      type: object
+      required:
+        - name
+        - email
+        - message
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        message:
+          type: string

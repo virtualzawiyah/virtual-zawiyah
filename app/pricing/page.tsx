@@ -1,441 +1,369 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
+import { CheckCircle2, Users, Video, Calendar } from 'lucide-react'
 import PublicNavbar from '@/components/PublicNavbar'
 import PublicFooter from '@/components/PublicFooter'
-import { Check, ArrowRight, Info, ShieldCheck, Calendar, Users, RefreshCw, Sparkles } from 'lucide-react'
+import GeometricPattern from '@/components/GeometricPattern'
 
-type Currency = 'USD' | 'GBP'
+const oneOnOnePlans = [
+  {
+    duration: "30 min",
+    perWeek: 3,
+    label: "3 Lessons / Week",
+    price: 60,
+    perLesson: 20,
+    popular: false,
+    features: [
+      "12 live sessions per month",
+      "Dedicated personal teacher",
+      "30-minute focused session",
+      "Progress reports",
+      "Flexible scheduling",
+    ],
+  },
+  {
+    duration: "30 min",
+    perWeek: 5,
+    label: "5 Lessons / Week",
+    price: 100,
+    perLesson: 20,
+    popular: true,
+    features: [
+      "20 live sessions per month",
+      "Dedicated personal teacher",
+      "30-minute focused session",
+      "Weekly progress report",
+      "Flexible scheduling",
+      "Priority teacher matching",
+    ],
+  },
+  {
+    duration: "60 min",
+    perWeek: 3,
+    label: "3 Lessons / Week",
+    price: 120,
+    perLesson: 40,
+    popular: false,
+    features: [
+      "12 live sessions per month",
+      "Dedicated personal teacher",
+      "60-minute in-depth session",
+      "Progress reports",
+      "Flexible scheduling",
+    ],
+  },
+  {
+    duration: "60 min",
+    perWeek: 5,
+    label: "5 Lessons / Week",
+    price: 200,
+    perLesson: 40,
+    popular: false,
+    features: [
+      "20 live sessions per month",
+      "Dedicated personal teacher",
+      "60-minute in-depth session",
+      "Weekly progress report",
+      "Flexible scheduling",
+      "Priority teacher matching",
+    ],
+  },
+]
+
+const groupPlans = [
+  {
+    duration: "120 min",
+    perWeek: 5,
+    label: "Group",
+    price: 40,
+    features: [
+      "20 live sessions per month",
+      "Group sessions",
+      "120-minute session",
+      "Structured curriculum",
+      "Deeper coverage per session",
+      "Q&A time included",
+    ],
+  },
+]
+
+const weekendPlan = {
+  price: 100,
+  duration: "30 min",
+  label: "Saturday & Sunday",
+  features: [
+    "8 dedicated weekend sessions/month",
+    "Personal one-on-one teacher",
+    "30-minute focused session",
+    "Perfect for working adults & school students",
+    "Consistent weekend routine",
+    "Progress reports",
+  ],
+}
 
 export default function PricingPage() {
-  const [currency, setCurrency] = useState<Currency>('USD')
-
-  const currencySymbol = currency === 'USD' ? '$' : '£'
-
-  // Pricing definitions in USD and GBP
-  const oneOnOnePlans = [
-    {
-      id: '1',
-      duration: '30 Min',
-      lessonsPerWeek: '3 Lessons / Week',
-      price: { USD: 60, GBP: 45 },
-      perLesson: { USD: 20, GBP: 15 },
-      features: [
-        '12 live sessions per month',
-        'Dedicated personal teacher',
-        '30-minute focused session',
-        'Monthly progress reports',
-        'Flexible scheduling options'
-      ],
-      ctaText: 'Apply Now',
-      popular: false
-    },
-    {
-      id: '2',
-      duration: '30 Min',
-      lessonsPerWeek: '5 Lessons / Week',
-      price: { USD: 100, GBP: 75 },
-      perLesson: { USD: 20, GBP: 15 },
-      features: [
-        '20 live sessions per month',
-        'Dedicated personal teacher',
-        '30-minute focused session',
-        'Weekly progress reports',
-        'Flexible scheduling options',
-        'Priority teacher matching'
-      ],
-      ctaText: 'Apply Now',
-      popular: true
-    },
-    {
-      id: '3',
-      duration: '60 Min',
-      lessonsPerWeek: '3 Lessons / Week',
-      price: { USD: 120, GBP: 90 },
-      perLesson: { USD: 40, GBP: 30 },
-      features: [
-        '12 live sessions per month',
-        'Dedicated personal teacher',
-        '60-minute in-depth session',
-        'Monthly progress reports',
-        'Flexible scheduling options'
-      ],
-      ctaText: 'Apply Now',
-      popular: false
-    },
-    {
-      id: '4',
-      duration: '60 Min',
-      lessonsPerWeek: '5 Lessons / Week',
-      price: { USD: 200, GBP: 150 },
-      perLesson: { USD: 40, GBP: 30 },
-      features: [
-        '20 live sessions per month',
-        'Dedicated personal teacher',
-        '60-minute in-depth session',
-        'Weekly progress reports',
-        'Flexible scheduling options',
-        'Priority teacher matching'
-      ],
-      ctaText: 'Apply Now',
-      popular: false
-    }
-  ]
-
-  const groupPlan = {
-    duration: '120 Min',
-    lessonsPerWeek: '5 Lessons / Week',
-    price: { USD: 40, GBP: 30 },
-    features: [
-      '20 live sessions per month',
-      'Collaborative group sessions',
-      '120-minute immersive class',
-      'Structured group curriculum',
-      'Deeper coverage per session',
-      'Dedicated Q&A time included'
-    ]
-  }
-
-  const weekendPlan = {
-    name: 'Saturday & Sunday',
-    type: 'One-on-One',
-    price: { USD: 100, GBP: 75 },
-    duration: '30 Min per session',
-    features: [
-      '8 dedicated weekend sessions/month',
-      'Personal one-on-one teacher',
-      '30-minute focused session',
-      'Perfect for working adults & school students',
-      'Consistent weekend routine',
-      'Monthly progress reports'
-    ]
-  }
-
-  const goodToKnow = [
-    {
-      title: 'Free Trial Included',
-      description: 'Every new student receives a 3-day free trial before committing to any plan. No payment required upfront.',
-      icon: Sparkles,
-      iconColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-    },
-    {
-      title: 'Monthly Billing',
-      description: 'All plans are billed monthly with no long-term contracts. Cancel or change your plan settings at any time.',
-      icon: Calendar,
-      iconColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20'
-    },
-    {
-      title: 'Gender-Segregated Classes',
-      description: 'Female students are always matched with female teachers; male students with male teachers — at no extra cost.',
-      icon: Users,
-      iconColor: 'text-teal-400 bg-teal-500/10 border-teal-500/20'
-    },
-    {
-      title: 'Flexible Rescheduling',
-      description: 'Missed a class? Sessions can be rescheduled easily with 12 hours\' advance notice at no penalty.',
-      icon: RefreshCw,
-      iconColor: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'
-    },
-    {
-      title: 'All Ages Welcome',
-      description: 'Our plans cover children, teens, and adults. The curriculum and teaching speed are tailored to the student\'s level.',
-      icon: Info,
-      iconColor: 'text-blue-400 bg-blue-500/10 border-blue-500/20'
-    },
-    {
-      title: 'Currency & Payment',
-      description: 'Fees can be paid in USD or GBP. We support bank transfer, Wise, card payments, and other direct methods.',
-      icon: ShieldCheck,
-      iconColor: 'text-purple-400 bg-purple-500/10 border-purple-500/20'
-    }
-  ]
-
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-x-hidden">
-      {/* Background Grid Pattern */}
-      <div className="absolute top-0 inset-x-0 h-[600px] pointer-events-none z-0">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-grid-pattern opacity-25" />
-        <div className="absolute top-[10%] right-[15%] w-[350px] h-[350px] rounded-full bg-emerald-500/5 blur-[130px]" />
-      </div>
-
+    <div className="public-page min-h-screen flex flex-col font-sans">
       <PublicNavbar />
 
-      <main className="flex-grow pt-36 pb-24 relative z-10 animate-fade-in-up">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-
-          {/* Breadcrumbs */}
-          <nav className="flex mb-8 text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
-            <Link href="/" className="hover:text-emerald-400 transition-colors">Home</Link>
-            <span className="mx-2 text-zinc-700">/</span>
-            <span className="text-emerald-400">Pricing</span>
+      {/* Page Header */}
+      <section 
+        className="relative py-20 overflow-hidden" 
+        style={{ background: "linear-gradient(135deg, #E8F5EE 0%, #FAFAF7 60%, #E8F5EE 100%)" }}
+      >
+        <GeometricPattern opacity={0.06} />
+        <div className="container mx-auto px-4 relative z-10 text-center animate-fade-in-up">
+          <nav className="text-sm text-gray-505 mb-6">
+            <Link href="/" className="hover:text-primary">Home</Link>
+            <span className="mx-2">/</span>
+            <span className="text-foreground font-semibold">Pricing</span>
           </nav>
+          <span className="text-xs font-semibold uppercase tracking-widest text-secondary">Transparent Pricing</span>
+          <h1 className="font-serif font-bold text-4xl md:text-5xl mt-3 mb-5" style={{ color: "#1A1A1A" }}>
+            Tuition & Fees
+          </h1>
+          <p className="text-lg max-w-2xl mx-auto text-gray-600">
+            Simple, affordable pricing with no hidden costs. Choose the plan that fits your schedule and learning goals — and start with a 3-day free trial.
+          </p>
+        </div>
+      </section>
 
-          {/* Header Section */}
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#c19b4c] bg-[#c19b4c]/10 border border-[#c19b4c]/20 px-3.5 py-1.5 rounded-full shadow">
-              TRANSPARENT PRICING
-            </span>
-            <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight font-serif bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
-              Tuition & Fees
-            </h1>
-            <p className="text-xs sm:text-sm text-zinc-455 leading-relaxed font-sans font-light">
-              Simple, affordable pricing with no hidden costs. Choose the plan that fits your schedule and learning goals — and start with a 3-day free trial.
-            </p>
-
-            {/* Currency Selector */}
-            <div className="inline-flex items-center p-1.5 rounded-2xl bg-slate-900/30 border border-white/5 shadow-inner">
-              <button
-                onClick={() => setCurrency('USD')}
-                className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
-                  currency === 'USD'
-                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/10'
-                    : 'text-zinc-450 hover:text-zinc-200'
-                }`}
-              >
-                USD ($)
-              </button>
-              <button
-                onClick={() => setCurrency('GBP')}
-                className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
-                  currency === 'GBP'
-                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/10'
-                    : 'text-zinc-450 hover:text-zinc-200'
-                }`}
-              >
-                GBP (£)
-              </button>
+      {/* One-on-One Plans */}
+      <section className="py-24 bg-white relative z-10">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-14 animate-fade-in-up">
+            <div className="inline-flex items-center gap-2 mb-3 px-4 py-2 rounded-full bg-[#E8F5EE] border border-primary/10">
+              <Video className="w-4 h-4 text-primary" />
+              <span className="text-sm font-semibold text-primary">One-on-One Classes</span>
             </div>
+            <h2 className="font-serif font-bold text-3xl md:text-4xl text-gray-900">Personal Instruction</h2>
+            <p className="mt-3 max-w-xl mx-auto text-base text-gray-600">
+              Your dedicated teacher, your pace, your schedule. The most effective way to learn Quran and Islamic studies.
+            </p>
           </div>
 
-          {/* One-on-One Pricing Section */}
-          <div className="mb-24">
-            <div className="border-l-4 border-[#c19b4c] pl-5 mb-10 space-y-1">
-              <h2 className="text-2xl font-bold tracking-tight text-white font-sans">
-                One-on-One Classes
-              </h2>
-              <p className="text-xs text-zinc-450 font-sans font-light">
-                Your dedicated teacher, your pace, your schedule. The most effective way to learn Quran and Islamic studies.
-              </p>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {oneOnOnePlans.map((plan, i) => (
+              <div
+                key={i}
+                className={`relative rounded-2xl border flex flex-col overflow-hidden transition-all duration-300 ${
+                  plan.popular 
+                    ? "shadow-xl ring-2 ring-primary border-primary bg-primary text-white" 
+                    : "shadow-sm hover:shadow-md border-primary/15 bg-white text-gray-900"
+                }`}
+                data-testid={`pricing-card-${i}`}
+              >
+                {plan.popular && (
+                  <div className="text-center py-2 text-[10px] font-extrabold uppercase tracking-widest bg-secondary text-white">
+                    Most Popular
+                  </div>
+                )}
+                <div className="p-7 flex flex-col flex-1 justify-between">
+                  <div className="mb-5">
+                    <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${
+                      plan.popular ? "text-white/60" : "text-gray-400"
+                    }`}>
+                      {plan.duration} · {plan.label}
+                    </p>
+                    <div className="flex items-end gap-1 mt-2">
+                      <span className="font-serif font-bold text-5xl leading-none">
+                        ${plan.price}
+                      </span>
+                      <span className={`text-sm mb-1 ${plan.popular ? "text-white/70" : "text-gray-500"}`}>/month</span>
+                    </div>
+                    <p className={`text-xs mt-1.5 ${plan.popular ? "text-white/65" : "text-gray-450"}`}>
+                      ${plan.perLesson} per lesson
+                    </p>
+                  </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {oneOnOnePlans.map((plan) => {
-                const priceVal = plan.price[currency]
-                const perLessonVal = plan.perLesson[currency]
-                return (
-                  <div
-                    key={plan.id}
-                    className={`relative flex flex-col justify-between rounded-2xl border bg-slate-900/10 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
-                      plan.popular
-                        ? 'border-amber-500/40 bg-slate-900/20 shadow-xl shadow-amber-500/[0.02]'
-                        : 'border-white/5 hover:border-emerald-500/20 hover:bg-slate-900/40'
+                  <ul className="space-y-3.5 flex-1 mb-7 border-t border-gray-150/10 pt-4 mt-2">
+                    {plan.features.map((f, j) => (
+                      <li key={j} className="flex items-start gap-2 text-xs">
+                        <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${plan.popular ? "text-secondary" : "text-primary"}`} />
+                        <span className={plan.popular ? "text-white/85" : "text-gray-700"}>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    href="/enrollment"
+                    className={`w-full font-bold h-11 inline-flex items-center justify-center rounded-md text-sm transition-colors text-center ${
+                      plan.popular 
+                        ? "bg-secondary text-white hover:bg-secondary/95 shadow-md" 
+                        : "border border-primary text-primary bg-primary/5 hover:bg-primary/10"
                     }`}
                   >
-                    {plan.popular && (
-                      <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-[9px] font-extrabold uppercase tracking-widest text-slate-950 bg-gradient-to-r from-amber-400 to-amber-600 px-3.5 py-1 rounded-full shadow-lg">
-                        Most Popular
-                      </span>
-                    )}
-
-                    <div>
-                      {/* Plan Spec */}
-                      <div className="flex items-baseline justify-between mb-5 border-b border-white/5 pb-3.5">
-                        <span className="text-xs font-bold text-emerald-450">{plan.duration}</span>
-                        <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">{plan.lessonsPerWeek}</span>
-                      </div>
-
-                      {/* Pricing */}
-                      <div className="mb-8">
-                        <div className="flex items-baseline text-white">
-                          <span className="text-4xl font-extrabold tracking-tight">{currencySymbol}{priceVal}</span>
-                          <span className="text-xs text-zinc-500 ml-1">/ month</span>
-                        </div>
-                        <span className="text-[9px] text-zinc-550 italic block mt-1.5 font-sans font-light">
-                          Approx. {currencySymbol}{perLessonVal} per lesson
-                        </span>
-                      </div>
-
-                      {/* Features */}
-                      <ul className="space-y-3 mb-8">
-                        {plan.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-start gap-2 text-xs text-zinc-400 font-light">
-                            <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Action */}
-                    <Link
-                      href="/enrollment"
-                      className={`w-full flex items-center justify-center gap-1.5 rounded-xl py-3.5 text-xs font-bold transition-all active:scale-[0.98] ${
-                        plan.popular
-                          ? 'bg-[#c19b4c] hover:bg-[#b08b3e] text-slate-950 font-bold shadow-lg shadow-[#c19b4c]/10'
-                          : 'border border-white/10 bg-white/5 text-zinc-300 hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/20'
-                      }`}
-                    >
-                      {plan.ctaText}
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Group & Weekend Pricing Section */}
-          <div className="grid gap-8 md:grid-cols-2 mb-24">
-            {/* Group Classes Card */}
-            <div className="space-y-6">
-              <div className="border-l-4 border-teal-500 pl-5 space-y-1">
-                <h3 className="text-xl font-bold text-white font-sans">Group Classes</h3>
-                <p className="text-xs text-zinc-450">Learn together with a structured academy syllabus.</p>
-              </div>
-
-              <div className="rounded-2xl border border-white/5 bg-slate-900/10 p-6 backdrop-blur-sm hover:border-teal-500/20 transition-all duration-300 hover:bg-slate-900/30 hover:-translate-y-0.5">
-                <div className="flex justify-between items-baseline mb-5 border-b border-white/5 pb-3.5">
-                  <span className="text-xs font-bold text-teal-400">{groupPlan.duration}</span>
-                  <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">{groupPlan.lessonsPerWeek}</span>
+                    Apply Now
+                  </Link>
                 </div>
-
-                <div className="mb-8">
-                  <div className="flex items-baseline text-white">
-                    <span className="text-4xl font-extrabold tracking-tight">{currencySymbol}{groupPlan.price[currency]}</span>
-                    <span className="text-xs text-zinc-500 ml-1">/ month</span>
-                  </div>
-                  <span className="text-[9px] text-zinc-550 italic block mt-1.5 font-sans font-light">
-                    Group tuition format · Daily schedule
-                  </span>
-                </div>
-
-                <ul className="space-y-3 mb-8">
-                  {groupPlan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-xs text-zinc-400 font-light">
-                      <Check className="h-4 w-4 text-teal-400 shrink-0 mt-0.5" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Link
-                  href="/enrollment"
-                  className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-3.5 text-xs font-bold text-zinc-300 hover:bg-teal-500/10 hover:text-teal-400 hover:border-teal-500/20 active:scale-[0.98] transition-all"
-                >
-                  Apply Now
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
               </div>
-            </div>
-
-            {/* Weekend Classes Card */}
-            <div className="space-y-6">
-              <div className="border-l-4 border-indigo-500 pl-5 space-y-1">
-                <h3 className="text-xl font-bold text-white font-sans">Weekend Classes</h3>
-                <p className="text-xs text-zinc-450">Dedicated weekend schedule for busy pupils.</p>
-              </div>
-
-              <div className="rounded-2xl border border-white/5 bg-slate-900/10 p-6 backdrop-blur-sm hover:border-indigo-500/20 transition-all duration-300 hover:bg-slate-900/30 hover:-translate-y-0.5">
-                <div className="flex justify-between items-baseline mb-5 border-b border-white/5 pb-3.5">
-                  <span className="text-xs font-bold text-indigo-400">{weekendPlan.name}</span>
-                  <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">{weekendPlan.type}</span>
-                </div>
-
-                <div className="mb-8">
-                  <div className="flex items-baseline text-white">
-                    <span className="text-4xl font-extrabold tracking-tight">{currencySymbol}{weekendPlan.price[currency]}</span>
-                    <span className="text-xs text-zinc-500 ml-1">/ month</span>
-                  </div>
-                  <span className="text-[9px] text-zinc-550 italic block mt-1.5 font-sans font-light">
-                    {weekendPlan.duration}
-                  </span>
-                </div>
-
-                <ul className="space-y-3 mb-8">
-                  {weekendPlan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-xs text-zinc-400 font-light">
-                      <Check className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Link
-                  href="/enrollment"
-                  className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white py-3.5 px-6 text-xs font-bold shadow hover:bg-emerald-500 active:scale-[0.98] transition-all"
-                >
-                  Apply for Weekend Classes
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            </div>
+            ))}
           </div>
-
-          {/* Good to Know Section */}
-          <div className="mb-12">
-            <div className="text-center max-w-3xl mx-auto mb-12 space-y-1">
-              <h3 className="text-2xl font-bold tracking-tight text-white font-serif italic">
-                Good to Know
-              </h3>
-              <p className="text-xs text-zinc-400 font-sans font-light">
-                Answers to frequently asked pricing, schedule, and policy questions.
-              </p>
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {goodToKnow.map((item, idx) => {
-                const Icon = item.icon
-                return (
-                  <div
-                    key={idx}
-                    className="flex gap-4 rounded-2xl border border-white/5 bg-slate-900/10 p-5 backdrop-blur-sm hover:border-emerald-500/10 transition-colors"
-                  >
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border text-base ${item.iconColor}`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-white mb-1.5">
-                        {item.title}
-                      </h4>
-                      <p className="text-xs text-zinc-400 leading-relaxed font-sans font-light">
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* CTA Banner */}
-          <div className="mt-20 rounded-3xl border border-white/5 bg-gradient-to-r from-emerald-950/40 to-slate-900/60 p-8 sm:p-12 text-center backdrop-blur-sm relative overflow-hidden">
-            <div className="absolute bottom-0 right-0 w-44 h-44 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
-            <h3 className="text-xl font-bold text-white mb-2">
-              Start with 3 Days Free
-            </h3>
-            <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto mb-8 font-sans font-light">
-              No payment details needed to begin. Apply today, try your chosen plan for 3 days, and enrol with confidence.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="/enrollment"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#c19b4c] hover:bg-[#b08b3e] text-slate-950 py-3.5 px-8 text-xs font-bold shadow-lg shadow-[#c19b4c]/10 active:scale-[0.98] transition-all"
-              >
-                Apply for Free Trial
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/contact"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3.5 px-8 text-xs font-bold text-zinc-200 hover:bg-white/10 hover:text-white transition-all active:scale-[0.98]"
-              >
-                Have a Question?
-              </Link>
-            </div>
-          </div>
-
         </div>
-      </main>
+      </section>
+
+      {/* Group Plans */}
+      <section className="py-24 relative z-10" style={{ background: "#FAFAF7" }}>
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-14 animate-fade-in-up">
+            <div className="inline-flex items-center gap-2 mb-3 px-4 py-2 rounded-full bg-[#E8F5EE] border border-primary/10">
+              <Users className="w-4 h-4 text-primary" />
+              <span className="text-sm font-semibold text-primary">Group Classes</span>
+            </div>
+            <h2 className="font-serif font-bold text-3xl md:text-4xl text-gray-900">Learn Together</h2>
+            <p className="mt-3 max-w-xl mx-auto text-base text-gray-650">
+              Group sessions with a structured curriculum — collaborative, affordable, and effective.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+            {groupPlans.map((plan, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border bg-white border-primary/15 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col overflow-hidden"
+              >
+                <div className="p-8 flex flex-col flex-1 justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest mb-1 text-gray-400">
+                      {plan.duration} · 5 Lessons / Week
+                    </p>
+                    <p className="font-serif font-bold text-xl mb-2 text-gray-900">{plan.label}</p>
+                    <div className="flex items-end gap-1 mb-6 border-b border-gray-100 pb-4">
+                      <span className="font-serif font-bold text-5xl leading-none text-primary">
+                        ${plan.price}
+                      </span>
+                      <span className="text-sm mb-1 text-gray-505">/month</span>
+                    </div>
+                    <ul className="space-y-3.5 mb-7">
+                      {plan.features.map((f, j) => (
+                        <li key={j} className="flex items-start gap-2 text-xs text-gray-700">
+                          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <Link 
+                    href="/enrollment" 
+                    className="w-full font-bold h-11 inline-flex items-center justify-center rounded-md text-sm border border-primary text-primary hover:bg-primary/5 text-center transition-colors"
+                  >
+                    Apply Now
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Weekend Plan */}
+      <section className="py-24 bg-white relative z-10">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-14 animate-fade-in-up">
+            <div className="inline-flex items-center gap-2 mb-3 px-4 py-2 rounded-full bg-[#E8F5EE] border border-primary/10">
+              <Calendar className="w-4 h-4 text-primary" />
+              <span className="text-sm font-semibold text-primary">Weekend Classes</span>
+            </div>
+            <h2 className="font-serif font-bold text-3xl md:text-4xl text-gray-900">Dedicated Weekend Plan</h2>
+            <p className="mt-3 max-w-xl mx-auto text-base text-gray-650">
+              Perfect for students who can only attend on weekends — a consistent Saturday & Sunday routine at a dedicated rate.
+            </p>
+          </div>
+
+          <div
+            className="max-w-lg mx-auto rounded-2xl overflow-hidden shadow-xl border-2 animate-fade-in-up"
+            style={{ borderColor: "#C9A84C" }}
+          >
+            {/* Gold header bar */}
+            <div className="py-4 text-center font-bold text-xs uppercase tracking-widest bg-[#C9A84C] text-white">
+              Saturday & Sunday · One-on-One
+            </div>
+            <div className="p-10 bg-white">
+              <div className="text-center mb-8 border-b border-gray-150 pb-6">
+                <div className="flex items-end justify-center gap-1">
+                  <span className="font-serif font-bold text-primary" style={{ fontSize: "4.5rem", lineHeight: 1 }}>$100</span>
+                  <span className="text-base mb-2 text-gray-500">/month</span>
+                </div>
+                <p className="text-xs mt-2 text-gray-400 font-semibold">30 minutes per session</p>
+              </div>
+              <ul className="space-y-4 mb-8">
+                {weekendPlan.features.map((f, i) => (
+                  <li key={i} className="flex items-start gap-3 text-xs text-gray-700">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link 
+                href="/enrollment" 
+                className="w-full inline-flex items-center justify-center bg-primary hover:bg-primary/95 text-white font-semibold py-3.5 px-6 rounded-md shadow-md text-sm text-center"
+              >
+                Apply for Weekend Classes
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Notes & FAQ */}
+      <section className="py-20 relative z-10" style={{ background: "#FAFAF7" }}>
+        <div className="container mx-auto px-4 max-w-3xl">
+          <div className="text-center mb-12 animate-fade-in-up">
+            <h2 className="font-serif font-bold text-2xl md:text-3xl" style={{ color: "#1A1A1A" }}>
+              Good to Know
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {[
+              { title: "Free Trial Included", body: "Every new student receives a 3-day free trial before committing to any plan. No payment required upfront." },
+              { title: "Monthly Billing", body: "All plans are billed monthly with no long-term contract. Cancel or change your plan at any time." },
+              { title: "Gender-Segregated Teaching", body: "Female students are always matched with female teachers; male students with male teachers — at no extra cost." },
+              { title: "Flexible Rescheduling", body: "Missed a class? Sessions can be rescheduled with 12 hours' advance notice at no penalty." },
+              { title: "All Ages Welcome", body: "Our plans cover children, teens, and adults. The curriculum and pace are tailored to the student's age and level." },
+              { title: "Currency & Payment", body: "Fees are listed in USD. Payment is accepted via bank transfer, Wise, or other online methods." },
+            ].map((note, i) => (
+              <div
+                key={i}
+                className="rounded-xl border border-primary/10 p-6 bg-white shadow-sm animate-fade-in-up"
+              >
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-primary" />
+                  <div>
+                    <p className="font-bold text-sm mb-1 text-gray-900">{note.title}</p>
+                    <p className="text-xs leading-relaxed text-gray-600">{note.body}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 bg-primary relative overflow-hidden z-10 text-white">
+        <GeometricPattern opacity={0.05} />
+        <div className="container mx-auto px-4 text-center relative z-10 animate-fade-in-up">
+          <h2 className="font-serif font-bold text-3xl md:text-4xl mb-4">Start with 3 Days Free</h2>
+          <p className="text-white/80 text-lg mb-8 max-w-xl mx-auto leading-relaxed">
+            No payment needed to begin. Apply today, try your chosen plan for 3 days, and enroll with confidence.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link 
+              href="/enrollment" 
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-md bg-secondary text-white hover:bg-secondary/95 py-3.5 px-8 font-semibold shadow-lg text-sm text-center"
+            >
+              Apply for Free Trial
+            </Link>
+            <Link 
+              href="/contact" 
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-md border border-white/40 text-white hover:bg-white/10 hover:border-white py-3.5 px-8 font-semibold text-sm text-center"
+            >
+              Have a Question?
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <PublicFooter />
     </div>
