@@ -18,13 +18,13 @@ export default function Home() {
       title: 'Live One-on-One Classes',
       description: 'Personalized attention from qualified teachers in real-time sessions tailored to your pace.',
       icon: GraduationCap,
-      color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+      color: 'text-[#c19b4c] bg-[#c19b4c]/10 border-[#c19b4c]/20'
     },
     {
       title: 'Qualified Scholars',
       description: 'All teachers hold traditional Islamic qualifications — Hafiz, Alim, and Tajweed-certified.',
       icon: Sparkles,
-      color: 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+      color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
     },
     {
       title: 'Flexible Scheduling',
@@ -147,30 +147,32 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans relative overflow-x-hidden">
-      {/* Glow backgrounds */}
-      <div className="absolute top-0 inset-x-0 h-[800px] pointer-events-none z-0">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-grid-pattern opacity-40" />
-        <div className="absolute top-[10%] left-[10%] w-[350px] h-[350px] rounded-full bg-emerald-500/10 blur-[130px]" />
-        <div className="absolute top-[20%] right-[10%] w-[350px] h-[350px] rounded-full bg-amber-500/5 blur-[120px]" />
+      {/* Background decoration grid overlays */}
+      <div className="absolute top-0 inset-x-0 h-[900px] pointer-events-none z-0">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-grid-pattern opacity-[0.25]" />
+        <div className="absolute top-[8%] left-[12%] w-[400px] h-[400px] rounded-full bg-emerald-500/[0.08] blur-[140px]" />
+        <div className="absolute top-[22%] right-[12%] w-[350px] h-[350px] rounded-full bg-amber-500/[0.04] blur-[120px]" />
       </div>
 
       <PublicNavbar />
 
       {/* Hero Section */}
-      <section className="relative pt-36 pb-24 lg:pt-44 lg:pb-36 z-10">
+      <section className="relative pt-40 pb-28 lg:pt-52 lg:pb-40 z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-12 lg:grid-cols-12 items-center">
+          <div className="grid gap-16 lg:grid-cols-12 items-center">
             
             {/* Left Column: Hero Text */}
             <div className="lg:col-span-7 space-y-8 text-center lg:text-left animate-fade-in-up">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider mx-auto lg:mx-0 shadow-lg shadow-emerald-950/20">
-                <Sparkles className="h-3.5 w-3.5" />
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-450 text-[10px] font-bold uppercase tracking-wider mx-auto lg:mx-0 shadow-md">
+                <Sparkles className="h-3.5 w-3.5 text-[#c19b4c]" />
                 Authentic Islamic Education Online
               </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-sans leading-tight">
-                Learn the Quran From <br className="hidden sm:inline" />
-                <span className="bg-gradient-to-r from-white via-slate-100 to-emerald-400 bg-clip-text text-transparent">Anywhere in the World</span>
+              
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight font-serif leading-[1.15]">
+                Learn the Holy Quran <br className="hidden sm:inline" />
+                <span className="bg-gradient-to-r from-[#C19B4C] via-white to-emerald-400 bg-clip-text text-transparent font-serif italic">From Anywhere</span>
               </h1>
+              
               <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-xl mx-auto lg:mx-0 font-sans font-light">
                 Virtual Zawiyah offers live, structured Islamic education with qualified scholars — accessible to every Muslim, wherever they are.
               </p>
@@ -178,49 +180,49 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
                 <Link
                   href="/enrollment"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#c19b4c] hover:bg-[#b08b3e] text-slate-950 py-3.5 px-8 text-xs font-bold shadow-lg shadow-[#c19b4c]/10 active:scale-[0.98] transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#c19b4c] hover:bg-[#b08b3e] text-slate-950 py-3.5 px-8 text-xs font-bold shadow-lg shadow-[#c19b4c]/10 hover:shadow-[#c19b4c]/20 hover:scale-[1.01] active:scale-[0.99] transition-all"
                 >
                   Apply Now
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/courses"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3.5 px-8 text-xs font-bold text-zinc-200 hover:bg-white/10 hover:text-white transition-all active:scale-[0.98]"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3.5 px-8 text-xs font-bold text-zinc-200 hover:bg-white/10 hover:text-white transition-all active:scale-[0.99]"
                 >
                   Explore Courses
                 </Link>
               </div>
 
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 text-xs text-zinc-500 pt-2 font-medium">
-                <span className="flex items-center gap-1.5"><span className="text-[#c19b4c]">★</span> 3 Days Free Trial</span>
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2.5 text-[11px] text-zinc-500 pt-3 font-semibold tracking-wide uppercase">
+                <span className="flex items-center gap-1.5"><span className="text-[#c19b4c] text-sm">★</span> 3 Days Free Trial</span>
                 <span className="hidden sm:inline text-zinc-800">•</span>
-                <span className="flex items-center gap-1.5"><span className="text-emerald-500">✔</span> Gender-Segregated Staff</span>
+                <span className="flex items-center gap-1.5"><span className="text-emerald-500 text-sm">✔</span> Gender-Segregated Staff</span>
                 <span className="hidden sm:inline text-zinc-800">•</span>
-                <span className="flex items-center gap-1.5"><span className="text-teal-400">⚡</span> One-on-One Focus</span>
+                <span className="flex items-center gap-1.5"><span className="text-[#c19b4c] text-sm">✦</span> One-on-One focus</span>
               </div>
             </div>
 
-            {/* Right Column: Premium Geometric Compliant Widget */}
+            {/* Right Column: Premium Custom Geometric Frame */}
             <div className="lg:col-span-5 flex justify-center lg:justify-end animate-float">
-              <div className="relative w-full max-w-[380px] aspect-square rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/60 to-slate-950 p-8 flex flex-col justify-between shadow-2xl shadow-emerald-950/20 overflow-hidden group hover:border-emerald-500/20 transition-all duration-300">
-                <div className="absolute -top-20 -right-20 w-44 h-44 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/15 transition-all" />
+              <div className="relative w-full max-w-[390px] aspect-square rounded-3xl border border-white/5 bg-slate-900/10 p-8 flex flex-col justify-between shadow-2xl shadow-emerald-950/20 backdrop-blur-md group hover:border-[#c19b4c]/30 transition-all duration-500">
+                <div className="absolute -top-20 -right-20 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/15 transition-all duration-500" />
                 <div className="absolute -bottom-20 -left-20 w-44 h-44 bg-[#c19b4c]/5 rounded-full blur-3xl pointer-events-none" />
 
-                {/* Vector Ornament / Islamic Star shape */}
+                {/* Asymmetric Ornament */}
                 <div className="flex-grow flex flex-col items-center justify-center space-y-6">
-                  <div className="relative flex h-24 w-24 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 group-hover:scale-105 transition-all duration-500">
-                    <div className="absolute inset-0.5 border border-dashed border-emerald-500/30 rounded-xl" />
-                    <Compass className="h-12 w-12 animate-spin-slow text-emerald-400" />
+                  <div className="relative flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 text-emerald-400 group-hover:border-[#c19b4c]/40 group-hover:rotate-6 transition-all duration-500">
+                    <div className="absolute inset-1 border border-dashed border-emerald-500/30 rounded-xl" />
+                    <Compass className="h-10 w-10 animate-spin-slow text-emerald-400" />
                   </div>
                   <div className="text-center space-y-1">
-                    <h3 className="text-xl font-serif font-bold text-white tracking-wider">الزاوية الافتراضية</h3>
-                    <p className="text-[10px] text-[#c19b4c] uppercase tracking-widest font-bold">Virtual Zawiyah</p>
+                    <h3 className="text-2xl font-serif font-bold text-white tracking-wider">الزاوية الافتراضية</h3>
+                    <p className="text-[10px] text-[#c19b4c] uppercase tracking-widest font-extrabold">Virtual Zawiyah</p>
                   </div>
                 </div>
 
                 <div className="border-t border-white/5 pt-5 text-center">
-                  <p className="text-[11px] text-zinc-450 leading-relaxed font-sans font-light">
-                    Structured Tajweed, Fiqh, and Arabic grammar. Taught by verified Alims & Alimahs.
+                  <p className="text-xs text-zinc-450 leading-relaxed font-sans font-light">
+                    Providing structured Tajweed, Fiqh, and Arabic grammar taught by verified Alims & Alimahs.
                   </p>
                 </div>
               </div>
@@ -231,7 +233,7 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-emerald-950/30 border-y border-white/5 py-12 backdrop-blur-md relative z-10">
+      <section className="bg-emerald-950/20 border-y border-white/5 py-12 backdrop-blur-md relative z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x-0 md:divide-x divide-white/5">
             {stats.map((stat, idx) => (
@@ -245,14 +247,14 @@ export default function Home() {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-24 relative z-10">
+      <section className="py-28 relative z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+          <div className="text-center max-w-3xl mx-auto mb-20 space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#c19b4c] bg-[#c19b4c]/10 border border-[#c19b4c]/20 px-3.5 py-1.5 rounded-full">
               WHY CHOOSE US
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white font-serif italic">
               Why Virtual Zawiyah
             </h2>
           </div>
@@ -263,12 +265,12 @@ export default function Home() {
               return (
                 <div 
                   key={idx} 
-                  className="group rounded-2xl border border-white/5 bg-slate-900/20 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/25 hover:bg-slate-900/60 hover:shadow-xl hover:shadow-emerald-500/[0.01]"
+                  className="group rounded-2xl border border-white/5 bg-slate-900/10 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/20 hover:bg-slate-900/30 hover:shadow-xl"
                 >
-                  <div className={`flex h-11 w-11 items-center justify-center rounded-xl border mb-5 transition-transform duration-500 group-hover:scale-105 ${pillar.color}`}>
-                    <Icon className="h-5.5 w-5.5" />
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl border mb-6 transition-transform duration-550 group-hover:scale-105 ${pillar.color}`}>
+                    <Icon className="h-6 w-6" />
                   </div>
-                  <h3 className="text-sm font-bold text-white mb-2.5 group-hover:text-emerald-400 transition-colors">{pillar.title}</h3>
+                  <h3 className="text-sm font-bold text-white mb-2.5 group-hover:text-[#c19b4c] transition-colors">{pillar.title}</h3>
                   <p className="text-xs text-zinc-400 leading-relaxed font-sans font-light">{pillar.description}</p>
                 </div>
               )
@@ -279,23 +281,23 @@ export default function Home() {
       </section>
 
       {/* Curriculum Highlight Section */}
-      <section className="py-24 border-t border-white/5 bg-slate-900/10 relative z-10">
-        <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-emerald-500/[0.02] blur-[150px] pointer-events-none" />
+      <section className="py-28 border-t border-white/5 bg-slate-900/10 relative z-10">
+        <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[550px] h-[550px] rounded-full bg-emerald-500/[0.02] blur-[150px] pointer-events-none" />
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
-          <div className="flex flex-col sm:flex-row items-center justify-between mb-16 gap-4">
-            <div className="text-center sm:text-left space-y-1">
+          <div className="flex flex-col sm:flex-row items-center justify-between mb-20 gap-4">
+            <div className="text-center sm:text-left space-y-2">
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#c19b4c]">
                 OUR CURRICULUM
               </span>
-              <h2 className="text-3xl font-extrabold tracking-tight text-white font-sans">
+              <h2 className="text-3xl font-semibold tracking-tight text-white font-serif italic">
                 Explore Our Courses
               </h2>
             </div>
             <Link
               href="/courses"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 px-6 text-xs font-bold text-zinc-200 hover:bg-white/10 hover:text-white transition-all active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 px-6 text-xs font-bold text-zinc-200 hover:bg-white/10 hover:text-white transition-all"
             >
               View All Courses
               <ArrowRight className="h-4 w-4" />
@@ -308,11 +310,11 @@ export default function Home() {
               return (
                 <div 
                   key={idx} 
-                  className="group rounded-2xl border border-white/5 bg-slate-900/30 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/20 hover:bg-slate-900/70 hover:shadow-xl hover:shadow-emerald-500/[0.01]"
+                  className="group rounded-2xl border border-white/5 bg-slate-900/10 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#c19b4c]/20 hover:bg-slate-900/40 hover:shadow-xl"
                 >
-                  <div className="flex justify-between items-center mb-5">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
-                      <Icon className="h-5.5 w-5.5" />
+                  <div className="flex justify-between items-center mb-6">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 group-hover:bg-[#c19b4c] group-hover:text-slate-950 group-hover:border-transparent transition-all duration-300">
+                      <Icon className="h-5 w-5" />
                     </div>
                     <span className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded bg-white/5 text-zinc-400 border border-white/5">
                       {course.badge}
@@ -326,7 +328,7 @@ export default function Home() {
                   </p>
                   <Link
                     href="/courses"
-                    className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-bold hover:text-emerald-300 transition-all group-hover:translate-x-1"
+                    className="inline-flex items-center gap-1.5 text-xs text-emerald-450 font-bold hover:text-emerald-350 transition-all group-hover:translate-x-1"
                   >
                     Learn More
                     <ChevronRight className="h-3.5 w-3.5" />
@@ -340,14 +342,14 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-24 bg-slate-900/10 border-t border-white/5 relative z-10">
+      <section className="py-28 bg-slate-900/10 border-t border-white/5 relative z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-2">
+          <div className="text-center max-w-3xl mx-auto mb-20 space-y-2">
             <span className="text-[10px] font-bold uppercase tracking-widest text-[#c19b4c]">
               SIMPLE PROCESS
             </span>
-            <h2 className="text-3xl font-extrabold tracking-tight text-white font-sans">
+            <h2 className="text-3xl font-semibold tracking-tight text-white font-serif italic">
               How It Works
             </h2>
           </div>
@@ -356,18 +358,18 @@ export default function Home() {
             {howItWorks.map((item, idx) => (
               <div 
                 key={idx} 
-                className="relative rounded-2xl border border-white/5 bg-slate-900/20 p-6 transition-all duration-300 hover:border-emerald-500/10"
+                className="relative rounded-2xl border border-white/5 bg-slate-900/10 p-6 backdrop-blur-sm transition-all duration-300 hover:border-emerald-500/10"
               >
-                <div className="absolute top-4 right-4 text-4xl font-black text-emerald-500/5 select-none">{item.step}</div>
+                <div className="absolute top-4 right-4 text-4xl font-black text-[#c19b4c]/5 select-none">{item.step}</div>
                 <h3 className="text-base font-bold text-white mb-2.5">{item.title}</h3>
                 <p className="text-xs text-zinc-400 leading-relaxed font-sans font-light">{item.description}</p>
               </div>
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-14">
             <Link
-              href="/enrollment"
+              href="/enrollment?tab=trial"
               className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white py-3.5 px-8 text-xs font-bold shadow-lg shadow-emerald-950/15 active:scale-[0.98] transition-all"
             >
               Start with a Free Trial
@@ -379,14 +381,14 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-24 border-t border-white/5 relative z-10">
+      <section className="py-28 border-t border-white/5 relative z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+          <div className="text-center max-w-3xl mx-auto mb-20 space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#c19b4c] bg-[#c19b4c]/10 border border-[#c19b4c]/20 px-3.5 py-1.5 rounded-full">
               STUDENT STORIES
             </span>
-            <h2 className="text-3xl font-extrabold tracking-tight text-white">
+            <h2 className="text-3xl font-semibold tracking-tight text-white font-serif italic">
               What Our Students Say
             </h2>
             <p className="text-xs text-zinc-400 font-sans font-light">
@@ -398,9 +400,9 @@ export default function Home() {
             {testimonials.map((test, idx) => (
               <div 
                 key={idx} 
-                className="group rounded-2xl border border-white/5 bg-slate-900/30 p-6 flex flex-col justify-between hover:border-emerald-500/10 transition-all duration-300"
+                className="group rounded-2xl border border-white/5 bg-slate-900/10 p-6 flex flex-col justify-between hover:border-emerald-500/10 hover:bg-slate-900/20 transition-all duration-300"
               >
-                <p className="text-xs sm:text-sm text-zinc-350 leading-relaxed font-sans italic mb-6 font-light">
+                <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans italic mb-6 font-light">
                   &ldquo;{test.quote}&rdquo;
                 </p>
                 <div className="flex items-center gap-3 border-t border-white/5 pt-4">
@@ -409,7 +411,7 @@ export default function Home() {
                   </div>
                   <div>
                     <span className="block text-xs font-bold text-white">{test.author}</span>
-                    <span className="block text-[9px] text-[#c19b4c] uppercase tracking-widest font-bold mt-0.5">{test.country}</span>
+                    <span className="block text-[9px] text-[#c19b4c] uppercase tracking-widest font-extrabold mt-0.5">{test.country}</span>
                   </div>
                 </div>
               </div>
@@ -420,14 +422,14 @@ export default function Home() {
       </section>
 
       {/* Featured Teachers Section */}
-      <section className="py-24 border-t border-white/5 bg-slate-900/10 relative z-10">
+      <section className="py-28 border-t border-white/5 bg-slate-900/10 relative z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-2">
+          <div className="text-center max-w-3xl mx-auto mb-20 space-y-2">
             <span className="text-[10px] font-bold uppercase tracking-widest text-[#c19b4c]">
               MEET THE FACULTY
             </span>
-            <h2 className="text-3xl font-extrabold tracking-tight text-white">
+            <h2 className="text-3xl font-semibold tracking-tight text-white font-serif italic">
               Featured Teachers
             </h2>
           </div>
@@ -436,7 +438,7 @@ export default function Home() {
             {featuredTeachers.map((teacher, idx) => (
               <div 
                 key={idx} 
-                className="group rounded-2xl border border-white/5 bg-slate-900/40 p-6 text-center hover:border-emerald-500/20 transition-all duration-300"
+                className="group rounded-2xl border border-white/5 bg-slate-900/20 p-6 text-center hover:border-emerald-500/20 transition-all duration-300"
               >
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-extrabold text-sm mb-4 group-hover:scale-105 transition-transform duration-500">
                   {teacher.letter}
@@ -466,14 +468,14 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 border-t border-white/5 bg-gradient-to-b from-slate-950 via-slate-950 to-emerald-950/20 relative z-10 overflow-hidden">
+      <section className="py-28 border-t border-white/5 bg-gradient-to-b from-slate-950 via-slate-950 to-emerald-950/20 relative z-10 overflow-hidden">
         <div className="absolute bottom-0 right-1/4 w-[350px] h-[350px] rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none" />
 
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center space-y-6">
           <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1.5 rounded-full shadow-lg">
             BEGIN TODAY
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white font-serif leading-tight">
             Ready to Begin Your Journey?
           </h2>
           <p className="text-xs sm:text-sm text-zinc-450 leading-relaxed max-w-xl mx-auto font-sans font-light">
@@ -481,7 +483,7 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
             <Link
-              href="/enrollment"
+              href="/enrollment?tab=trial"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#c19b4c] hover:bg-[#b08b3e] text-slate-950 py-3.5 px-8 text-xs font-bold shadow-lg shadow-[#c19b4c]/10 active:scale-[0.98] transition-all"
             >
               Apply for Free Trial

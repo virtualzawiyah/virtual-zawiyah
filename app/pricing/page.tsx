@@ -155,13 +155,13 @@ export default function PricingPage() {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-x-hidden">
       {/* Background Grid Pattern */}
       <div className="absolute top-0 inset-x-0 h-[600px] pointer-events-none z-0">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-grid-pattern opacity-30" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-grid-pattern opacity-25" />
         <div className="absolute top-[10%] right-[15%] w-[350px] h-[350px] rounded-full bg-emerald-500/5 blur-[130px]" />
       </div>
 
       <PublicNavbar />
 
-      <main className="flex-grow pt-32 pb-24 relative z-10 animate-fade-in-up">
+      <main className="flex-grow pt-36 pb-24 relative z-10 animate-fade-in-up">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
           {/* Breadcrumbs */}
@@ -176,15 +176,15 @@ export default function PricingPage() {
             <span className="text-[10px] font-bold uppercase tracking-widest text-[#c19b4c] bg-[#c19b4c]/10 border border-[#c19b4c]/20 px-3.5 py-1.5 rounded-full shadow">
               TRANSPARENT PRICING
             </span>
-            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight font-sans bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight font-serif bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
               Tuition & Fees
             </h1>
-            <p className="text-sm sm:text-base text-zinc-400 leading-relaxed font-sans font-light">
+            <p className="text-xs sm:text-sm text-zinc-455 leading-relaxed font-sans font-light">
               Simple, affordable pricing with no hidden costs. Choose the plan that fits your schedule and learning goals — and start with a 3-day free trial.
             </p>
 
             {/* Currency Selector */}
-            <div className="inline-flex items-center p-1.5 rounded-2xl bg-slate-900 border border-white/5 shadow-inner">
+            <div className="inline-flex items-center p-1.5 rounded-2xl bg-slate-900/30 border border-white/5 shadow-inner">
               <button
                 onClick={() => setCurrency('USD')}
                 className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
@@ -210,7 +210,7 @@ export default function PricingPage() {
 
           {/* One-on-One Pricing Section */}
           <div className="mb-24">
-            <div className="border-l-4 border-emerald-500 pl-5 mb-10 space-y-1">
+            <div className="border-l-4 border-[#c19b4c] pl-5 mb-10 space-y-1">
               <h2 className="text-2xl font-bold tracking-tight text-white font-sans">
                 One-on-One Classes
               </h2>
@@ -226,10 +226,10 @@ export default function PricingPage() {
                 return (
                   <div
                     key={plan.id}
-                    className={`relative flex flex-col justify-between rounded-2xl border bg-slate-900/20 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
+                    className={`relative flex flex-col justify-between rounded-2xl border bg-slate-900/10 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
                       plan.popular
-                        ? 'border-amber-500/40 bg-slate-900/40 shadow-xl shadow-amber-500/[0.02]'
-                        : 'border-white/5 hover:border-emerald-500/20 hover:bg-slate-900/60'
+                        ? 'border-amber-500/40 bg-slate-900/20 shadow-xl shadow-amber-500/[0.02]'
+                        : 'border-white/5 hover:border-emerald-500/20 hover:bg-slate-900/40'
                     }`}
                   >
                     {plan.popular && (
@@ -241,7 +241,7 @@ export default function PricingPage() {
                     <div>
                       {/* Plan Spec */}
                       <div className="flex items-baseline justify-between mb-5 border-b border-white/5 pb-3.5">
-                        <span className="text-xs font-bold text-emerald-400">{plan.duration}</span>
+                        <span className="text-xs font-bold text-emerald-450">{plan.duration}</span>
                         <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">{plan.lessonsPerWeek}</span>
                       </div>
 
@@ -270,7 +270,7 @@ export default function PricingPage() {
                     {/* Action */}
                     <Link
                       href="/enrollment"
-                      className={`w-full flex items-center justify-center gap-1.5 rounded-xl py-3 text-xs font-bold transition-all active:scale-[0.98] ${
+                      className={`w-full flex items-center justify-center gap-1.5 rounded-xl py-3.5 text-xs font-bold transition-all active:scale-[0.98] ${
                         plan.popular
                           ? 'bg-[#c19b4c] hover:bg-[#b08b3e] text-slate-950 font-bold shadow-lg shadow-[#c19b4c]/10'
                           : 'border border-white/10 bg-white/5 text-zinc-300 hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/20'
@@ -294,7 +294,7 @@ export default function PricingPage() {
                 <p className="text-xs text-zinc-450">Learn together with a structured academy syllabus.</p>
               </div>
 
-              <div className="rounded-2xl border border-white/5 bg-slate-900/20 p-6 backdrop-blur-sm hover:border-teal-500/20 transition-all duration-300 hover:bg-slate-900/60 hover:-translate-y-0.5">
+              <div className="rounded-2xl border border-white/5 bg-slate-900/10 p-6 backdrop-blur-sm hover:border-teal-500/20 transition-all duration-300 hover:bg-slate-900/30 hover:-translate-y-0.5">
                 <div className="flex justify-between items-baseline mb-5 border-b border-white/5 pb-3.5">
                   <span className="text-xs font-bold text-teal-400">{groupPlan.duration}</span>
                   <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">{groupPlan.lessonsPerWeek}</span>
@@ -336,7 +336,7 @@ export default function PricingPage() {
                 <p className="text-xs text-zinc-450">Dedicated weekend schedule for busy pupils.</p>
               </div>
 
-              <div className="rounded-2xl border border-white/5 bg-slate-900/20 p-6 backdrop-blur-sm hover:border-indigo-500/20 transition-all duration-300 hover:bg-slate-900/60 hover:-translate-y-0.5">
+              <div className="rounded-2xl border border-white/5 bg-slate-900/10 p-6 backdrop-blur-sm hover:border-indigo-500/20 transition-all duration-300 hover:bg-slate-900/30 hover:-translate-y-0.5">
                 <div className="flex justify-between items-baseline mb-5 border-b border-white/5 pb-3.5">
                   <span className="text-xs font-bold text-indigo-400">{weekendPlan.name}</span>
                   <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">{weekendPlan.type}</span>
@@ -375,7 +375,7 @@ export default function PricingPage() {
           {/* Good to Know Section */}
           <div className="mb-12">
             <div className="text-center max-w-3xl mx-auto mb-12 space-y-1">
-              <h3 className="text-2xl font-bold tracking-tight text-white font-sans">
+              <h3 className="text-2xl font-bold tracking-tight text-white font-serif italic">
                 Good to Know
               </h3>
               <p className="text-xs text-zinc-400 font-sans font-light">

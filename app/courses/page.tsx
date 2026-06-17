@@ -91,7 +91,7 @@ const groupCourses = [
     id: 'dars-e-nizami',
     title: 'Dars-e-Nizami — Classical Islamic Curriculum',
     icon: Home,
-    description: 'The complete 8-year classical Islamic scholarship curriculum taught in traditional seminaries worldwide. Students select their year of entry at admission. Subjects include Fiqh, Hadith, Tafsir, Aqeedah, Arabic Grammar, Mantiq (Logic), Balagha (Rhetoric), and more.',
+    description: 'The complete 8-year classical Islamic scholarship curriculum taught in traditional seminaries worldwide. Subjects include Fiqh, Hadith, Tafsir, Aqeedah, Arabic Grammar, Mantiq (Logic), Balagha (Rhetoric), and more.',
     duration: '120 min · 5 days/week',
     points: [
       '8-year structured curriculum',
@@ -120,14 +120,14 @@ export default function CoursesPage() {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-x-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 inset-x-0 h-[600px] pointer-events-none z-0">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-grid-pattern opacity-30" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full bg-grid-pattern opacity-25" />
         <div className="absolute top-[10%] left-[20%] w-[300px] h-[300px] rounded-full bg-emerald-500/5 blur-[120px]" />
       </div>
 
       <PublicNavbar />
 
-      <main className="flex-grow pt-32 pb-24 relative z-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 animate-fade-in-up">
+      <main className="flex-grow pt-36 pb-24 relative z-10 animate-fade-in-up">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
           {/* Breadcrumbs */}
           <nav className="flex mb-8 text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
@@ -138,29 +138,29 @@ export default function CoursesPage() {
 
           {/* Header Section */}
           <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
-            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight font-sans bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight font-serif bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
               Our Courses
             </h1>
-            <p className="text-sm sm:text-base text-zinc-400 leading-relaxed font-sans font-light">
+            <p className="text-xs sm:text-sm text-zinc-450 leading-relaxed font-sans font-light">
               Comprehensive Islamic education — from Quran recitation to classical scholarship. Every course taught by qualified scholars.
             </p>
 
             {/* Badges Bar */}
-            <div className="inline-flex flex-wrap items-center justify-center gap-3 p-2 rounded-2xl bg-slate-900/50 border border-white/5 shadow-inner">
-              <span className="px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+            <div className="inline-flex flex-wrap items-center justify-center gap-3 p-2 rounded-2xl bg-slate-900/30 border border-white/5 shadow-inner">
+              <span className="px-3.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
                 From $60 / month (1:1)
               </span>
-              <span className="px-3 py-1 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 text-[10px] font-bold uppercase tracking-wider">
+              <span className="px-3.5 py-1 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 text-[10px] font-bold uppercase tracking-wider">
                 $40 / month (Group)
               </span>
-              <span className="px-3 py-1 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+              <span className="px-3.5 py-1 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-450 text-[10px] font-bold uppercase tracking-wider">
                 3 Days Free Trial
               </span>
             </div>
             
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-zinc-550">
               Full pricing breakdown with all plan options on our{' '}
-              <Link href="/pricing" className="text-emerald-400 font-bold hover:text-emerald-300 transition-colors">
+              <Link href="/pricing" className="text-emerald-450 font-bold hover:text-emerald-350 transition-colors">
                 Tuition & Fees page
               </Link>
               .
@@ -169,7 +169,7 @@ export default function CoursesPage() {
 
           {/* One-on-One Section */}
           <div className="mb-24">
-            <div className="border-l-4 border-emerald-500 pl-5 mb-10 space-y-1">
+            <div className="border-l-4 border-[#c19b4c] pl-5 mb-10 space-y-1">
               <h2 className="text-2xl font-bold tracking-tight text-white font-sans">
                 One-on-One Courses
               </h2>
@@ -184,19 +184,19 @@ export default function CoursesPage() {
                 return (
                   <div
                     key={course.id}
-                    className="group relative flex flex-col justify-between rounded-2xl border border-white/5 bg-slate-900/20 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/20 hover:bg-slate-900/60 hover:shadow-xl hover:shadow-emerald-500/[0.01]"
+                    className="group relative flex flex-col justify-between rounded-2xl border border-white/5 bg-slate-900/10 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/20 hover:bg-slate-900/30 hover:shadow-xl hover:shadow-emerald-500/[0.01]"
                   >
                     <div>
                       {/* Course Header */}
                       <div className="flex items-center justify-between mb-5">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 group-hover:bg-[#c19b4c] group-hover:text-slate-950 group-hover:border-transparent transition-all duration-500">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 group-hover:bg-[#c19b4c] group-hover:text-slate-950 group-hover:border-transparent transition-all duration-550">
                           <Icon className="h-5.5 w-5.5" />
                         </div>
                         <div className="flex flex-col items-end gap-1">
                           <span className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded bg-white/5 text-zinc-400 border border-white/5">
                             One-on-One
                           </span>
-                          <span className="text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">
+                          <span className="text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-450">
                             3 Days Free
                           </span>
                         </div>
@@ -266,12 +266,12 @@ export default function CoursesPage() {
                 return (
                   <div
                     key={course.id}
-                    className="group relative flex flex-col justify-between rounded-2xl border border-white/5 bg-slate-900/20 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-teal-500/20 hover:bg-slate-900/60 hover:shadow-xl hover:shadow-teal-500/[0.01]"
+                    className="group relative flex flex-col justify-between rounded-2xl border border-white/5 bg-slate-900/10 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-teal-500/20 hover:bg-slate-900/30 hover:shadow-xl hover:shadow-teal-500/[0.01]"
                   >
                     <div>
                       {/* Course Header */}
                       <div className="flex items-center justify-between mb-5">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 group-hover:bg-[#c19b4c] group-hover:text-slate-950 group-hover:border-transparent transition-all duration-500">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 group-hover:bg-[#c19b4c] group-hover:text-slate-950 group-hover:border-transparent transition-all duration-550">
                           <Icon className="h-5.5 w-5.5" />
                         </div>
                         <span className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded bg-white/5 text-zinc-400 border border-white/5">
