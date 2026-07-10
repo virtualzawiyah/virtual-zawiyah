@@ -1,85 +1,49 @@
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
-  
-  // Refresh session if expired - required for Server Components
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
+const publicPaths = ['/', '/about', '/courses', '/fee', '/contact', '/enrollment', '/teachers', '/faq', '/login', '/staff/login', '/debug', '/terms', '/privacy', '/api/public', '/api/notifications/create']
 
-  const path = req.nextUrl.pathname
-
-  // Public paths that do not require authentication
-  const publicPaths = [
-    '/',
-    '/courses',
-    '/about',
-    '/pricing',
-    '/enrollment',
-    '/trial-request',
-    '/contact',
-    '/login'
-  ]
-  
-  const isPublicPath = publicPaths.includes(path)
-
-  // Redirect to /login if user is not authenticated and is trying to access a protected route
-  if (!user) {
-    if (!isPublicPath) {
-      return NextResponse.redirect(new URL('/login', req.url))
-    }
-    return res
-  }
-
-  // Fetch the user's role from their profile
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  const role = profile?.role
-
-  // If user is authenticated and goes to login, redirect to their dashboard
-  if (path === '/login') {
-    if (role) {
-      return NextResponse.redirect(new URL(`/${role}/dashboard`, req.url))
-    }
-    // Fallback if role is not found (should not happen if profile setup is correct)
-    return NextResponse.redirect(new URL('/', req.url))
-  }
-
-  // Redirect /dashboard (generic URL) to role-specific dashboard
-  if (path === '/dashboard') {
-    if (role) {
-      return NextResponse.redirect(new URL(`/${role}/dashboard`, req.url))
-    }
-    return res
-  }
-
-  // Role-based route guard checks
-  if (path.startsWith('/teacher') && role !== 'teacher') {
-    return NextResponse.redirect(new URL('/dashboard', req.url))
-  }
-  if (path.startsWith('/student') && role !== 'student') {
-    return NextResponse.redirect(new URL('/dashboard', req.url))
-  }
-  if (path.startsWith('/parent') && role !== 'parent') {
-    return NextResponse.redirect(new URL('/dashboard', req.url))
-  }
-  if (path.startsWith('/admin') && role !== 'admin') {
-    return NextResponse.redirect(new URL('/dashboard', req.url))
-  }
-
-  return res
+const roleToPath: Record<string, string> = {
+  student: '/student',
+  parent: '/student',
+  teacher: '/teacher',
+  registrar: '/registrar',
+  supervisor: '/supervisor',
+  content_manager: '/content-manager',
+  finance_officer: '/finance',
+  academic_director: '/director',
+  founder: '/founder',
 }
 
-// Ensure the middleware runs on all paths except static assets
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const response = NextResponse.next()
+
+  const supabase = createMiddlewareClient({ req: request, res: response })
+  const { data: { session } } = await supabase.auth.getSession()
+
+  const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
+
+  if (!session) {
+    if (isPublic) return response
+    const isStaffPath = ['/teacher', '/registrar', '/supervisor', '/content-manager', '/finance', '/director', '/founder'].some(p => pathname.startsWith(p))
+    return NextResponse.redirect(new URL(isStaffPath ? '/staff/login' : '/login', request.url))
+  }
+
+  const role = session.user.user_metadata?.role as string
+  const allowedPath = roleToPath[role]
+
+  if (pathname === '/login' || pathname === '/staff/login') {
+    if (allowedPath) return NextResponse.redirect(new URL(allowedPath + '/dashboard', request.url))
+  }
+
+  if (!isPublic && allowedPath && !pathname.startsWith(allowedPath) && !pathname.startsWith('/api/')) {
+    return NextResponse.redirect(new URL(allowedPath + '/dashboard', request.url))
+  }
+
+  return response
+}
+
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.svg$|.*\\.jpg$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }

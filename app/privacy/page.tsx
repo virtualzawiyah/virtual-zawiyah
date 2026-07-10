@@ -62,10 +62,10 @@ export default function PrivacyPolicyPage() {
 
             <Section title="1. Who We Are">
               <p>
-                Virtual Zawiyah (&quot;<strong>we</strong>&quot;, &quot;<strong>our</strong>&quot;, or &quot;<strong>us</strong>&quot;) is an online Islamic Academy providing Quran and Islamic education services globally. We operate as the data controller responsible for your personal information collected through our website at <strong>virtualzawiyah.com</strong> and all associated services.
+                Virtual Zawiyah (&quot;<strong>we</strong>&quot;, &quot;<strong>our</strong>&quot;, or &quot;<strong>us</strong>&quot;) is an online Islamic learning provider offering Quran and Islamic education services globally. We operate as the data controller responsible for your personal information collected through our website at <strong>virtualzawiyah.com</strong> and all associated services.
               </p>
               <p className="mt-2 text-sm text-gray-600 font-medium">
-                Contact: info@virtualzawiyah.com &nbsp;|&nbsp; WhatsApp: +92 335 5777312 (primary) / +92 325 5777312 (secondary)
+                Contact: <a href="mailto:info@virtualzawiyah.com" className="text-primary hover:underline font-semibold">info@virtualzawiyah.com</a> &nbsp;|&nbsp; WhatsApp: <a href="https://wa.me/923255777312" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">+92 325 5777312</a> &nbsp;|&nbsp; Call: <a href="tel:+923255777312" className="text-primary hover:underline font-semibold">+92 325 5777312</a>
               </p>
             </Section>
 
@@ -91,7 +91,7 @@ export default function PrivacyPolicyPage() {
               <p className="font-semibold mt-4 text-gray-800">c) Information from third parties:</p>
               <ul className="list-disc list-inside space-y-1 pl-4 text-sm md:text-base text-gray-650">
                 <li>Payment processors (billing confirmation only — we do not store card details)</li>
-                <li>Video conferencing platforms used for live classes (e.g., Zoom)</li>
+                <li>Our custom, browser-based online classroom portal</li>
               </ul>
             </Section>
 
@@ -171,7 +171,7 @@ export default function PrivacyPolicyPage() {
                 Virtual Zawiyah provides educational services to students of all ages, including children under 13. Where a student is under 13 (or under 16 in certain jurisdictions), we require verifiable parental or guardian consent prior to collecting any personal data. We collect only the minimum data necessary for educational purposes from minors.
               </p>
               <p>
-                Parents and guardians may review, correct, or request deletion of their child&apos;s information by contacting us at <strong>info@virtualzawiyah.com</strong>.
+                Parents and guardians may review, correct, or request deletion of their child&apos;s information by contacting us at <strong><a href="mailto:info@virtualzawiyah.com" className="text-primary hover:underline">info@virtualzawiyah.com</a></strong>.
               </p>
             </Section>
 
@@ -211,7 +211,7 @@ export default function PrivacyPolicyPage() {
               <p className="font-semibold mt-4 text-primary">Other Jurisdictions:</p>
               <p className="text-sm">We respect equivalent rights under applicable local laws in all jurisdictions where we operate, including Canada (PIPEDA), Australia (Privacy Act), and others.</p>
 
-              <p className="mt-4 text-sm text-gray-600">To exercise any of these rights, please contact us at <strong>info@virtualzawiyah.com</strong>. We will respond within 30 days (or within the timeframe required by applicable law). We may need to verify your identity before processing your request.</p>
+              <p className="mt-4 text-sm text-gray-650">To exercise any of these rights, please contact us at <strong><a href="mailto:info@virtualzawiyah.com" className="text-primary hover:underline">info@virtualzawiyah.com</a></strong>. We will respond within 30 days (or within the timeframe required by applicable law). We may need to verify your identity before processing your request.</p>
             </Section>
 
             <Section title="11. Data Security">
@@ -240,11 +240,19 @@ export default function PrivacyPolicyPage() {
               <div className="mt-3 p-5 rounded-xl border space-y-3" style={{ borderColor: "#E0E0E0", background: "#FAFAF7" }}>
                 <div className="flex items-center gap-3 text-sm md:text-base">
                   <Mail className="w-5 h-5 shrink-0 text-primary" />
-                  <span>privacy@virtualzawiyah.com &nbsp;|&nbsp; info@virtualzawiyah.com</span>
+                  <span>
+                    <a href="mailto:privacy@virtualzawiyah.com" className="text-primary hover:underline">privacy@virtualzawiyah.com</a>
+                    &nbsp;|&nbsp;
+                    <a href="mailto:info@virtualzawiyah.com" className="text-primary hover:underline">info@virtualzawiyah.com</a>
+                  </span>
                 </div>
                 <div className="flex items-center gap-3 text-sm md:text-base">
                   <Phone className="w-5 h-5 shrink-0 text-primary" />
-                  <span>+92 335 5777312 (primary) &nbsp;·&nbsp; +92 325 5777312 (secondary)</span>
+                  <span>
+                    WhatsApp: <a href="https://wa.me/923255777312" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">+92 325 5777312</a>
+                    &nbsp;·&nbsp;
+                    Call: <a href="tel:+923255777312" className="text-primary hover:underline font-semibold">+92 325 5777312</a>
+                  </span>
                 </div>
               </div>
               <p className="mt-4 text-sm text-gray-650 leading-relaxed">

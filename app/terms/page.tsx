@@ -62,7 +62,7 @@ export default function TermsOfServicePage() {
 
             <Section title="1. About Virtual Zawiyah">
               <p>
-                Virtual Zawiyah is an online Islamic Academy offering live, instructor-led courses in Quran recitation, Tajweed, Islamic studies, and related disciplines. We serve students globally, including but not limited to the United States, European Union, United Kingdom, Hong Kong, Canada, Australia, and Pakistan.
+                Virtual Zawiyah is an online Islamic learning platform offering live, instructor-led courses in Quran recitation, Tajweed, Islamic studies, and related disciplines. We serve students globally, including but not limited to the United States, European Union, United Kingdom, Hong Kong, Canada, Australia, and Pakistan.
               </p>
               <p>
                 These Terms of Service govern your use of our website (<strong>virtualzawiyah.com</strong>) and all services, courses, and content provided through it. By using our services, you confirm you are at least 18 years old, or have parental/guardian consent if younger.
@@ -84,15 +84,16 @@ export default function TermsOfServicePage() {
               </p>
             </Section>
 
-            <Section title="3. Free Trial Policy">
+            <Section title="3. Trial Period Policy">
               <p>
-                We offer a <strong>3-day free trial</strong> (and may from time to time offer promotional free sessions) to allow prospective students to experience our teaching methodology. During the trial period:
+                We offer a <strong>3-day trial period</strong> exclusively for our 1:1 (individual) courses to allow prospective students to experience our teaching methodology. During the trial period:
               </p>
               <ul className="list-disc list-inside space-y-1 pl-4 text-sm md:text-base text-gray-650">
-                <li>Trial sessions are provided at no charge and without obligation</li>
-                <li>Trial access may be limited to specific courses or session types</li>
+                <li>Trial sessions are not available for group programs</li>
+                <li>Trial sessions begin after completing your initial enrollment application</li>
+                <li>Trial access is limited to your chosen course program</li>
                 <li>We reserve the right to end or modify trial offerings at any time</li>
-                <li>Continued enrollment after the trial requires agreement to our fee schedule</li>
+                <li>Continued enrollment after the trial requires agreement to our standard monthly fee schedule</li>
               </ul>
             </Section>
 
@@ -106,7 +107,7 @@ export default function TermsOfServicePage() {
                 <li><strong>After the first week:</strong> No refund for the current billing period; you may cancel future billing</li>
                 <li><strong>Exceptional circumstances</strong> (illness, bereavement): considered on a case-by-case basis — please contact us</li>
               </ul>
-              <p className="mt-2">Refund requests must be submitted in writing to <strong>info@virtualzawiyah.com</strong>.</p>
+              <p className="mt-2">Refund requests must be submitted in writing to <strong><a href="mailto:info@virtualzawiyah.com" className="text-primary hover:underline">info@virtualzawiyah.com</a></strong>.</p>
             </Section>
 
             <Section title="5. Scheduling and Attendance">
@@ -171,7 +172,7 @@ export default function TermsOfServicePage() {
                 <strong>Services provided &quot;as is&quot;:</strong> Our services are provided in good faith but without warranty of any kind, express or implied, including warranties of merchantability, fitness for a particular purpose, or non-infringement.
               </p>
               <p>
-                <strong>Service availability:</strong> We strive for high availability but cannot guarantee uninterrupted service. We are not liable for outages caused by internet connectivity issues, third-party platforms (e.g., Zoom), or force majeure events.
+                <strong>Service availability:</strong> We strive for high availability but cannot guarantee uninterrupted service. We are not liable for outages caused by internet connectivity issues, third-party service provider outages, or force majeure events.
               </p>
               <p>
                 <strong>Limitation of liability:</strong> To the maximum extent permitted by applicable law, Virtual Zawiyah&apos;s total liability to you for any claim arising from these Terms or your use of our services shall not exceed the total fees paid by you in the three months preceding the claim.
@@ -186,7 +187,7 @@ export default function TermsOfServicePage() {
 
             <Section title="11. Third-Party Links and Services">
               <p>
-                Our website may contain links to third-party websites (e.g., social media, Zoom). These links are provided for your convenience. We do not endorse and are not responsible for the content, privacy practices, or terms of any third-party website. We encourage you to review the privacy policies of any third-party sites you visit.
+                Our website may contain links to third-party websites (e.g., payment gateways or social media). These links are provided for your convenience. We do not endorse and are not responsible for the content, privacy practices, or terms of any third-party website. We encourage you to review the privacy policies of any third-party sites you visit.
               </p>
             </Section>
 
@@ -195,7 +196,7 @@ export default function TermsOfServicePage() {
                 These Terms are governed by and construed in accordance with the laws of <strong>Pakistan</strong>, without regard to its conflict of law provisions.
               </p>
               <p>
-                In the event of any dispute, we encourage you to first contact us at <strong>info@virtualzawiyah.com</strong> to seek an amicable resolution. If a resolution cannot be reached within 30 days, disputes shall be submitted to binding arbitration or the courts of competent jurisdiction in Pakistan, except where prohibited by local consumer protection law.
+                In the event of any dispute, we encourage you to first contact us at <strong><a href="mailto:info@virtualzawiyah.com" className="text-primary hover:underline">info@virtualzawiyah.com</a></strong> to seek an amicable resolution. If a resolution cannot be reached within 30 days, disputes shall be submitted to binding arbitration or the courts of competent jurisdiction in Pakistan, except where prohibited by local consumer protection law.
               </p>
               <p>
                 <strong>EU/UK consumers:</strong> You retain the right to bring proceedings in the courts of your country of residence and may also use the EU Online Dispute Resolution platform at <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" className="underline text-primary hover:opacity-80">ec.europa.eu/consumers/odr</a>.
@@ -225,7 +226,7 @@ export default function TermsOfServicePage() {
               <div className="mt-3 p-5 rounded-xl border space-y-3" style={{ borderColor: "#E0E0E0", background: "#FAFAF7" }}>
                 <div className="flex items-center gap-3">
                   <Mail className="w-5 h-5 shrink-0 text-primary" />
-                  <span>info@virtualzawiyah.com</span>
+                  <a href="mailto:info@virtualzawiyah.com" className="text-primary hover:underline">info@virtualzawiyah.com</a>
                 </div>
               </div>
             </Section>

@@ -1,5 +1,7 @@
 'use client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Clock, Users, CheckCircle2, Award } from 'lucide-react'
 import PublicNavbar from '@/components/PublicNavbar'
@@ -17,91 +19,7 @@ interface Course {
   highlights: string[]
 }
 
-const oneOnOneCourses: Course[] = [
-  {
-    icon: "📖",
-    name: "Quran Reading with Tajweed",
-    description: "Learn to read the Holy Quran correctly with proper Tajweed rules. This foundational course is suitable for beginners and those looking to improve their recitation. Progress at your own pace with personalized guidance.",
-    format: "One-on-One",
-    duration: "30 / 60 / 90 min per session",
-    feeLabel: "$60 / month",
-    freeTrial: true,
-    highlights: ["Makhaarij (articulation points)", "Rules of Noon Sakinah & Tanween", "Rules of Madd", "Practice with Quran passages"],
-  },
-  {
-    icon: "🎯",
-    name: "Applied Tajweed (Basic)",
-    description: "A focused course on mastering the foundational rules of Tajweed with practical application. Ideal for students who can read Arabic but want to perfect their recitation quality.",
-    format: "One-on-One",
-    duration: "30 / 60 / 90 min per session",
-    feeLabel: "$60 / month",
-    freeTrial: true,
-    highlights: ["All Tajweed rules systematically", "Audio feedback and correction", "Practical recitation exercises", "Recitation evaluation reports"],
-  },
-  {
-    icon: "🌙",
-    name: "Quran Memorization (Hifz)",
-    description: "Embark on the noble journey of becoming a Hafiz or Hafizah. This personalized course uses proven memorization techniques adapted to your schedule and learning style.",
-    format: "One-on-One",
-    duration: "30 / 60 / 90 min per session",
-    feeLabel: "$60 / month",
-    freeTrial: true,
-    highlights: ["Personalized memorization plan", "Daily revision (muraja'ah) sessions", "Tajweed-accurate memorization", "Progress tracking and reports"],
-  },
-  {
-    icon: "📜",
-    name: "40 Hadith Memorization",
-    description: "Memorize Imam Nawawi's collection of 40 essential Hadiths — the prophetic traditions every Muslim should know. Each Hadith is explained in context.",
-    format: "One-on-One",
-    duration: "30 / 60 / 90 min per session",
-    feeLabel: "$60 / month",
-    freeTrial: true,
-    highlights: ["Full Arabic text memorization", "Meaning and explanation of each Hadith", "Chain of narration introduction", "Regular revision"],
-  },
-  {
-    icon: "🌐",
-    name: "Quran Translation",
-    description: "Understand the meaning of the Quran in English. This course helps students connect with the Quran's message, themes, and wisdom beyond recitation.",
-    format: "One-on-One",
-    duration: "30 / 60 / 90 min per session",
-    feeLabel: "$60 / month",
-    freeTrial: true,
-    highlights: ["Word-for-word translation", "Thematic understanding", "Tafsir introduction", "Contemporary application"],
-  },
-  {
-    icon: "✍️",
-    name: "Arabic Grammar (Sarf & Nahw)",
-    description: "Master classical Arabic grammar — the key that unlocks the Quran, Hadith, and Islamic texts. Covers both morphology (Sarf) and syntax (Nahw) in a structured sequence.",
-    format: "One-on-One",
-    duration: "30 / 60 / 90 min per session",
-    feeLabel: "$60 / month",
-    freeTrial: true,
-    highlights: ["Arabic word morphology (Sarf)", "Arabic sentence structure (Nahw)", "Classical text reading", "Application to Quranic Arabic"],
-  },
-]
-
-const groupCourses: Course[] = [
-  {
-    icon: "🕌",
-    name: "Dars-e-Nizami — Classical Islamic Curriculum",
-    description: "The complete 8-year classical Islamic scholarship curriculum taught in traditional seminaries worldwide. Students select their year of entry at admission. Subjects include Fiqh, Hadith, Tafsir, Aqeedah, Arabic Grammar, Mantiq (Logic), Balagha (Rhetoric), and more.",
-    format: "Group",
-    duration: "120 min · 5 days/week",
-    feeLabel: "$40 / month",
-    freeTrial: false,
-    highlights: ["8-year structured curriculum", "Fiqh, Hadith, Tafsir, Aqeedah", "Mantiq, Balagha, and more", "Select Year 1 to 8 at enrollment"],
-  },
-  {
-    icon: "✨",
-    name: "Tajweed — 2-Year Structured Group Program",
-    description: "A comprehensive two-year group course covering all Tajweed rules from beginner to advanced level. Students progress through a structured curriculum alongside peers and benefit from group recitation practice.",
-    format: "Group",
-    duration: "120 min · 5 days/week",
-    feeLabel: "$40 / month",
-    freeTrial: false,
-    highlights: ["Complete Tajweed rules over 2 years", "Group recitation practice", "Regular assessments", "Certificate upon completion"],
-  },
-]
+// Live courses lists will be fetched dynamically from the database.
 
 function CourseCard({ course, index }: { course: Course; index: number }) {
   return (
@@ -123,7 +41,7 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
             </span>
             {course.freeTrial && (
               <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full text-secondary-foreground" style={{ background: "#C9A84C" }}>
-                3 Days Free Trial
+                3-Day Trial
               </span>
             )}
           </div>
@@ -139,7 +57,7 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
           </div>
           <div className="flex items-center gap-2 font-semibold text-primary">
             <Award className="w-4 h-4 shrink-0" />
-            <Link href="/pricing" className="underline underline-offset-2 hover:opacity-75 transition-opacity">
+            <Link href="/fee" className="underline underline-offset-2 hover:opacity-75 transition-opacity">
               View Fees & Plans →
             </Link>
           </div>
@@ -169,6 +87,56 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
 }
 
 export default function CoursesPage() {
+  const [oneOnOneCourses, setOneOnOneCourses] = useState<Course[]>([])
+  const [groupCourses, setGroupCourses] = useState<Course[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch('/api/content/courses')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to load courses')
+        return res.json()
+      })
+      .then(data => {
+        const active = data.filter((c: any) => c.active)
+        
+        const mappedOneOnOne = active
+          .filter((c: any) => c.program_type === '1:1')
+          .map((c: any) => ({
+            icon: c.icon || '📖',
+            name: c.title,
+            description: c.description || '',
+            format: 'One-on-One' as const,
+            duration: c.duration || '30 / 60 / 90 min per session',
+            feeLabel: `$${c.base_fee} / month`,
+            freeTrial: c.freeTrial !== undefined ? c.freeTrial : true,
+            highlights: c.highlights || []
+          }))
+
+        const mappedGroup = active
+          .filter((c: any) => c.program_type === 'group')
+          .map((c: any) => ({
+            icon: c.icon || '🕌',
+            name: c.title,
+            description: c.description || '',
+            format: 'Group' as const,
+            duration: c.duration || '120 min · 5 days/week',
+            feeLabel: `$${c.base_fee} / month`,
+            freeTrial: c.freeTrial !== undefined ? c.freeTrial : false,
+            highlights: c.highlights || []
+          }))
+
+        setOneOnOneCourses(mappedOneOnOne)
+        setGroupCourses(mappedGroup)
+      })
+      .catch(err => {
+        console.error('Error fetching courses:', err)
+        setError(err.message || 'Unable to connect to courses database.')
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
   return (
     <div className="public-page min-h-screen flex flex-col font-sans">
       <PublicNavbar />
@@ -212,7 +180,7 @@ export default function CoursesPage() {
                 <Users className="w-5 h-5 text-blue-650" />
               </div>
               <div>
-                <div className="font-bold text-lg text-blue-700">$40 / month</div>
+                <div className="font-bold text-lg text-blue-700">$10 / month</div>
                 <div className="text-xs text-gray-500">Group Classes</div>
               </div>
             </div>
@@ -222,15 +190,15 @@ export default function CoursesPage() {
                 <Award className="w-5 h-5 text-secondary" />
               </div>
               <div>
-                <div className="font-bold text-lg text-secondary">3 Days Free</div>
-                <div className="text-xs text-gray-500">Trial for 1:1 Courses</div>
+                <div className="font-bold text-lg text-secondary">3-Day Trial</div>
+                <div className="text-xs text-gray-500">For 1:1 Courses</div>
               </div>
             </div>
 
           </div>
           <p className="text-center text-xs text-gray-400 mt-6">
             Full pricing breakdown with all plan options on our{" "}
-            <Link href="/pricing" className="font-semibold underline text-primary">
+            <Link href="/fee" className="font-semibold underline text-primary">
               Tuition & Fees
             </Link>{" "}
             page.
@@ -238,35 +206,64 @@ export default function CoursesPage() {
         </div>
       </section>
 
-      {/* One-on-One Courses */}
-      <section className="py-24 bg-white relative z-10">
-        <div className="container mx-auto px-4">
-          <div className="mb-14 animate-fade-in-up">
-            <h2 className="font-serif font-bold text-3xl md:text-4xl" style={{ color: "#1A1A1A" }}>One-on-One Courses</h2>
-            <p className="mt-2 text-base text-gray-600">Personalized instruction tailored to your pace and learning style. From $60/month · 3 days free trial.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-            {oneOnOneCourses.map((course, i) => (
-              <CourseCard key={i} course={course} index={i} />
-            ))}
-          </div>
+      {/* Loading & Error States */}
+      {loading && (
+        <div className="flex-1 flex flex-col items-center justify-center py-24 bg-white">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+          <p className="text-sm text-gray-500 font-semibold mt-4">Loading our dynamic course offerings...</p>
         </div>
-      </section>
+      )}
 
-      {/* Group Courses */}
-      <section className="py-24 relative z-10" style={{ background: "#FAFAF7" }}>
-        <div className="container mx-auto px-4">
-          <div className="mb-14 animate-fade-in-up">
-            <h2 className="font-serif font-bold text-3xl md:text-4xl" style={{ color: "#1A1A1A" }}>Group Courses</h2>
-            <p className="mt-2 text-base text-gray-600">Structured group learning with fellow students. $40/month · 120 min · 5 days/week.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {groupCourses.map((course, i) => (
-              <CourseCard key={i} course={course} index={oneOnOneCourses.length + i} />
-            ))}
+      {error && (
+        <div className="flex-1 flex flex-col items-center justify-center py-24 bg-white px-4">
+          <div className="p-4 bg-rose-50 border border-rose-150 rounded-2xl text-center max-w-md">
+            <p className="font-bold text-rose-900 mb-1">Could Not Load Catalog</p>
+            <p className="text-xs text-rose-750">{error}</p>
           </div>
         </div>
-      </section>
+      )}
+
+      {!loading && !error && (
+        <>
+          {/* One-on-One Courses */}
+          <section className="py-24 bg-white relative z-10">
+            <div className="container mx-auto px-4">
+              <div className="mb-14 animate-fade-in-up">
+                <h2 className="font-serif font-bold text-3xl md:text-4xl" style={{ color: "#1A1A1A" }}>One-on-One Courses</h2>
+                <p className="mt-2 text-base text-gray-600">Personalized instruction tailored to your pace and learning style. From $60/month · 3-day trial.</p>
+              </div>
+              {oneOnOneCourses.length === 0 ? (
+                <p className="text-sm text-gray-500 italic text-center py-10 bg-zinc-50 rounded-xl">No active 1:1 courses found.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                  {oneOnOneCourses.map((course, i) => (
+                    <CourseCard key={i} course={course} index={i} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Group Courses */}
+          <section className="py-24 relative z-10" style={{ background: "#FAFAF7" }}>
+            <div className="container mx-auto px-4">
+              <div className="mb-14 animate-fade-in-up">
+                <h2 className="font-serif font-bold text-3xl md:text-4xl" style={{ color: "#1A1A1A" }}>Group Courses</h2>
+                <p className="mt-2 text-base text-gray-600">Structured group learning with fellow students. $10/month · 120 min · 5 days/week.</p>
+              </div>
+              {groupCourses.length === 0 ? (
+                <p className="text-sm text-gray-500 italic text-center py-10 bg-zinc-50 rounded-xl">No active Group courses found.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                  {groupCourses.map((course, i) => (
+                    <CourseCard key={i} course={course} index={oneOnOneCourses.length + i} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        </>
+      )}
 
       {/* CTA */}
       <section className="py-20 bg-primary relative overflow-hidden z-10 text-white">

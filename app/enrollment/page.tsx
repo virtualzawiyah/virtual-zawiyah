@@ -79,7 +79,7 @@ const ONE_ON_ONE_PLANS = [
 ]
 
 const GROUP_PLANS = [
-  { value: "120min-5x-weekly-group", label: "120 min · 5 lessons/week ($40/month)", price: "$40/month" },
+  { value: "120min-5x-weekly-group", label: "120 min · 5 lessons/week ($10/month)", price: "$10/month" },
 ]
 
 export default function EnrollmentPage() {
@@ -88,6 +88,7 @@ export default function EnrollmentPage() {
   // Shared Form Fields
   const [studentName, setStudentName] = useState('')
   const [parentEmail, setParentEmail] = useState('')
+  const [emailError, setEmailError] = useState('')
   const [course, setCourse] = useState('')
   const [classFormat, setClassFormat] = useState<'One-on-One' | 'Group'>('One-on-One')
   const [timezone, setTimezone] = useState('UTC')
@@ -132,6 +133,15 @@ export default function EnrollmentPage() {
       if (tabParam === 'trial') {
         setActiveTab('trial')
       }
+      const teacherParam = params.get('teacher')
+      if (teacherParam) {
+        setAdditionalNotes(`Preferred Teacher: ${teacherParam}`)
+        if (teacherParam.startsWith('Ustadha')) {
+          setPreferredTeacherGender('Female')
+        } else if (teacherParam.startsWith('Ustadh')) {
+          setPreferredTeacherGender('Male')
+        }
+      }
     }
   }, [])
 
@@ -174,91 +184,64 @@ export default function EnrollmentPage() {
     )
   }
 
-  const handleAdmissionSubmit = async () => {
-    if (!studentName || !fathersName || !parentEmail || !guardianWhatsapp || !country || !stateProvince || !course) {
-      throw new Error('Please fill in all required fields marked with *.')
-    }
-
-    const prependedMessage = [
-      `[Gender: ${studentGender}]`,
-      `[Relationship: ${guardianRelationship}]`,
-      `[Fathers Name: ${fathersName}]`,
-      `[Guardian Name: ${guardianName || 'N/A'}]`,
-      `[Country: ${country}]`,
-      `[State/Province: ${stateProvince}]`,
-      `[Student WhatsApp: ${studentWhatsapp || 'N/A'}]`,
-      `[Class Format: ${classFormat}]`,
-      `[Preferred Duration/Plan: ${preferredDuration || 'N/A'}]`,
-      `[Preferred Teacher Gender: ${preferredTeacherGender}]`,
-      `[Dars-e-Nizami Year: ${darsENizamiYear || 'N/A'}]`,
-      `[Current Experience Level: ${currentLevel || 'N/A'}]`,
-      `[Preferred Time 1: ${preferredTime1 || 'N/A'}]`,
-      `[Preferred Time 2: ${preferredTime2 || 'N/A'}]`,
-      `[Days Available: ${daysAvailable.join(', ') || 'N/A'}]`,
-      `[Special Needs: ${specialNeeds || 'None'}]`,
-      `[Referral: ${howDidYouHear || 'N/A'}]`,
-      `Notes: ${additionalNotes || 'None'}`
-    ].join(' | ')
-
-    const { error } = await supabase
-      .from('enrollment_requests')
-      .insert({
-        student_name: studentName,
-        student_age: studentAge ? parseInt(studentAge, 10) : null,
-        parent_name: fathersName,
-        parent_email: parentEmail,
-        parent_whatsapp: guardianWhatsapp,
-        course_interest: course,
-        message: prependedMessage,
-        timezone: timezone,
-        status: 'pending'
-      })
-
-    if (error) throw error
-  }
-
-  const handleTrialSubmit = async () => {
-    if (!studentName || !parentEmail || !requestedDate || !course || !guardianWhatsapp) {
-      throw new Error('Please fill in all required fields.')
-    }
-
-    const feedbackNotes = [
-      `Course interest: ${course}`,
-      `Preferred Teacher Gender: ${preferredTeacherGender}`,
-      `Parent WhatsApp: ${guardianWhatsapp}`,
-      `Notes: ${additionalNotes || 'None'}`
-    ].join(' | ')
-
-    const { error } = await supabase
-      .from('trial_requests')
-      .insert({
-        student_name: studentName,
-        parent_email: parentEmail,
-        requested_date: requestedDate,
-        timezone: timezone,
-        feedback: feedbackNotes,
-        status: 'pending'
-      })
-
-    if (error) throw error
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
   }
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     setErrorMsg('')
+    setEmailError('')
+
+    if (!parentEmail || !validateEmail(parentEmail.trim())) {
+      setEmailError('Please enter a valid email address (e.g., sponsor@email.com).')
+      setIsSubmitting(false)
+      return
+    }
 
     try {
-      if (activeTab === 'admission') {
-        await handleAdmissionSubmit()
-      } else {
-        await handleTrialSubmit()
+      const payload = {
+        student_name: studentName,
+        parent_name: activeTab === 'admission' ? fathersName : studentName,
+        parent_email: parentEmail,
+        parent_whatsapp: guardianWhatsapp,
+        student_gender: activeTab === 'admission' ? studentGender.toLowerCase() : 'male',
+        student_age: activeTab === 'admission' ? studentAge : '18',
+        country: country || 'Other',
+        state: stateProvince || 'N/A',
+        course_interest: course,
+        course_type: classFormat === 'One-on-One' ? '1:1' : 'group',
+        preferred_teacher_gender: preferredTeacherGender.toLowerCase(),
+        student_timezone: timezone,
+        preferred_schedule: {
+          days: daysAvailable,
+          time1: preferredTime1,
+          time2: preferredTime2,
+          requested_date: activeTab === 'trial' ? requestedDate : null
+        },
+        message: activeTab === 'trial' 
+          ? `Preferred Starting Date: ${requestedDate}\n${additionalNotes}` 
+          : additionalNotes
       }
+
+      const res = await fetch('/api/public/enrollment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+
+      const json = await res.json()
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Failed to submit enrollment request')
+      }
+
       setSubmitted(true)
     } catch (err) {
       console.error('Submission error:', err)
-      const errorMsg = err instanceof Error ? err.message : 'An error occurred during submission. Please try again.'
-      setErrorMsg(errorMsg)
+      const msg = err instanceof Error ? err.message : 'An error occurred during submission. Please try again.'
+      setErrorMsg(msg)
     } finally {
       setIsSubmitting(false)
     }
@@ -279,9 +262,9 @@ export default function EnrollmentPage() {
             <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mx-auto mb-6 shadow-sm">
               <CheckCircle2 className="w-10 h-10 text-white" />
             </div>
-            <h2 className="font-serif font-bold text-3xl mb-4 text-gray-900">Application Received!</h2>
+            <h2 className="font-serif font-bold text-3xl mb-4 text-gray-900">✅ Application Received!</h2>
             <p className="text-sm sm:text-base leading-relaxed mb-6 text-gray-700">
-              Jazakallah khair. Your request has been logged successfully. Our coordinators will review your details and contact you within 24 hours via WhatsApp at <strong className="text-primary">{guardianWhatsapp}</strong> to configure timings and match you with a teacher.
+              We have received your enrollment request. Our team will contact you on WhatsApp (<strong className="text-primary">{guardianWhatsapp}</strong>) within 24 hours to confirm your details and assign a teacher.
             </p>
             <p className="text-xs text-gray-500 mb-8">May Allah bless your learning journey.</p>
             <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
@@ -292,7 +275,7 @@ export default function EnrollmentPage() {
                 Return to Home
               </Link>
               <a 
-                href="https://wa.me/923355777312"
+                href="https://wa.me/923255777312"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto border border-primary text-primary hover:bg-primary/5 font-semibold py-3 px-8 rounded-md text-sm"
@@ -362,7 +345,7 @@ export default function EnrollmentPage() {
                   : 'text-gray-500 hover:text-primary'
               }`}
             >
-              3-Day Free Trial
+              3-Day Trial
             </button>
           </div>
 
@@ -527,7 +510,7 @@ export default function EnrollmentPage() {
                       id="guardianWhatsapp"
                       value={guardianWhatsapp.startsWith(dialCode) ? guardianWhatsapp.slice(dialCode.length) : guardianWhatsapp}
                       onChange={(e) => setGuardianWhatsapp(dialCode + e.target.value.replace(/\D/g, ""))}
-                      placeholder="e.g. 335 5777312"
+                      placeholder="e.g. 325 5777312"
                       required
                       className="flex-1 px-3 py-2 text-sm bg-transparent outline-none h-10"
                     />
@@ -548,7 +531,7 @@ export default function EnrollmentPage() {
                         id="studentWhatsapp"
                         value={studentWhatsapp.startsWith(dialCode) ? studentWhatsapp.slice(dialCode.length) : studentWhatsapp}
                         onChange={(e) => setStudentWhatsapp(dialCode + e.target.value.replace(/\D/g, ""))}
-                        placeholder="e.g. 335 5777312"
+                        placeholder="e.g. 325 5777312"
                         className="flex-1 px-3 py-2 text-sm bg-transparent outline-none h-10"
                       />
                     </div>
@@ -563,11 +546,23 @@ export default function EnrollmentPage() {
                     type="email"
                     id="parentEmail"
                     value={parentEmail}
-                    onChange={(e) => setParentEmail(e.target.value)}
+                    onChange={(e) => {
+                      setParentEmail(e.target.value)
+                      if (emailError) setEmailError('')
+                    }}
                     placeholder="sponsor@email.com"
                     required
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-transparent outline-none h-10 focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
+                    className={`w-full rounded-md border px-3 py-2 text-sm bg-transparent outline-none h-10 transition-all ${
+                      emailError 
+                        ? 'border-rose-500 focus:border-rose-500 focus:ring-1 focus:ring-rose-500/20' 
+                         : 'border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary/20'
+                    }`}
                   />
+                  {emailError && (
+                    <p className="text-xs font-semibold text-rose-600 mt-1" role="alert">
+                      {emailError}
+                    </p>
+                  )}
                 </div>
 
                 {activeTab === 'trial' && (
@@ -868,7 +863,7 @@ export default function EnrollmentPage() {
                 )}
               </button>
               <p className="text-xs text-gray-500 font-medium">
-                No payment information required upfront. We will contact you within 24 hours via WhatsApp after reviewing your details.
+                We will contact you within 24 hours via WhatsApp after reviewing your details to coordinate your enrollment fee and schedule.
               </p>
             </div>
 

@@ -187,14 +187,6 @@ export default function TeachersPage() {
                     <p className="text-xs leading-relaxed italic text-gray-600">&quot;{teacher.bio}&quot;</p>
                   </div>
                 </div>
-
-                <Link 
-                  href="/enrollment" 
-                  className="w-full inline-flex items-center justify-center bg-primary hover:bg-primary/95 text-white font-semibold py-3 px-4 rounded-md shadow-sm transition-colors text-sm text-center"
-                  data-testid={`btn-apply-teacher-${i}`}
-                >
-                  Apply to Learn with This Teacher
-                </Link>
               </div>
             ))}
           </div>

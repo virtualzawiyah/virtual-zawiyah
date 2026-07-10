@@ -14,7 +14,7 @@ const values = [
 ]
 
 const orgLevels = [
-  { role: "Administration", desc: "Oversees all academy operations and student welfare" },
+  { role: "Administration", desc: "Oversees all program operations and student welfare" },
   { role: "Supervisor", desc: "Manages teacher quality and academic standards" },
   { role: "Teacher", desc: "Delivers classes and tracks student progress" },
   { role: "Student", desc: "Learns, grows, and connects with their deen" },
@@ -44,7 +44,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Academy Story */}
+      {/* Platform Story */}
       <section className="py-24 bg-background relative z-10">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
@@ -56,7 +56,7 @@ export default function AboutPage() {
                 Virtual Zawiyah was founded with a simple but urgent vision: to make authentic Islamic education accessible to every Muslim, wherever they live. For too long, the lack of qualified Islamic teachers outside Muslim-majority countries has left communities disconnected from their deen.
               </p>
               <p className="leading-relaxed mb-4 text-gray-750 text-sm">
-                Our founders — scholars and educators who saw this gap firsthand — built this academy to bridge it. We offer the same quality of instruction you would find in a traditional madrasa, delivered through modern technology to your home.
+                Our founders — scholars and educators who saw this gap firsthand — built this platform to bridge it. We offer the same quality of instruction you would find in a traditional madrasa, delivered through modern technology to your home.
               </p>
               <p className="leading-relaxed text-gray-750 text-sm italic">
                 The word <em className="font-semibold text-primary">zawiyah</em> refers to a corner or gathering place for Islamic learning. That is what we aim to be — your corner of the world where sacred knowledge is transmitted with care, dignity, and excellence.
@@ -157,13 +157,13 @@ export default function AboutPage() {
       {/* CTA */}
       <section className="py-20 relative z-10" style={{ background: "#E8F5EE" }}>
         <div className="container mx-auto px-4 text-center">
-          <h2 className="font-serif font-bold text-3xl mb-4" style={{ color: "#1A1A1A" }}>Ready to Join Our Academy?</h2>
+          <h2 className="font-serif font-bold text-3xl mb-4" style={{ color: "#1A1A1A" }}>Ready to Begin Learning?</h2>
           <p className="mb-8 text-lg max-w-md mx-auto text-gray-650">Take the first step towards authentic Islamic knowledge. Apply today.</p>
           <Link 
             href="/enrollment" 
             className="inline-flex items-center justify-center gap-2 rounded-md bg-primary hover:bg-primary/95 text-white py-3.5 px-10 font-semibold shadow-md transition-colors"
           >
-            Join Our Academy
+            Begin Your Journey
           </Link>
         </div>
       </section>

@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node -e \"const fs = require('fs'); if (fs.existsSync('.next')) { fs.rmSync('.next', { recursive: true, force: true }); }\" && next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check": "tsc --noEmit && next lint"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.10.0",

@@ -1,14 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
 import { 
   Calendar, 
   Clock, 
   Video, 
   User, 
   Loader2, 
-  AlertCircle,
   HelpCircle,
   Play
 } from 'lucide-react'
@@ -24,19 +22,6 @@ interface LocalSchedule {
   duration_minutes: number
 }
 
-interface DBClassSchedule {
-  id: string
-  assignment_id: string
-  day_of_week: number
-  start_time: string
-  duration_minutes: number
-}
-
-interface Assignment {
-  id: string
-  teacher: { id: string; full_name: string }
-}
-
 const DAYS = [
   'Sunday',
   'Monday',
@@ -48,51 +33,106 @@ const DAYS = [
 ]
 
 export default function StudentSchedulePage() {
+  const [activeStudentId, setActiveStudentId] = useState<string | null>(null)
   const [schedules, setSchedules] = useState<LocalSchedule[]>([])
+  const [studentTimezone, setStudentTimezone] = useState<string>('UTC')
   const [loading, setLoading] = useState(true)
-  const [errorMsg, setErrorMsg] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const [currentTime, setCurrentTime] = useState(new Date())
 
   // Keep current time updated for active class check
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date())
-    }, 30000) // update every 30s
+    }, 15000) // update every 15s
     return () => clearInterval(timer)
   }, [])
 
-  // Converts recurring UTC weekly schedule to client's local timezone
-  const convertUTCSlotToLocal = (dayOfWeek: number, startTime: string, durationMin: number): {
-    localDay: number
-    localTime: string
-    localEndTime: string
-  } => {
-    const [h, m] = startTime.split(':').map(Number)
-    const utcDate = new Date(Date.UTC(2026, 0, 4 + dayOfWeek, h, m))
-    
-    const localDay = utcDate.getDay()
-    const localHours = String(utcDate.getHours()).padStart(2, '0')
-    const localMinutes = String(utcDate.getMinutes()).padStart(2, '0')
-    const localTime = `${localHours}:${localMinutes}`
+  // Helper to convert UTC day_of_week (0-6) and start_time (HH:MM:SS) to student's timezone
+  const convertUtcToTimezone = (utcDay: number, utcTimeStr: string, timezone: string) => {
+    try {
+      const [hours, minutes] = utcTimeStr.split(':').map(Number)
+      const now = new Date()
+      const currentDay = now.getUTCDay()
+      
+      // Calculate difference in days to match the week day index
+      let daysDiff = utcDay - currentDay
+      const utcDate = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() + daysDiff,
+        hours,
+        minutes,
+        0
+      ))
 
-    const localEndDate = new Date(utcDate.getTime() + durationMin * 60000)
-    const endHours = String(localEndDate.getHours()).padStart(2, '0')
-    const endMinutes = String(localEndDate.getMinutes()).padStart(2, '0')
-    const localEndTime = `${endHours}:${endMinutes}`
+      // Day index in target timezone
+      const dayFormatter = new Intl.DateTimeFormat('en-US', { weekday: 'long', timeZone: timezone })
+      const localDayName = dayFormatter.format(utcDate)
+      const localDay = DAYS.indexOf(localDayName)
 
-    return { localDay, localTime, localEndTime }
+      // Time in target timezone (24-hour format)
+      const timeFormatter = new Intl.DateTimeFormat('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: timezone
+      })
+      const localTime = timeFormatter.format(utcDate)
+
+      return { localDay, localTime }
+    } catch (e) {
+      console.error('Timezone conversion error:', e)
+      return { localDay: utcDay, localTime: utcTimeStr.substring(0, 5) }
+    }
+  }
+
+  // Get current wall-clock date in target timezone
+  const getCurrentTimeInTimezone = (timezone: string): Date => {
+    try {
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: timezone,
+        year: 'numeric', month: 'numeric', day: 'numeric',
+        hour: 'numeric', minute: 'numeric', second: 'numeric',
+        hour12: false
+      })
+      const parts = formatter.formatToParts(new Date())
+      const getPart = (type: string) => Number(parts.find(p => p.type === type)?.value)
+      
+      return new Date(
+        getPart('year'),
+        getPart('month') - 1,
+        getPart('day'),
+        getPart('hour'),
+        getPart('minute'),
+        getPart('second')
+      )
+    } catch (e) {
+      console.error('Error getting timezone time:', e)
+      return new Date()
+    }
+  }
+
+  // Format YYYYMMDD string in student's timezone
+  const getYYYYMMDD = (timezone: string) => {
+    const tzTime = getCurrentTimeInTimezone(timezone)
+    const yyyy = tzTime.getFullYear()
+    const mm = String(tzTime.getMonth() + 1).padStart(2, '0')
+    const dd = String(tzTime.getDate()).padStart(2, '0')
+    return `${yyyy}${mm}${dd}`
   }
 
   // Returns true if class is currently running (based on local time)
   const isClassActive = (sched: LocalSchedule): boolean => {
-    const currentDayIdx = currentTime.getDay()
+    const tzTime = getCurrentTimeInTimezone(studentTimezone)
+    const currentDayIdx = tzTime.getDay()
     if (sched.local_day !== currentDayIdx) return false
 
     const [startH, startM] = sched.local_time.split(':').map(Number)
     const [endH, endM] = sched.local_end_time.split(':').map(Number)
 
-    const curH = currentTime.getHours()
-    const curM = currentTime.getMinutes()
+    const curH = tzTime.getHours()
+    const curM = tzTime.getMinutes()
 
     const startTotal = startH * 60 + startM
     const endTotal = endH * 60 + endM
@@ -103,12 +143,13 @@ export default function StudentSchedulePage() {
 
   // Returns true if class is starting in the next 15 minutes
   const isClassUpcoming = (sched: LocalSchedule): boolean => {
-    const currentDayIdx = currentTime.getDay()
+    const tzTime = getCurrentTimeInTimezone(studentTimezone)
+    const currentDayIdx = tzTime.getDay()
     if (sched.local_day !== currentDayIdx) return false
 
     const [startH, startM] = sched.local_time.split(':').map(Number)
-    const curH = currentTime.getHours()
-    const curM = currentTime.getMinutes()
+    const curH = tzTime.getHours()
+    const curM = tzTime.getMinutes()
 
     const startTotal = startH * 60 + startM
     const curTotal = curH * 60 + curM
@@ -116,106 +157,131 @@ export default function StudentSchedulePage() {
     return startTotal > curTotal && (startTotal - curTotal) <= 15
   }
 
+  const fetchSchedule = async (studentId: string) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch(`/api/student/schedule?student_id=${studentId}`)
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || 'Failed to fetch schedule')
+
+      const tz = result.studentTimezone || 'UTC'
+      setStudentTimezone(tz)
+
+      // Convert each schedule from UTC to target timezone
+      const localSchedules = (result.schedules || []).map((s: any) => {
+        const { localDay, localTime } = convertUtcToTimezone(s.day_of_week, s.start_time, tz)
+        
+        // Calculate local end time
+        const [h, m] = localTime.split(':').map(Number)
+        const totalMinutes = h * 60 + m + s.duration_minutes
+        const endH = Math.floor(totalMinutes / 60) % 24
+        const endM = totalMinutes % 60
+        const localEndTime = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`
+
+        return {
+          id: s.id,
+          assignment_id: s.assignment_id,
+          teacher_name: s.teacher_name,
+          teacher_id: s.teacher_id,
+          local_day: localDay,
+          local_time: localTime,
+          local_end_time: localEndTime,
+          duration_minutes: s.duration_minutes
+        }
+      })
+
+      // Sort schedules by local day and start time
+      localSchedules.sort((a: any, b: any) => {
+        if (a.local_day !== b.local_day) return a.local_day - b.local_day
+        return a.local_time.localeCompare(b.local_time)
+      })
+
+      setSchedules(localSchedules)
+    } catch (err: any) {
+      console.error('Error fetching schedule:', err)
+      setError(err.message || 'Failed to load weekly schedule.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    const fetchStudentSchedule = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (!session?.user) return
+    const initializeStudent = async () => {
+      let savedId = null
+      if (typeof window !== 'undefined') {
+        savedId = localStorage.getItem('activeStudentId')
+      }
 
-        // 1. Fetch student assignments
-        const { data: assigns, error: assignErr } = await supabase
-          .from('teacher_student_assignments')
-          .select(`
-            id,
-            teacher:profiles!teacher_id(id, full_name)
-          `)
-          .eq('student_id', session.user.id)
-          .eq('is_active', true)
-
-        if (assignErr) throw assignErr
-
-        const assignmentMap = new Map<string, Assignment>()
-        const assignmentIds: string[] = []
-
-        interface QueryAssignment {
-          id: string
-          teacher: { id: string; full_name: string } | { id: string; full_name: string }[] | null
-        }
-
-        if (assigns) {
-          (assigns as unknown as QueryAssignment[]).forEach((a) => {
-            const teacherProfile = Array.isArray(a.teacher) ? a.teacher[0] : a.teacher
-            if (teacherProfile) {
-              assignmentMap.set(a.id, {
-                id: a.id,
-                teacher: teacherProfile
-              })
-              assignmentIds.push(a.id)
+      if (!savedId) {
+        // Try fetching siblings to auto-select if single
+        try {
+          const res = await fetch('/api/student/siblings')
+          const result = await res.json()
+          if (res.ok && result.siblings && result.siblings.length === 1) {
+            savedId = result.siblings[0].id
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('activeStudentId', savedId)
+              localStorage.setItem('selectedKey', savedId)
             }
-          })
+          }
+        } catch (e) {
+          console.error(e)
         }
+      }
 
-        if (assignmentIds.length === 0) {
-          setSchedules([])
-          setLoading(false)
-          return
-        }
-
-        // 2. Fetch class schedules for student's assignments
-        const { data: schedulesData, error: schedErr } = await supabase
-          .from('class_schedules')
-          .select('*')
-          .in('assignment_id', assignmentIds)
-
-        if (schedErr) throw schedErr
-
-        const formatted: LocalSchedule[] = []
-        if (schedulesData) {
-          (schedulesData as DBClassSchedule[]).forEach((s) => {
-            const assign = assignmentMap.get(s.assignment_id)
-            if (assign) {
-              const { localDay, localTime, localEndTime } = convertUTCSlotToLocal(
-                s.day_of_week,
-                s.start_time,
-                s.duration_minutes
-              )
-
-              formatted.push({
-                id: s.id,
-                assignment_id: s.assignment_id,
-                teacher_name: assign.teacher.full_name,
-                teacher_id: assign.teacher.id,
-                local_day: localDay,
-                local_time: localTime,
-                local_end_time: localEndTime,
-                duration_minutes: s.duration_minutes
-              })
-            }
-          })
-        }
-
-        // Sort schedules by day of week then start time
-        formatted.sort((a, b) => {
-          if (a.local_day !== b.local_day) return a.local_day - b.local_day
-          return a.local_time.localeCompare(b.local_time)
-        })
-
-        setSchedules(formatted)
-      } catch (err) {
-        console.error('Failed to load student schedule:', err)
-        setErrorMsg('Failed to load your schedules list.')
-      } finally {
+      if (savedId) {
+        setActiveStudentId(savedId)
+      } else {
         setLoading(false)
       }
     }
-
-    fetchStudentSchedule()
+    initializeStudent()
   }, [])
+
+  useEffect(() => {
+    if (activeStudentId) {
+      fetchSchedule(activeStudentId)
+    }
+  }, [activeStudentId])
 
   if (loading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#1B6B3A]" />
+      </div>
+    )
+  }
+
+  if (!activeStudentId) {
+    return (
+      <div className="rounded-2xl border border-zinc-200 bg-white p-12 text-center shadow-sm max-w-xl mx-auto space-y-4 my-12">
+        <HelpCircle className="h-12 w-12 text-amber-500 mx-auto animate-bounce" />
+        <h2 className="text-xl font-bold font-serif text-zinc-900">No Student Selected</h2>
+        <p className="text-sm text-zinc-700 font-sans">
+          Please select a student profile first in order to view their personalized schedule.
+        </p>
+        <a 
+          href="/student/dashboard"
+          className="inline-block rounded-xl bg-gradient-to-r from-emerald-600 to-[#1B6B3A] text-white px-6 py-2.5 text-sm font-bold shadow-md hover:scale-[1.01] transition-all"
+        >
+          Go to Dashboard
+        </a>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-6 shadow-sm max-w-xl mx-auto space-y-4 my-12 font-sans">
+        <h2 className="text-lg font-bold text-red-800">Error Loading Schedule</h2>
+        <p className="text-sm text-red-700">{error}</p>
+        <button 
+          onClick={() => fetchSchedule(activeStudentId)}
+          className="rounded-xl bg-red-600 text-white px-4 py-2 text-xs font-bold hover:bg-red-700 transition-all"
+        >
+          Retry Load
+        </button>
       </div>
     )
   }
@@ -233,32 +299,25 @@ export default function StudentSchedulePage() {
     <div className="space-y-8">
       {/* Title */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-white font-sans">My Learning Schedule</h1>
-        <p className="mt-1 text-sm text-zinc-400">
-          Your active weekly classes automatically converted to your local timezone. Join your virtual classroom directly from here.
+        <h1 className="text-3xl font-bold font-serif tracking-tight text-zinc-900">My Learning Schedule</h1>
+        <p className="mt-1 text-sm text-zinc-700 font-sans">
+          Your active weekly classes automatically converted to your local timezone ({studentTimezone}). Join your virtual classroom directly from here.
         </p>
       </div>
-
-      {errorMsg && (
-        <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
-          <AlertCircle className="h-5 w-5 shrink-0" />
-          {errorMsg}
-        </div>
-      )}
 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Main Schedule Visual Calendar */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-md space-y-4">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-emerald-400" /> Weekly Class Schedule
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm space-y-4">
+            <h2 className="text-xl font-bold font-serif text-zinc-900 flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-[#1B6B3A]" /> Weekly Class Schedule
             </h2>
 
             {schedules.length === 0 ? (
-              <div className="text-center py-12 text-zinc-500 space-y-3">
-                <HelpCircle className="h-10 w-10 text-zinc-600 mx-auto" />
+              <div className="text-center py-12 text-zinc-500 space-y-3 font-sans">
+                <HelpCircle className="h-10 w-10 text-zinc-400 mx-auto" />
                 <p className="text-sm">You do not have any active class assignments scheduled yet.</p>
-                <p className="text-xs text-zinc-600">Please contact academy administration if you believe this is an error.</p>
+                <p className="text-xs text-zinc-700">Please contact administration if you believe this is an error.</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -266,7 +325,7 @@ export default function StudentSchedulePage() {
                   if (day.slots.length === 0) return null
                   return (
                     <div key={day.dayIdx} className="space-y-2">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-400 border-b border-emerald-500/20 pb-1.5">{day.dayName}</h3>
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#1B6B3A] border-b border-[#1B6B3A]/20 pb-1.5 font-sans">{day.dayName}</h3>
                       <div className="grid gap-3">
                         {day.slots.map((s) => {
                           const active = isClassActive(s)
@@ -275,21 +334,21 @@ export default function StudentSchedulePage() {
                           return (
                             <div 
                               key={s.id} 
-                              className={`rounded-xl border p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-4 transition-all duration-150 ${
-                                active ? 'bg-emerald-500/10 border-emerald-500 shadow-md shadow-emerald-500/5' :
-                                upcoming ? 'bg-yellow-500/5 border-yellow-500/50' :
-                                'bg-black/20 border-white/5 hover:border-white/10'
+                              className={`rounded-xl border p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-4 transition-all duration-150 font-sans ${
+                                active ? 'bg-emerald-50 border-[#1B6B3A] shadow-sm animate-pulse-light' :
+                                upcoming ? 'bg-amber-50/50 border-amber-300' :
+                                'bg-zinc-50/80 border-zinc-200 hover:border-zinc-300'
                               }`}
                             >
                               <div className="space-y-1.5">
-                                <p className="font-bold text-white flex items-center gap-1.5">
-                                  <User className="h-4 w-4 text-zinc-400" /> Teacher: {s.teacher_name}
+                                <p className="font-bold text-zinc-800 flex items-center gap-1.5">
+                                  <User className="h-4 w-4 text-zinc-500" /> Teacher: {s.teacher_name}
                                 </p>
-                                <div className="flex flex-wrap gap-2 text-xs font-mono text-zinc-400">
-                                  <span className="flex items-center gap-1 bg-zinc-800 px-2 py-0.5 rounded">
-                                    <Clock className="h-3.5 w-3.5 text-zinc-500" /> {s.local_time} - {s.local_end_time}
+                                <div className="flex flex-wrap gap-2 text-xs font-mono text-zinc-700">
+                                  <span className="flex items-center gap-1 bg-white border border-zinc-200 px-2 py-0.5 rounded">
+                                    <Clock className="h-3.5 w-3.5 text-zinc-400" /> {s.local_time} - {s.local_end_time}
                                   </span>
-                                  <span className="bg-zinc-850 px-2 py-0.5 rounded text-zinc-500">
+                                  <span className="bg-zinc-100 border border-zinc-200 px-2 py-0.5 rounded text-zinc-700">
                                     {s.duration_minutes} Minutes
                                   </span>
                                 </div>
@@ -299,28 +358,34 @@ export default function StudentSchedulePage() {
                                 {active && (
                                   <span className="flex h-2.5 w-2.5 relative">
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
                                   </span>
                                 )}
                                 {upcoming && (
-                                  <span className="text-[10px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/20 px-2 py-0.5 rounded font-bold uppercase">
+                                  <span className="text-[10px] bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded font-bold uppercase">
                                     Starting Soon
                                   </span>
                                 )}
 
-                                <a
-                                  href={`https://meet.jit.si/virtual-zawiyah-teacher-${s.teacher_id}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className={`flex items-center justify-center gap-2 rounded-xl py-2 px-4 text-xs font-bold tracking-wide transition-all ${
-                                    active 
-                                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow shadow-emerald-500/10' 
-                                      : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-white/5'
-                                  }`}
-                                >
-                                  <Video className="h-3.5 w-3.5" />
-                                  {active ? 'Join Class Now' : 'Classroom Link'}
-                                </a>
+                                {active ? (
+                                  <a
+                                    href={`https://meet.virtualzawiyah.com/VZ-${s.teacher_id}-${activeStudentId}-${getYYYYMMDD(studentTimezone)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center gap-2 rounded-xl py-2 px-4 text-xs font-bold tracking-wide transition-all bg-gradient-to-r from-emerald-600 to-[#1B6B3A] hover:from-emerald-500 hover:to-[#1B6B3A] text-white shadow-sm active:scale-[0.98]"
+                                  >
+                                    <Video className="h-3.5 w-3.5" />
+                                    Join Class Now
+                                  </a>
+                                ) : (
+                                  <button
+                                    disabled
+                                    className="flex items-center justify-center gap-2 rounded-xl py-2 px-4 text-xs font-bold tracking-wide transition-all bg-zinc-100 text-zinc-400 border border-zinc-200 cursor-not-allowed"
+                                  >
+                                    <Video className="h-3.5 w-3.5 text-zinc-350" />
+                                    Classroom Link
+                                  </button>
+                                )}
                               </div>
                             </div>
                           )
@@ -336,23 +401,23 @@ export default function StudentSchedulePage() {
 
         {/* Info panel */}
         <div className="space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-md space-y-4">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <Video className="h-5 w-5 text-emerald-400" /> Virtual Classroom Guidelines
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm space-y-4">
+            <h3 className="text-lg font-bold font-serif text-zinc-900 flex items-center gap-2">
+              <Video className="h-5 w-5 text-[#1B6B3A]" /> Virtual Classroom Guidelines
             </h3>
-            <div className="space-y-3 text-xs text-zinc-400 leading-relaxed">
+            <div className="space-y-3 text-xs text-zinc-700 leading-relaxed font-sans">
               <p>
                 Our system uses **Jitsi Meet** for secure, private video learning. No account creation or software download is required.
               </p>
               <ul className="list-disc pl-4 space-y-2">
                 <li>Classes are visible in your calendar. Please join within 5 minutes of your scheduled time.</li>
                 <li>Make sure your camera and microphone are permitted by your web browser.</li>
-                <li>Rooms are protected. Only you and your teacher can access your Jitsi classroom room (virtual-zawiyah-teacher-ID).</li>
+                <li>Rooms are protected. Only you and your teacher can access your Jitsi classroom room.</li>
               </ul>
-              <div className="rounded-xl border border-emerald-500/10 bg-emerald-500/5 p-3 text-emerald-300 flex items-start gap-2">
-                <Play className="h-4 w-4 shrink-0 mt-0.5" />
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-emerald-800 flex items-start gap-2">
+                <Play className="h-4 w-4 shrink-0 mt-0.5 text-emerald-600" />
                 <div>
-                  <span className="font-bold block text-emerald-200">How to Join?</span>
+                  <span className="font-bold block text-emerald-900 font-sans">How to Join?</span>
                   Simply click the green &quot;Join Class Now&quot; button when the class starts.
                 </div>
               </div>

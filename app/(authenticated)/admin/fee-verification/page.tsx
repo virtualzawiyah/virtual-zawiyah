@@ -442,7 +442,7 @@ export default function AdminFeeVerificationPage() {
                               <p className="font-semibold text-zinc-300">PKR {(Number(fee.pkr_amount) * 0.9).toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
                             </div>
                             <div>
-                              <p>Academy Fee (10%)</p>
+                              <p>Platform Fee (10%)</p>
                               <p className="font-semibold text-zinc-300">PKR {(Number(fee.pkr_amount) * 0.1).toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
                             </div>
                           </div>

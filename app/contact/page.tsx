@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Mail, Phone, Globe, CheckCircle2, Loader2 } from 'lucide-react'
+import { Mail, Phone, Globe, CheckCircle2, Loader2, MessageSquare } from 'lucide-react'
 import PublicNavbar from '@/components/PublicNavbar'
 import PublicFooter from '@/components/PublicFooter'
 import GeometricPattern from '@/components/GeometricPattern'
@@ -11,6 +11,7 @@ export default function ContactPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
 
   // Validation & Submission state
   const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({})
@@ -40,21 +41,40 @@ export default function ContactPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setErrorMsg('')
     
     if (!validateForm()) return
 
     setIsSubmitting(true)
 
-    // Simulate network submission
-    setTimeout(() => {
-      setIsSubmitting(false)
+    try {
+      const res = await fetch('/api/public/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          full_name: name,
+          email,
+          message
+        })
+      })
+
+      const json = await res.json()
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Failed to send message')
+      }
+
       setSubmitted(true)
       setName('')
       setEmail('')
       setMessage('')
-    }, 1200)
+    } catch (err: any) {
+      console.error('Contact submission error:', err)
+      setErrorMsg(err.message || 'An error occurred. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -90,23 +110,23 @@ export default function ContactPage() {
               
               {/* WhatsApp Card */}
               <div className="rounded-2xl p-8 border" style={{ background: "#E8F5EE", borderColor: "rgba(27,107,58,0.2)" }}>
-                <svg className="w-12 h-12 mb-4 text-[#25D366] fill-current" viewBox="0 0 24 24">
-                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.966a9.785 9.785 0 0 0-6.96-2.879c-5.43 0-9.855 4.37-9.859 9.801-.002 1.741.485 3.45 1.407 4.966l-.995 3.637 3.792-.987zm11.58-7.16c-.076-.127-.278-.203-.581-.355-.304-.152-1.793-.883-2.071-.984-.279-.101-.482-.152-.684.152-.203.304-.785.984-.963 1.186-.177.203-.355.228-.658.076-.304-.152-1.283-.473-2.443-1.507-.903-.805-1.512-1.8-1.689-2.103-.177-.304-.019-.468.133-.619.136-.136.304-.355.456-.532.152-.177.203-.304.304-.506.101-.203.051-.38-.025-.532-.076-.152-.684-1.647-.937-2.256-.247-.599-.498-.518-.684-.527-.177-.008-.38-.01-.582-.01-.203 0-.532.076-.81.38-.279.304-1.064 1.039-1.064 2.532 0 1.494 1.089 2.937 1.241 3.14.152.203 2.144 3.273 5.193 4.59.724.313 1.29.5 1.732.64.727.23 1.39.198 1.912.12.583-.088 1.794-.733 2.048-1.442.253-.709.253-1.316.177-1.442z"/>
+                <svg className="w-12 h-12 mb-4 text-[#25D366] fill-white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.458 5.704 1.459h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                 </svg>
                 <h2 className="font-serif font-bold text-2xl mb-3 text-gray-900">Chat with Us on WhatsApp</h2>
                 <p className="mb-5 text-sm leading-relaxed text-gray-600">
                   The fastest way to reach us. Our team is available to answer questions about courses, fees, schedules, and enrollment.
                 </p>
                 <a
-                  href="https://wa.me/923355777312"
+                  href="https://wa.me/923255777312"
                   target="_blank"
                   rel="noopener noreferrer"
                   data-testid="btn-whatsapp-contact"
                   className="inline-flex items-center gap-3 text-white hover:opacity-90 font-bold px-6 py-3 rounded-xl transition-all shadow-md"
                   style={{ background: "#25D366" }}
                 >
-                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.966a9.785 9.785 0 0 0-6.96-2.879c-5.43 0-9.855 4.37-9.859 9.801-.002 1.741.485 3.45 1.407 4.966l-.995 3.637 3.792-.987zm11.58-7.16c-.076-.127-.278-.203-.581-.355-.304-.152-1.793-.883-2.071-.984-.279-.101-.482-.152-.684.152-.203.304-.785.984-.963 1.186-.177.203-.355.228-.658.076-.304-.152-1.283-.473-2.443-1.507-.903-.805-1.512-1.8-1.689-2.103-.177-.304-.019-.468.133-.619.136-.136.304-.355.456-.532.152-.177.203-.304.304-.506.101-.203.051-.38-.025-.532-.076-.152-.684-1.647-.937-2.256-.247-.599-.498-.518-.684-.527-.177-.008-.38-.01-.582-.01-.203 0-.532.076-.81.38-.279.304-1.064 1.039-1.064 2.532 0 1.494 1.089 2.937 1.241 3.14.152.203 2.144 3.273 5.193 4.59.724.313 1.29.5 1.732.64.727.23 1.39.198 1.912.12.583-.088 1.794-.733 2.048-1.442.253-.709.253-1.316.177-1.442z"/>
+                  <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.458 5.704 1.459h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                   </svg>
                   Chat on WhatsApp
                 </a>
@@ -128,19 +148,29 @@ export default function ContactPage() {
                   </div>
                 </a>
 
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <Phone className="w-5 h-5 text-primary" />
+                <a href="tel:+923255777312" className="flex items-center gap-4 group" data-testid="link-phone">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary transition-colors">
+                    <Phone className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold uppercase tracking-wider mb-0.5 text-secondary">WhatsApp Numbers</div>
-                    <div className="font-semibold text-gray-900 text-sm">
-                      +92 335 5777312 <span className="text-[10px] text-gray-400 font-normal italic">(Primary)</span>
-                      &nbsp;·&nbsp;
-                      +92 325 5777312 <span className="text-[10px] text-gray-400 font-normal italic">(Secondary)</span>
+                    <div className="text-[10px] font-bold uppercase tracking-wider mb-0.5 text-secondary">Voice Call Number</div>
+                    <div className="font-semibold text-gray-900 text-sm group-hover:text-primary transition-colors">
+                      +92 325 5777312
                     </div>
                   </div>
-                </div>
+                </a>
+
+                <a href="https://wa.me/923255777312" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group" data-testid="link-whatsapp-contact-page">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary transition-colors">
+                    <MessageSquare className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider mb-0.5 text-secondary">WhatsApp Number</div>
+                    <div className="font-semibold text-gray-900 text-sm group-hover:text-primary transition-colors">
+                      +92 325 5777312
+                    </div>
+                  </div>
+                </a>
 
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -203,9 +233,9 @@ export default function ContactPage() {
                 {submitted ? (
                   <div className="text-center py-8">
                     <CheckCircle2 className="w-16 h-16 text-primary mx-auto mb-4" />
-                    <h3 className="font-serif font-bold text-2xl mb-3 text-gray-900">Message Received!</h3>
+                    <h3 className="font-serif font-bold text-2xl mb-3 text-gray-900">✅ Message Sent!</h3>
                     <p className="text-xs sm:text-sm leading-relaxed text-gray-650 max-w-sm mx-auto mb-6">
-                      Thank you for reaching out. We will get back to you as soon as possible. You can also reach us directly on WhatsApp for a faster response.
+                      We have received your inquiry and will respond within 24 hours.
                     </p>
                     <button 
                       onClick={() => setSubmitted(false)}
@@ -219,6 +249,12 @@ export default function ContactPage() {
                     <h2 className="font-serif font-bold text-2xl mb-2 text-gray-900">Send Us a Message</h2>
                     <p className="text-xs text-gray-450 mb-8 font-semibold">Have a question? We&apos;d love to hear from you.</p>
                     
+                    {errorMsg && (
+                      <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold animate-fade-in">
+                        {errorMsg}
+                      </div>
+                    )}
+
                     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
                       
                       <div className="space-y-1.5">

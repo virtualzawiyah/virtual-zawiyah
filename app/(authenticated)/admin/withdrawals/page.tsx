@@ -103,6 +103,22 @@ export default function AdminWithdrawalsPage() {
 
       if (error) throw error
 
+      // Trigger 21: Teacher withdrawal approved
+      try {
+        await fetch('/api/notifications/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: activeRequest.teacher_id,
+            role: 'teacher',
+            title: 'Withdrawal Approved',
+            message: `Your withdrawal request for ${activeRequest.amount} PKR has been approved`
+          })
+        })
+      } catch (notifErr: any) {
+        console.error('Failed to send notification for withdrawal approval (non-fatal):', notifErr.message)
+      }
+
       setSuccessMsg(`Payout of PKR ${activeRequest.amount.toLocaleString()} settled successfully.`)
       setRequests(prev => prev.filter(r => r.id !== activeRequest.id))
       setActiveRequest(null)
@@ -133,6 +149,22 @@ export default function AdminWithdrawalsPage() {
         .eq('id', request.id)
 
       if (error) throw error
+
+      // Trigger 21: Teacher withdrawal rejected
+      try {
+        await fetch('/api/notifications/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: request.teacher_id,
+            role: 'teacher',
+            title: 'Withdrawal Rejected',
+            message: `Your withdrawal request for ${request.amount} PKR has been rejected`
+          })
+        })
+      } catch (notifErr: any) {
+        console.error('Failed to send notification for withdrawal rejection (non-fatal):', notifErr.message)
+      }
 
       setSuccessMsg('Withdrawal request rejected. Funds refunded to teacher wallet.')
       setRequests(prev => prev.filter(r => r.id !== request.id))

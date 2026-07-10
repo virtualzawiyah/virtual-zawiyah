@@ -275,7 +275,7 @@ export default function AdminCalendarPage() {
       {/* Title */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Academy Calendar & Scheduling</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">Academic Calendar & Scheduling</h1>
           <p className="mt-1 text-sm text-zinc-400">
             Monitor and coordinate active classes, filter assignments, and manage academic calendar non-teaching days.
           </p>
@@ -439,7 +439,7 @@ export default function AdminCalendarPage() {
                           </td>
                           <td className="py-4 px-4">
                             <a
-                              href={`https://meet.jit.si/virtual-zawiyah-teacher-${s.teacher_id}`}
+                              href={`https://meet.virtualzawiyah.com/VZ-${s.teacher_id}-student-ahmed-20260702`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 text-[11px] font-bold transition-all"

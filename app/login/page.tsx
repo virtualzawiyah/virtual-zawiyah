@@ -1,12 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
-import { Eye, EyeOff, Lock, Mail, Loader2, Compass } from 'lucide-react'
+import { Eye, EyeOff, Lock, Mail, Loader2 } from 'lucide-react'
+import GeometricPattern from '@/components/GeometricPattern'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -23,29 +22,47 @@ export default function LoginPage() {
         email: email.trim(),
         password: password
       })
+      console.log('Auth result:', data, error);
 
       if (error) {
-        throw new Error(error.message)
+        throw new Error('Incorrect email or password')
       }
 
       if (data?.user) {
-        // Query the profile role
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', data.user.id)
-          .single()
+        const role = data.user.user_metadata?.role
+        console.log('User metadata role:', role);
 
-        if (profileError) {
-          throw new Error('Failed to retrieve user profile.')
+        if (!role) {
+          await supabase.auth.signOut()
+          throw new Error('Failed to retrieve user role from metadata.')
+        }
+        const allowedRoles = ['student', 'parent']
+
+        if (!allowedRoles.includes(role)) {
+          await supabase.auth.signOut()
+          throw new Error('This login is for students only. Please use the Staff Portal.')
         }
 
-        const role = profile?.role
-        if (role) {
-          router.push(`/${role}/dashboard`)
-        } else {
-          router.push('/')
+        // Cache role in user metadata and session cookie
+        await supabase.auth.updateUser({ data: { role } })
+        document.cookie = `vz_user_role=${role}; path=/; max-age=2592000; SameSite=Lax`
+
+        const getDashboardPath = (roleStr: string) => {
+          switch (roleStr) {
+            case 'student': return '/student/dashboard'
+            case 'parent': return '/parent/dashboard'
+            default: return '/'
+          }
         }
+
+        const targetPath = getDashboardPath(role)
+        window.location.href = targetPath
+
+        // Timeout safety net
+        setTimeout(() => {
+          setErrorMsg('Redirect failed. Please refresh or try again.')
+          setLoading(false)
+        }, 3000)
       }
     } catch (err) {
       const error = err as Error
@@ -55,29 +72,24 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-zinc-900 to-slate-900 p-4 font-sans selection:bg-emerald-500/30 selection:text-emerald-300">
-      
-      {/* Decorative background glow accents */}
-      <div className="absolute top-1/4 left-1/4 -z-10 h-72 w-72 rounded-full bg-emerald-500/10 blur-[100px] animate-pulse"></div>
-      <div className="absolute bottom-1/4 right-1/4 -z-10 h-80 w-80 rounded-full bg-teal-500/10 blur-[120px] animate-pulse"></div>
+    <div className="relative flex min-h-screen items-center justify-center bg-gradient-to-b from-[#E8F5EE] via-[#FAFAF7] to-[#FAFAF7] p-4 font-sans selection:bg-[#1B6B3A]/20 selection:text-[#1B6B3A]">
+      <GeometricPattern opacity={0.07} />
 
-      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl shadow-2xl transition-all duration-300 hover:border-white/15">
+      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-[#1B6B3A]/10 bg-white p-8 shadow-xl transition-all duration-300 hover:shadow-2xl">
         
         {/* Brand Header */}
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400 mb-4 shadow-inner">
-            <Compass className="h-8 w-8 animate-spin-slow" />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">
+          <img src="/weblogo-01.png" alt="Virtual Zawiyah Logo" className="h-16 w-auto object-contain mb-4" />
+          <h1 className="text-3xl font-serif font-bold text-gray-900">
             Virtual Zawiyah
           </h1>
-          <p className="mt-2 text-sm text-zinc-400">
-            Islamic Tutoring Academy Platform
+          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-zinc-650 bg-zinc-100 px-3 py-1 rounded-full">
+            Student &amp; Guardian Portal
           </p>
         </div>
 
         {errorMsg && (
-          <div className="mb-6 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-center text-xs text-red-400">
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-3 text-center text-xs font-semibold text-red-700">
             {errorMsg}
           </div>
         )}
@@ -85,11 +97,11 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="space-y-5">
           {/* Email field */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+            <label className="text-xs font-bold uppercase tracking-wider text-gray-700">
               Email Address
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-500">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">
                 <Mail className="h-5 w-5" />
               </span>
               <input
@@ -98,7 +110,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full rounded-xl border border-white/10 bg-black/25 py-3 pl-10 pr-4 text-sm text-white placeholder-zinc-500 outline-none transition-all duration-200 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50"
+                className="w-full rounded-xl border border-gray-300 bg-transparent py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-zinc-400 outline-none transition-all duration-200 focus:border-[#1B6B3A] focus:ring-1 focus:ring-[#1B6B3A]/20"
               />
             </div>
           </div>
@@ -106,12 +118,12 @@ export default function LoginPage() {
           {/* Password field */}
           <div className="space-y-1">
             <div className="flex justify-between">
-              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-700">
                 Password
               </label>
             </div>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-500">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">
                 <Lock className="h-5 w-5" />
               </span>
               <input
@@ -120,12 +132,12 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full rounded-xl border border-white/10 bg-black/25 py-3 pl-10 pr-10 text-sm text-white placeholder-zinc-500 outline-none transition-all duration-200 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50"
+                className="w-full rounded-xl border border-gray-300 bg-transparent py-3 pl-10 pr-10 text-sm text-gray-900 placeholder-zinc-400 outline-none transition-all duration-200 focus:border-[#1B6B3A] focus:ring-1 focus:ring-[#1B6B3A]/20"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-zinc-500 hover:text-zinc-300"
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-zinc-450 hover:text-zinc-650"
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
@@ -136,7 +148,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/10 transition-all duration-200 hover:from-emerald-500 hover:to-teal-500 hover:shadow-emerald-500/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1B6B3A] hover:bg-[#1B6B3A]/95 py-3.5 text-sm font-semibold text-white shadow-md transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? (
               <>
@@ -149,8 +161,8 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-8 text-center text-xs text-zinc-500">
-          Not enrolled? <a href="/enrollment" className="font-semibold text-emerald-400 hover:underline">Request Enrollment</a>
+        <div className="mt-8 text-center text-xs text-gray-500">
+          Not enrolled? <a href="/enrollment" className="font-bold text-[#1B6B3A] hover:underline">Request Enrollment</a>
         </div>
       </div>
     </div>

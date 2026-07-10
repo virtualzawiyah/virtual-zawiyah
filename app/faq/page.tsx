@@ -31,7 +31,7 @@ const faqs: FAQCategory[] = [
       },
       {
         q: "Is there a free trial before I commit?",
-        a: "Yes! We offer a 3-day free trial for all new students. This gives you the opportunity to experience our teaching style, meet your teacher, and ensure the course is the right fit — with absolutely no obligation or payment required.",
+        a: "We offer a 3-day free trial exclusively for our 1:1 (individual) course students. This gives you the opportunity to experience our teaching style, meet your teacher, and ensure the course is the right fit before committing — with absolutely no obligation or payment required. Group programs do not include a free trial.",
       },
       {
         q: "What age groups do you accept?",
@@ -43,7 +43,7 @@ const faqs: FAQCategory[] = [
       },
       {
         q: "Can I enroll mid-month or mid-term?",
-        a: "Yes, we accept new students on a rolling basis. Fees for the first month are pro-rated based on your start date.",
+        a: "For 1:1 (individual) courses, yes, we accept new students on a rolling basis (fees are pro-rated). For group programs (such as Dars-e-Nizami or the Tajweed Group Program), we do not accept registrations mid-session; new cohorts for group courses begin exclusively on the 1st of every Ramadan.",
       },
     ],
   },
@@ -101,7 +101,7 @@ const faqs: FAQCategory[] = [
       },
       {
         q: "What platform is used for online classes?",
-        a: "Classes are conducted via Zoom, which provides high-quality audio and video essential for Quran recitation and Tajweed correction. A Zoom account is free to create and works on all devices including smartphones, tablets, and computers.",
+        a: "Classes are conducted entirely on our own custom, browser-based online classroom. You do not need to install any external apps like Zoom or Teams — everything runs securely inside your web browser via our student portal.",
       },
     ],
   },
@@ -112,7 +112,7 @@ const faqs: FAQCategory[] = [
         q: "How much do courses cost?",
         a: (
           <>
-            Course fees vary depending on the course type, number of sessions per week, and individual vs. group format. Please visit our <Link href="/pricing" className="underline font-medium text-primary hover:opacity-80">Pricing page</Link> or <Link href="/contact" className="underline font-medium text-primary hover:opacity-80">contact us on WhatsApp</Link> for a personalised fee quote.
+            Course fees vary depending on the course type, number of sessions per week, and individual vs. group format. Please visit our <Link href="/fee" className="underline font-medium text-primary hover:opacity-80">Fee page</Link> or <a href="https://wa.me/923255777312" target="_blank" rel="noopener noreferrer" className="underline font-medium text-primary hover:opacity-80">contact us on WhatsApp</a> for a personalised fee quote.
           </>
         ),
       },
@@ -135,7 +135,7 @@ const faqs: FAQCategory[] = [
     items: [
       {
         q: "What equipment do I need for online classes?",
-        a: "You need a device with a camera and microphone (laptop, tablet, or smartphone), a stable internet connection, and the free Zoom app. A headset or earphones are highly recommended for better audio quality during Quran recitation.",
+        a: "You need a device with a camera and microphone (laptop, desktop, or tablet recommended), a stable internet connection, and a modern web browser (such as Chrome, Safari, Firefox, or Edge) to access our custom classroom. A headset or earphones are highly recommended for better audio quality during Quran recitation.",
       },
       {
         q: "What internet speed is required?",
@@ -143,7 +143,7 @@ const faqs: FAQCategory[] = [
       },
       {
         q: "Can I use a smartphone for classes?",
-        a: "Yes, Zoom works well on smartphones (iOS and Android). For younger students, a larger screen (tablet or laptop) is recommended to make it easier to follow along with text and the teacher's screen.",
+        a: "While our custom classroom can run on mobile web browsers, we strongly recommend using a large-screen device (such as a laptop, desktop, or tablet) to ensure the best learning experience, allowing you to clearly view the Quranic text, shared board, and teacher's screens.",
       },
     ],
   },
@@ -263,15 +263,15 @@ export default function FAQPage() {
               Our team is available on WhatsApp to answer any question about courses, enrollment, scheduling, or fees.
             </p>
             <a
-              href="https://wa.me/923355777312?text=Assalamu%20Alaikum%2C%20I%20have%20a%20question%20about%20Virtual%20Zawiyah."
+              href="https://wa.me/923255777312?text=Assalamu%20Alaikum%2C%20I%20have%2520a%2520question%2520about%2520Virtual%2520Zawiyah."
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Ask your question to Virtual Zawiyah on WhatsApp"
               className="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-bold text-base transition-all hover:opacity-90 hover:scale-105 text-white"
               style={{ background: "#25D366" }}
             >
-              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.966a9.785 9.785 0 0 0-6.96-2.879c-5.43 0-9.855 4.37-9.859 9.801-.002 1.741.485 3.45 1.407 4.966l-.995 3.637 3.792-.987zm11.58-7.16c-.076-.127-.278-.203-.581-.355-.304-.152-1.793-.883-2.071-.984-.279-.101-.482-.152-.684.152-.203.304-.785.984-.963 1.186-.177.203-.355.228-.658.076-.304-.152-1.283-.473-2.443-1.507-.903-.805-1.512-1.8-1.689-2.103-.177-.304-.019-.468.133-.619.136-.136.304-.355.456-.532.152-.177.203-.304.304-.506.101-.203.051-.38-.025-.532-.076-.152-.684-1.647-.937-2.256-.247-.599-.498-.518-.684-.527-.177-.008-.38-.01-.582-.01-.203 0-.532.076-.81.38-.279.304-1.064 1.039-1.064 2.532 0 1.494 1.089 2.937 1.241 3.14.152.203 2.144 3.273 5.193 4.59.724.313 1.29.5 1.732.64.727.23 1.39.198 1.912.12.583-.088 1.794-.733 2.048-1.442.253-.709.253-1.316.177-1.442z" />
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.458 5.704 1.459h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
               </svg>
               Ask on WhatsApp
             </a>

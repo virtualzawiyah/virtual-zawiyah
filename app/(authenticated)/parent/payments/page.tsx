@@ -257,7 +257,7 @@ export default function ParentPaymentsHistoryPage() {
                                 <p className="font-semibold text-white">PKR {fee.teacher_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                               </div>
                               <div>
-                                <p className="text-zinc-500">Academy Fee (10%)</p>
+                                <p className="text-zinc-500">Platform Fee (10%)</p>
                                 <p className="font-semibold text-white">PKR {fee.commission_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                               </div>
                             </div>
