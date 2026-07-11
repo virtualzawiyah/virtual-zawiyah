@@ -196,7 +196,7 @@ export default function Home() {
 
   useEffect(() => {
     // Fetch active announcement
-    fetch('/api/content/announcements')
+    fetch('/api/public/announcements')
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch announcements')
         return res.json()
@@ -226,7 +226,7 @@ export default function Home() {
       .catch(err => console.error('Error fetching active announcement:', err))
 
     // Fetch active courses
-    fetch('/api/content/courses')
+    fetch('/api/public/courses')
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch courses')
         return res.json()

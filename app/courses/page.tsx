@@ -93,7 +93,7 @@ export default function CoursesPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/api/content/courses')
+    fetch('/api/public/courses')
       .then(res => {
         if (!res.ok) throw new Error('Failed to load courses')
         return res.json()

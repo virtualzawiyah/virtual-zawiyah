@@ -29,7 +29,7 @@ export default function PricingPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/api/content/fee-cards')
+    fetch('/api/public/fee-cards')
       .then(res => {
         if (!res.ok) throw new Error('Failed to load pricing configurations')
         return res.json()
