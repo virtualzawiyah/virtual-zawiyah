@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { BookOpen, Shield, Globe, Users, ShieldCheck } from 'lucide-react'
 import PublicNavbar from '@/components/PublicNavbar'
 import PublicFooter from '@/components/PublicFooter'
@@ -64,14 +63,11 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="relative rounded-2xl overflow-hidden border border-primary/10 shadow-lg animate-fade-in-up bg-white aspect-[4/3] w-full min-h-[300px]">
-              <Image
+            <div className="animate-fade-in-up w-full flex items-center justify-center">
+              <img
                 src="/qari-sahib.png"
                 alt="Qari Sahib"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority
+                className="w-full h-auto rounded-2xl"
               />
             </div>
 
