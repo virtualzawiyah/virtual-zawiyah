@@ -39,62 +39,47 @@ function Waveform() {
   )
 }
 const FATIHA_WORDS = [
-  // Line 2
   [
-    { code: "\uFB51", color: "" },
-    { code: "\uFB52", color: "" },
-    { code: "\uFB53", color: "text-[#C9A84C]" }, // Tajweed Gold Madd
-    { code: "\uFB54", color: "text-[#C9A84C]" }, // Tajweed Gold Madd
-    { code: "\uFB55", color: "text-[#1B6B3A]" } // Tajweed Verse Ending (Green)
+    { code: "أ", color: "" },
+    { code: "ب", color: "" },
+    { code: "ت", color: "text-[#C9A84C]" },
+    { code: "ث", color: "text-[#1B6B3A]" }
   ],
-  // Line 3
   [
-    { code: "\uFB56", color: "" },
-    { code: "\uFB57", color: "" },
-    { code: "\uFB58", color: "" },
-    { code: "\uFB59", color: "text-[#C9A84C]" }, // Tajweed Gold Madd
-    { code: "\uFB5a", color: "text-[#1B6B3A]" } // Tajweed Verse Ending (Green)
+    { code: "ج", color: "" },
+    { code: "ح", color: "" },
+    { code: "خ", color: "" },
+    { code: "د", color: "text-[#C9A84C]" }
   ],
-  // Line 4
   [
-    { code: "\uFB5b", color: "text-[#C9A84C]" }, // Tajweed Gold Madd
-    { code: "\uFB5c", color: "text-[#C9A84C]" }, // Tajweed Gold Madd
-    { code: "\uFB5d", color: "text-[#1B6B3A]" }, // Tajweed Verse Ending (Green)
-    { code: "\uFB5e", color: "text-[#C9A84C]" }, // Tajweed Gold Madd
-    { code: "\uFB5f", color: "" },
-    { code: "\uFB60", color: "text-[#C9A84C]" }, // Tajweed Gold Madd
-    { code: "\uFB61", color: "text-[#1B6B3A]" } // Tajweed Verse Ending (Green)
+    { code: "ذ", color: "text-[#1B6B3A]" },
+    { code: "ر", color: "" },
+    { code: "ز", color: "" },
+    { code: "س", color: "" }
   ],
-  // Line 5
   [
-    { code: "\uFB62", color: "" },
-    { code: "\uFB63", color: "" },
-    { code: "\uFB64", color: "" },
-    { code: "\uFB65", color: "text-[#C9A84C]" }, // Tajweed Gold Madd
-    { code: "\uFB66", color: "text-[#1B6B3A]" }, // Tajweed Verse Ending (Green)
-    { code: "\uFB67", color: "" }
+    { code: "ش", color: "" },
+    { code: "ص", color: "text-[#C9A84C]" },
+    { code: "ض", color: "" },
+    { code: "ط", color: "" }
   ],
-  // Line 6
   [
-    { code: "\uFB68", color: "" },
-    { code: "\uFB69", color: "text-[#C9A84C]" }, // Tajweed Gold Madd (Highlighted by Teacher cursor)
-    { code: "\uFB6a", color: "text-[#1B6B3A]" }, // Tajweed Verse Ending (Green)
-    { code: "\uFB6b", color: "" },
-    { code: "\uFB6c", color: "" },
-    { code: "\uFB6d", color: "text-[#1B6B3A]" } // Tajweed Green
+    { code: "ظ", color: "" },
+    { code: "ع", color: "text-[#1B6B3A]" },
+    { code: "غ", color: "" },
+    { code: "ف", color: "" }
   ],
-  // Line 7
   [
-    { code: "\uFB6e", color: "" },
-    { code: "\uFB6f", color: "" },
-    { code: "\uFB70", color: "" },
-    { code: "\uFB71", color: "" }
+    { code: "ق", color: "text-rose-600" },
+    { code: "ك", color: "" },
+    { code: "ل", color: "" },
+    { code: "م", color: "" }
   ],
-  // Line 8
   [
-    { code: "\uFB72", color: "" },
-    { code: "\uFB73", color: "text-rose-600 font-bold" }, // Tajweed Madd Lazim (Red)
-    { code: "\uFB74", color: "text-[#1B6B3A]" } // Tajweed Verse Ending (Green)
+    { code: "ن", color: "" },
+    { code: "هـ", color: "" },
+    { code: "و", color: "" },
+    { code: "ي", color: "" }
   ]
 ]
 
@@ -475,7 +460,6 @@ export default function Home() {
                             <div 
                               key={lineIdx} 
                               className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2 text-[13px] sm:text-base md:text-lg lg:text-[21px] font-normal leading-[1.8] text-gray-900 whitespace-nowrap"
-                              style={{ fontFamily: "'QCF_P001'" }}
                             >
                               {line.map((word, wordIdx) => (
                                 <span 
@@ -485,7 +469,7 @@ export default function Home() {
                                   {word.code}
                                   
                                   {/* Anchored Teacher laser pointer overlay */}
-                                  {word.code === "\uFB69" && (
+                                  {word.code === "ق" && (
                                     <div className="absolute -bottom-5 -left-12 pointer-events-none flex items-center gap-1 z-20 animate-float scale-90 sm:scale-100">
                                       <span className="w-2 h-2 rounded-full bg-rose-500 ring-4 ring-rose-500/30 inline-block animate-pulse" />
                                       <span className="text-[7px] bg-rose-600 text-white font-bold px-1 py-0.5 rounded shadow-md font-sans whitespace-nowrap">

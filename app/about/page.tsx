@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { BookOpen, Shield, Globe, Users, ShieldCheck } from 'lucide-react'
 import PublicNavbar from '@/components/PublicNavbar'
 import PublicFooter from '@/components/PublicFooter'
@@ -63,15 +64,15 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div
-              className="rounded-2xl p-10 text-center border animate-fade-in-up"
-              style={{ background: "#E8F5EE", borderColor: "rgba(27,107,58,0.15)" }}
-            >
-              <div className="font-serif font-bold text-7xl text-primary mb-4">زاوية</div>
-              <p className="font-serif text-xl font-semibold mb-2" style={{ color: "#1A1A1A" }}>Zawiyah</p>
-              <p className="text-sm leading-relaxed text-gray-600">
-                In the Islamic tradition, a zawiyah is a sacred corner — a place where seekers of knowledge gather to learn, grow, and connect with their Lord. Your zawiyah is now wherever you are.
-              </p>
+            <div className="relative rounded-2xl overflow-hidden border border-primary/10 shadow-lg animate-fade-in-up bg-white aspect-[4/3] w-full min-h-[300px]">
+              <Image
+                src="/qari-sahib.png"
+                alt="Qari Sahib"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+              />
             </div>
 
           </div>
