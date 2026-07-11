@@ -67,7 +67,7 @@ export default function AboutPage() {
               <img
                 src="/qari-sahib.png"
                 alt="Qari Sahib"
-                className="w-full h-auto rounded-2xl"
+                className="w-full h-auto max-h-[520px] object-contain drop-shadow-lg"
               />
             </div>
 
