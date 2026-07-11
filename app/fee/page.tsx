@@ -127,11 +127,11 @@ export default function PricingPage() {
               {oneOnOnePlans.length === 0 ? (
                 <p className="text-sm text-gray-500 italic text-center py-10 bg-zinc-50 rounded-xl max-w-lg mx-auto">No 1:1 plan structures found.</p>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+                <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
                   {oneOnOnePlans.map((plan, i) => (
                     <div
                       key={plan.id || i}
-                      className={`relative rounded-2xl border flex flex-col overflow-hidden transition-all duration-300 ${
+                      className={`relative rounded-2xl border flex flex-col overflow-hidden transition-all duration-300 w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] ${
                         plan.popular 
                           ? "shadow-xl ring-2 ring-primary border-primary bg-primary text-white" 
                           : "shadow-sm hover:shadow-md border-primary/15 bg-white text-gray-900"
