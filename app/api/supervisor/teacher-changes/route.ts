@@ -136,7 +136,7 @@ export async function PATCH(request: Request) {
     if (updateError) throw updateError
 
     // Trigger 17: Supervisor reassignment approved/rejected
-    const studentName = changeReq?.student?.full_name || 'Student'
+    const studentName = (Array.isArray(changeReq?.student) ? (changeReq.student[0] as any)?.full_name : (changeReq?.student as any)?.full_name) || 'Student'
     try {
 
       // Notify registrar

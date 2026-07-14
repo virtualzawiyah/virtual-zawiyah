@@ -16,7 +16,9 @@ import {
   Briefcase,
   Download,
   Loader2,
-  Search
+  Search,
+  Pencil,
+  Menu
 } from 'lucide-react'
 import GeometricPattern from '@/components/GeometricPattern'
 import NotificationBell from '@/components/NotificationBell'
@@ -30,6 +32,7 @@ interface StaffMock {
   contact: string
   joiningDate: string
   status: string
+  gender?: string
 }
 
 export default function FounderOwnerDashboard() {
@@ -82,9 +85,10 @@ export default function FounderOwnerDashboard() {
   const [roleFilter, setRoleFilter] = useState('All')
 
   // Modals state
-  const [activeModal, setActiveModal] = useState<'add-staff' | 'remove-staff' | 'hire-success' | null>(null)
+  const [activeModal, setActiveModal] = useState<'add-staff' | 'remove-staff' | 'hire-success' | 'edit-staff' | null>(null)
   const [selectedStaff, setSelectedStaff] = useState<StaffMock | null>(null)
   const [removalReason, setRemovalReason] = useState('')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   // New staff form state
   const [newName, setNewName] = useState('')
@@ -92,6 +96,13 @@ export default function FounderOwnerDashboard() {
   const [newEmail, setNewEmail] = useState('')
   const [newContact, setNewContact] = useState('')
   const [newJoinDate, setNewJoinDate] = useState('')
+  const [newGender, setNewGender] = useState<string>('Male')
+
+  // Edit staff form state
+  const [editName, setEditName] = useState('')
+  const [editRole, setEditRole] = useState<string>('Teacher')
+  const [editContact, setEditContact] = useState('')
+  const [editGender, setEditGender] = useState<string>('Male')
 
   // Newly created credentials
   const [hiredCredentials, setHiredCredentials] = useState<{
@@ -100,6 +111,7 @@ export default function FounderOwnerDashboard() {
     email: string
     password: string
     id: string
+    gender: string
   } | null>(null)
 
   const triggerToast = (msg: string) => {
@@ -163,7 +175,8 @@ export default function FounderOwnerDashboard() {
           role: newRole,
           email: newEmail,
           contact: newContact,
-          joining_date: newJoinDate
+          joining_date: newJoinDate,
+          gender: newGender
         })
       })
 
@@ -179,7 +192,8 @@ export default function FounderOwnerDashboard() {
           role: newRole,
           email: newEmail,
           password: json.generatedPassword,
-          id: json.staffId
+          id: json.staffId,
+          gender: newGender
         })
         setActiveModal('hire-success')
         triggerToast(`Success: Staff member "${newName}" successfully hired.`)
@@ -190,7 +204,48 @@ export default function FounderOwnerDashboard() {
         setNewRole('Teacher')
         setNewContact('')
         setNewJoinDate('')
+        setNewGender('Male')
         
+        await loadData()
+      }
+    } catch (err: any) {
+      alert(err.message)
+      setLoading(false)
+    }
+  }
+
+  // Handle staff edit submit
+  const handleEditStaffSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editName.trim() || !editContact.trim() || !selectedStaff) return
+
+    try {
+      setLoading(true)
+      const res = await fetch('/api/founder/staff', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          staff_id: selectedStaff.id,
+          full_name: editName,
+          role: editRole,
+          contact: editContact,
+          gender: editGender
+        })
+      })
+
+      if (!res.ok) {
+        const errJson = await res.json()
+        throw new Error(errJson.error || 'Failed to update staff member details')
+      }
+
+      const json = await res.json()
+      if (json.success) {
+        triggerToast(`Success: Staff member "${editName}" profile updated successfully.`)
+        setSelectedStaff(null)
+        setEditName('')
+        setEditContact('')
+        setEditGender('Male')
+        setActiveModal(null)
         await loadData()
       }
     } catch (err: any) {
@@ -246,10 +301,20 @@ export default function FounderOwnerDashboard() {
     <div className="flex h-screen w-screen bg-[#FAFAF7] text-zinc-800 select-none overflow-hidden font-sans relative">
       <GeometricPattern opacity={0.04} />
 
+      {/* Mobile sidebar overlay mask */}
+      {sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/30 z-15 lg:hidden animate-fade-in"
+        />
+      )}
+
       {/* ========================================== */}
       {/* PERSISTENT LEFT SIDEBAR                    */}
       {/* ========================================== */}
-      <aside className="w-80 shrink-0 border-r border-zinc-200 bg-white flex flex-col h-full overflow-hidden z-20">
+      <aside className={`fixed lg:static top-0 bottom-0 left-0 w-80 shrink-0 border-r border-zinc-200 bg-white flex flex-col h-full overflow-hidden z-20 transition-transform duration-300 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
         
         <div className="flex border-b border-zinc-155 px-6 py-5 items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
@@ -259,14 +324,19 @@ export default function FounderOwnerDashboard() {
               <span className="block text-[9px] uppercase tracking-wider text-[#1B6B3A] font-bold leading-none mt-0.5">FOUNDER PORTAL</span>
             </div>
           </div>
-          <NotificationBell />
+          <div className="hidden lg:block">
+            <NotificationBell />
+          </div>
         </div>
 
         {/* Navigation Sidebar List */}
         <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
           {/* Financial Overview Tab */}
           <button 
-            onClick={() => setActiveTab('financial')}
+            onClick={() => {
+              setActiveTab('financial')
+              setSidebarOpen(false)
+            }}
             className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-bold font-sans transition-all duration-150 active:scale-[0.98] ${
               activeTab === 'financial' 
                 ? 'bg-[#1B6B3A] text-white shadow-xs' 
@@ -281,7 +351,10 @@ export default function FounderOwnerDashboard() {
 
           {/* Academy Overview Tab */}
           <button 
-            onClick={() => setActiveTab('academy')}
+            onClick={() => {
+              setActiveTab('academy')
+              setSidebarOpen(false)
+            }}
             className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-bold font-sans transition-all duration-150 active:scale-[0.98] ${
               activeTab === 'academy' 
                 ? 'bg-[#1B6B3A] text-white shadow-xs' 
@@ -296,7 +369,10 @@ export default function FounderOwnerDashboard() {
 
           {/* Staff Directory Tab */}
           <button 
-            onClick={() => setActiveTab('staff')}
+            onClick={() => {
+              setActiveTab('staff')
+              setSidebarOpen(false)
+            }}
             className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-bold font-sans transition-all duration-150 active:scale-[0.98] ${
               activeTab === 'staff' 
                 ? 'bg-[#1B6B3A] text-white shadow-xs' 
@@ -311,7 +387,10 @@ export default function FounderOwnerDashboard() {
 
           {/* View Portals switcher Tab */}
           <button 
-            onClick={() => setActiveTab('portals')}
+            onClick={() => {
+              setActiveTab('portals')
+              setSidebarOpen(false)
+            }}
             className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-bold font-sans transition-all duration-150 active:scale-[0.98] ${
               activeTab === 'portals' 
                 ? 'bg-[#1B6B3A] text-white shadow-xs' 
@@ -352,19 +431,29 @@ export default function FounderOwnerDashboard() {
       <main className="flex-1 flex flex-col h-full overflow-hidden relative z-10">
         
         {/* Top Header */}
-        <header className="h-16 shrink-0 bg-white border-b border-zinc-200 px-8 flex justify-between items-center z-10 shadow-2xs">
-          <div>
-            <h2 className="text-md font-serif font-bold text-zinc-900 capitalize">
+        <header className="h-16 shrink-0 bg-white border-b border-zinc-200 px-4 sm:px-8 flex justify-between items-center z-10 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 -ml-2 border border-zinc-200 rounded-xl hover:bg-zinc-50 active:scale-95 transition-all text-zinc-650"
+              title="Open Navigation Menu"
+            >
+              <Menu className="h-4.5 w-4.5" />
+            </button>
+            <h2 className="text-xs sm:text-md font-serif font-bold text-zinc-900 capitalize">
               {activeTab === 'financial' && 'Financial Ledger Overview'}
-              {activeTab === 'academy' && 'Academy-Wide Academic Overview'}
+              {activeTab === 'academy' && 'Academy Overview'}
               {activeTab === 'staff' && 'Central Staff Roster'}
-              {activeTab === 'portals' && 'View As Role Switchboard'}
+              {activeTab === 'portals' && 'Role Switchboard'}
             </h2>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="text-[10px] text-zinc-500 font-mono font-bold bg-zinc-50 border border-zinc-200/80 px-3 py-1.5 rounded-xl">
+            <div className="hidden sm:block text-[10px] text-zinc-500 font-mono font-bold bg-zinc-50 border border-zinc-200/80 px-3 py-1.5 rounded-xl">
               SYSTEM PRIVILEGE: OWNER
+            </div>
+            <div className="lg:hidden">
+              <NotificationBell />
             </div>
           </div>
         </header>
@@ -733,7 +822,9 @@ export default function FounderOwnerDashboard() {
                         <tr key={s.id} className="hover:bg-zinc-50/20 transition-colors">
                           <td className="py-3 pr-4 font-bold text-zinc-900">
                             <div>
-                              <span className="block font-sans text-xs text-zinc-850">{s.name}</span>
+                              <span className="block font-sans text-xs text-zinc-850">
+                                {s.name} {s.gender && <span className="text-[10px] text-zinc-550 font-semibold font-sans capitalize">({s.gender})</span>}
+                              </span>
                               <span className="block text-[8px] text-zinc-450 font-mono mt-0.5">{s.id}</span>
                               <span className="block text-[8px] text-[#1B6B3A] font-medium font-sans mt-0.5">{s.email}</span>
                             </div>
@@ -761,17 +852,33 @@ export default function FounderOwnerDashboard() {
                           </td>
                           <td className="py-3 pl-4 text-right">
                             {s.status === 'Active' && (
-                              <button
-                                onClick={() => {
-                                  setSelectedStaff(s)
-                                  setRemovalReason('')
-                                  setActiveModal('remove-staff')
-                                }}
-                                className="p-1.5 border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors active:scale-95"
-                                title="Terminate staff member"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
+                              <div className="flex justify-end gap-1.5">
+                                <button
+                                  onClick={() => {
+                                    setSelectedStaff(s)
+                                    setEditName(s.name)
+                                    setEditRole(s.role)
+                                    setEditContact(s.contact)
+                                    setEditGender(s.gender || 'Male')
+                                    setActiveModal('edit-staff')
+                                  }}
+                                  className="p-1.5 border border-zinc-250 text-zinc-650 hover:bg-zinc-50 rounded-lg transition-colors active:scale-95"
+                                  title="Edit staff details"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setSelectedStaff(s)
+                                    setRemovalReason('')
+                                    setActiveModal('remove-staff')
+                                  }}
+                                  className="p-1.5 border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors active:scale-95"
+                                  title="Terminate staff member"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
                             )}
                           </td>
                         </tr>
@@ -959,15 +1066,28 @@ export default function FounderOwnerDashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Joining Date</label>
-                  <input 
-                    type="date"
+                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Gender</label>
+                  <select
+                    value={newGender}
+                    onChange={(e) => setNewGender(e.target.value)}
                     required
-                    value={newJoinDate}
-                    onChange={(e) => setNewJoinDate(e.target.value)}
-                    className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-850"
-                  />
+                    className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800"
+                  >
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
                 </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Joining Date</label>
+                <input 
+                  type="date"
+                  required
+                  value={newJoinDate}
+                  onChange={(e) => setNewJoinDate(e.target.value)}
+                  className="w-full text-xs p-3 rounded-xl border border-zinc-300 bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-850"
+                />
               </div>
 
               <div className="space-y-1">
@@ -1024,6 +1144,10 @@ export default function FounderOwnerDashboard() {
               <div className="grid grid-cols-3 gap-1">
                 <span className="text-zinc-500 text-[10px]">Role:</span>
                 <span className="col-span-2 text-zinc-850 font-bold">{hiredCredentials.role}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-1">
+                <span className="text-zinc-500 text-[10px]">Gender:</span>
+                <span className="col-span-2 text-zinc-800 font-bold capitalize">{hiredCredentials.gender}</span>
               </div>
               <div className="grid grid-cols-3 gap-1">
                 <span className="text-zinc-500 text-[10px]">Email:</span>
@@ -1106,6 +1230,101 @@ export default function FounderOwnerDashboard() {
                 Terminate Credentials
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT STAFF PROFILE & DETAILS MODAL */}
+      {activeModal === 'edit-staff' && selectedStaff && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-white border border-zinc-200 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-scale-up">
+            <h3 className="text-sm font-bold text-zinc-955 font-serif">Edit Staff Profile & Details</h3>
+            
+            <form onSubmit={handleEditStaffSubmit} className="space-y-4 text-xs font-medium text-zinc-850">
+              <div className="space-y-1">
+                <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Staff Full Name</label>
+                <input 
+                  type="text"
+                  required
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="e.g. Brother Kamal"
+                  className="w-full text-xs p-3 rounded-xl border border-zinc-300 bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Email Address (Read-only)</label>
+                <input 
+                  type="email"
+                  disabled
+                  value={selectedStaff.email}
+                  className="w-full text-xs p-3 rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-500 cursor-not-allowed"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Executive Role</label>
+                  <select
+                    value={editRole}
+                    onChange={(e) => setEditRole(e.target.value)}
+                    className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800"
+                  >
+                    <option value="Academic Director">Academic Director</option>
+                    <option value="Supervisor">Supervisor</option>
+                    <option value="Registrar">Registrar</option>
+                    <option value="Content Manager">Content Manager</option>
+                    <option value="Finance Officer">Finance Officer</option>
+                    <option value="Teacher">Teacher</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Gender</label>
+                  <select
+                    value={editGender}
+                    onChange={(e) => setEditGender(e.target.value)}
+                    required
+                    className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800"
+                  >
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Contact Phone Number</label>
+                <input 
+                  type="text"
+                  required
+                  value={editContact}
+                  onChange={(e) => setEditContact(e.target.value)}
+                  placeholder="e.g. +92 325 5777312"
+                  className="w-full text-xs p-3 rounded-xl border border-zinc-300 bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveModal(null)
+                    setSelectedStaff(null)
+                  }}
+                  className="py-2 px-4 border border-zinc-300 text-zinc-700 hover:bg-zinc-50 font-bold rounded-xl active:scale-95 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="py-2 px-4 bg-[#1B6B3A] text-white hover:bg-[#1B6B3A]/90 font-bold rounded-xl active:scale-95 transition-all shadow-xs"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

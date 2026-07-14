@@ -22,6 +22,7 @@ interface UserProfile {
   role: string
   email: string
   avatar_url?: string
+  gender?: string
 }
 
 export default function DashboardSidebar() {
@@ -41,7 +42,7 @@ export default function DashboardSidebar() {
 
         const { data, error } = await supabase
           .from('profiles')
-          .select('full_name, role, email, avatar_url')
+          .select('full_name, role, email, avatar_url, gender')
           .eq('id', session.user.id)
           .single()
 
@@ -161,7 +162,7 @@ export default function DashboardSidebar() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-zinc-800 font-sans">
-              {profile?.full_name || 'Ahmed Bilal'}
+              {profile?.full_name || 'Ahmed Bilal'} {profile?.gender && <span className="text-[10px] text-zinc-500 font-bold capitalize">({profile.gender})</span>}
             </p>
             <p className="truncate text-xs text-zinc-600">
               {profile?.email || 'ahmed.bilal@gmail.com'}

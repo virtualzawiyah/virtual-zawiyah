@@ -145,7 +145,7 @@ export default function NotificationBell() {
 
       {isOpen && (
         <div 
-          className="absolute right-0 mt-2.5 w-80 sm:w-96 rounded-xl border border-gray-150 bg-white shadow-xl z-50 overflow-hidden animate-fade-in-up"
+          className="fixed sm:absolute right-4 sm:right-0 top-16 sm:top-auto mt-0 sm:mt-2.5 w-[calc(100vw-2rem)] sm:w-96 max-w-[380px] sm:max-w-none rounded-xl border border-gray-150 bg-white shadow-xl z-50 overflow-hidden animate-fade-in-up"
           style={{ transformOrigin: 'top right' }}
           id="notification-dropdown"
         >
@@ -165,7 +165,7 @@ export default function NotificationBell() {
           </div>
 
           {/* Notifications List */}
-          <div className="max-h-[360px] overflow-y-auto divide-y divide-gray-100" id="notification-list">
+          <div className="max-h-[calc(100vh-160px)] sm:max-h-[360px] overflow-y-auto divide-y divide-gray-100" id="notification-list">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-10 text-gray-400 gap-2">
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
@@ -195,7 +195,7 @@ export default function NotificationBell() {
                       {formatTimeAgo(notif.created_at)}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-650 leading-relaxed break-words line-clamp-2">
+                  <p className="text-xs text-gray-650 leading-relaxed break-words whitespace-normal">
                     {notif.message}
                   </p>
                   {!notif.is_read && (
