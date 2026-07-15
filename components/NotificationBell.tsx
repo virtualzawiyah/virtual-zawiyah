@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { Bell, Loader2, Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -48,6 +49,7 @@ export default function NotificationBell({ align = 'right' }: NotificationBellPr
   const [isLoading, setIsLoading] = useState(true)
   const [isMobile, setIsMobile] = useState(true)
   const [coords, setCoords] = useState<{ top: number; left: number } | null>(null)
+  const [mounted, setMounted] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
@@ -106,6 +108,7 @@ export default function NotificationBell({ align = 'right' }: NotificationBellPr
   }
 
   useEffect(() => {
+    setMounted(true)
     fetchNotifications()
 
     // Poll every 30 seconds
@@ -185,7 +188,7 @@ export default function NotificationBell({ align = 'right' }: NotificationBellPr
         )}
       </button>
 
-      {isOpen && (
+      {isOpen && mounted && createPortal(
         <div 
           className="fixed w-[calc(100vw-2rem)] sm:w-96 max-w-[380px] sm:max-w-none rounded-xl border border-gray-150 bg-white shadow-xl z-50 overflow-hidden animate-fade-in-up"
           style={{ 
@@ -253,7 +256,8 @@ export default function NotificationBell({ align = 'right' }: NotificationBellPr
               ))
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
