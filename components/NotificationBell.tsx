@@ -37,7 +37,11 @@ function formatTimeAgo(dateString: string) {
   }
 }
 
-export default function NotificationBell() {
+interface NotificationBellProps {
+  align?: 'left' | 'right'
+}
+
+export default function NotificationBell({ align = 'right' }: NotificationBellProps) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
@@ -145,8 +149,10 @@ export default function NotificationBell() {
 
       {isOpen && (
         <div 
-          className="fixed sm:absolute right-4 sm:right-0 top-16 sm:top-auto mt-0 sm:mt-2.5 w-[calc(100vw-2rem)] sm:w-96 max-w-[380px] sm:max-w-none rounded-xl border border-gray-150 bg-white shadow-xl z-50 overflow-hidden animate-fade-in-up"
-          style={{ transformOrigin: 'top right' }}
+          className={`fixed sm:absolute ${
+            align === 'left' ? 'left-4 sm:left-0 sm:right-auto' : 'right-4 sm:right-0 sm:left-auto'
+          } top-16 sm:top-auto mt-0 sm:mt-2.5 w-[calc(100vw-2rem)] sm:w-96 max-w-[380px] sm:max-w-none rounded-xl border border-gray-150 bg-white shadow-xl z-50 overflow-hidden animate-fade-in-up`}
+          style={{ transformOrigin: align === 'left' ? 'top left' : 'top right' }}
           id="notification-dropdown"
         >
           {/* Header */}

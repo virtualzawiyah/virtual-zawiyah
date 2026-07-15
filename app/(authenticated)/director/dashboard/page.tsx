@@ -382,7 +382,7 @@ export default function AcademicDirectorDashboard() {
               <span className="block text-[9px] uppercase tracking-wider text-[#1B6B3A] font-bold leading-none mt-0.5">DIRECTOR PORTAL</span>
             </div>
           </div>
-          <NotificationBell />
+          <NotificationBell align="left" />
         </div>
 
         {/* Sidebar Nav Links */}

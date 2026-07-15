@@ -325,7 +325,7 @@ export default function FounderOwnerDashboard() {
             </div>
           </div>
           <div className="hidden lg:block">
-            <NotificationBell />
+            <NotificationBell align="left" />
           </div>
         </div>
 

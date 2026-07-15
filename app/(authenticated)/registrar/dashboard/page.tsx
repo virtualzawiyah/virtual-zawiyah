@@ -976,7 +976,7 @@ export default function RegistrarDashboard() {
               <span className="block text-[9px] uppercase tracking-wider text-[#1B6B3A] font-bold leading-none mt-0.5">REGISTRAR PORTAL</span>
             </div>
           </div>
-          <NotificationBell />
+          <NotificationBell align="left" />
         </div>
 
         {/* Portal Navigation Items */}
