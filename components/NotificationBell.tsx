@@ -47,17 +47,45 @@ export default function NotificationBell({ align = 'right' }: NotificationBellPr
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isMobile, setIsMobile] = useState(true)
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+
+  const updateCoords = () => {
+    if (isOpen && dropdownRef.current) {
+      const rect = dropdownRef.current.getBoundingClientRect()
+      const isMobileSize = window.innerWidth < 640
+      if (isMobileSize) {
+        setCoords(null)
+      } else {
+        const top = rect.bottom + window.scrollY
+        const left = align === 'left' 
+          ? rect.left + window.scrollX
+          : rect.right + window.scrollX - 384 // 384px is w-96 width
+        setCoords({ top, left })
+      }
+    } else {
+      setCoords(null)
+    }
+  }
+
+  useEffect(() => {
+    updateCoords()
+  }, [isOpen, align])
 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 640)
+      updateCoords()
     }
     handleResize()
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+    window.addEventListener('scroll', updateCoords, true)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('scroll', updateCoords, true)
+    }
+  }, [isOpen])
 
   const fetchNotifications = async (silent = false) => {
     if (!silent) setIsLoading(true)
@@ -159,10 +187,12 @@ export default function NotificationBell({ align = 'right' }: NotificationBellPr
 
       {isOpen && (
         <div 
-          className="fixed sm:absolute top-16 sm:top-auto mt-0 sm:mt-2.5 w-[calc(100vw-2rem)] sm:w-96 max-w-[380px] sm:max-w-none rounded-xl border border-gray-150 bg-white shadow-xl z-50 overflow-hidden animate-fade-in-up"
+          className="fixed w-[calc(100vw-2rem)] sm:w-96 max-w-[380px] sm:max-w-none rounded-xl border border-gray-150 bg-white shadow-xl z-50 overflow-hidden animate-fade-in-up"
           style={{ 
-            left: isMobile ? undefined : (align === 'left' ? 0 : 'auto'), 
-            right: isMobile ? undefined : (align === 'left' ? 'auto' : 0), 
+            position: 'fixed',
+            top: coords ? `${coords.top}px` : '4rem',
+            left: coords ? `${coords.left}px` : '1rem',
+            right: coords ? 'auto' : '1rem',
             transformOrigin: align === 'left' ? 'top left' : 'top right' 
           }}
           id="notification-dropdown"
