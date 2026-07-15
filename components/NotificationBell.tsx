@@ -46,8 +46,18 @@ export default function NotificationBell({ align = 'right' }: NotificationBellPr
   const [unreadCount, setUnreadCount] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isMobile, setIsMobile] = useState(true)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640)
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const fetchNotifications = async (silent = false) => {
     if (!silent) setIsLoading(true)
@@ -149,10 +159,12 @@ export default function NotificationBell({ align = 'right' }: NotificationBellPr
 
       {isOpen && (
         <div 
-          className={`fixed sm:absolute ${
-            align === 'left' ? 'left-4 sm:left-0 sm:right-auto' : 'right-4 sm:right-0 sm:left-auto'
-          } top-16 sm:top-auto mt-0 sm:mt-2.5 w-[calc(100vw-2rem)] sm:w-96 max-w-[380px] sm:max-w-none rounded-xl border border-gray-150 bg-white shadow-xl z-50 overflow-hidden animate-fade-in-up`}
-          style={{ transformOrigin: align === 'left' ? 'top left' : 'top right' }}
+          className="fixed sm:absolute top-16 sm:top-auto mt-0 sm:mt-2.5 w-[calc(100vw-2rem)] sm:w-96 max-w-[380px] sm:max-w-none rounded-xl border border-gray-150 bg-white shadow-xl z-50 overflow-hidden animate-fade-in-up"
+          style={{ 
+            left: isMobile ? undefined : (align === 'left' ? 0 : 'auto'), 
+            right: isMobile ? undefined : (align === 'left' ? 'auto' : 0), 
+            transformOrigin: align === 'left' ? 'top left' : 'top right' 
+          }}
           id="notification-dropdown"
         >
           {/* Header */}
