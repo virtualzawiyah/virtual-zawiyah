@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import DashboardSidebar from '@/components/DashboardSidebar'
 import GeometricPattern from '@/components/GeometricPattern'
+import ChangePasswordWidget from '@/components/ChangePasswordWidget'
 
 export default function AuthenticatedLayout({
   children,
@@ -30,6 +31,9 @@ export default function AuthenticatedLayout({
         <main className="flex-1 h-full w-full relative z-10">
           {children}
         </main>
+
+        {/* Floating change password tool */}
+        <ChangePasswordWidget />
       </div>
     )
   }
@@ -48,6 +52,9 @@ export default function AuthenticatedLayout({
           {children}
         </div>
       </main>
+
+      {/* Floating change password tool */}
+      <ChangePasswordWidget />
     </div>
   )
 }
