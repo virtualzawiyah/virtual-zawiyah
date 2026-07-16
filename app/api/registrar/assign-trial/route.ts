@@ -38,18 +38,30 @@ export async function POST(req: Request) {
     if (existingProfile) {
       studentId = existingProfile.id
     } else {
-      // 2. Create user in Supabase Auth via Admin Client
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: parentEmail,
-        email_confirm: true,
-        user_metadata: { role: 'student' }
-      })
-
-      if (authError) {
-        return NextResponse.json({ error: `Auth creation failed: ${authError.message}` }, { status: 400 })
+      // Check if user already exists in Supabase Auth
+      const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
+      if (listError) {
+        return NextResponse.json({ error: `Failed to check existing auth users: ${listError.message}` }, { status: 400 })
       }
+      
+      const existingAuthUser = users?.find((u: any) => u.email?.toLowerCase() === parentEmail.toLowerCase())
+      
+      if (existingAuthUser) {
+        studentId = existingAuthUser.id
+      } else {
+        // 2. Create user in Supabase Auth via Admin Client
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+          email: parentEmail,
+          email_confirm: true,
+          user_metadata: { role: 'student' }
+        })
 
-      studentId = authData.user.id
+        if (authError) {
+          return NextResponse.json({ error: `Auth creation failed: ${authError.message}` }, { status: 400 })
+        }
+
+        studentId = authData.user.id
+      }
 
       // 3. Create profile entry
       const { error: profileError } = await supabase

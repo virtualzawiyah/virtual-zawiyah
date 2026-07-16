@@ -13,7 +13,8 @@ import {
   Inbox,
   LogOut,
   Sliders,
-  Award
+  Award,
+  Copy
 } from 'lucide-react'
 import BackToFounderBanner from '@/components/BackToFounderBanner'
 import NotificationBell from '@/components/NotificationBell'
@@ -323,6 +324,7 @@ export default function RegistrarDashboard() {
     className?: string
     pendingSupervisor?: boolean
   } | null>(null)
+  const [copiedCredentials, setCopiedCredentials] = useState(false)
 
   // --- Trial Tab States ---
   const [activeTrialSelection, setActiveTrialSelection] = useState<string | null>(null)
@@ -376,6 +378,7 @@ export default function RegistrarDashboard() {
       availableDays,
       yearLevel,
       status: row.status,
+      studentGender: row.student_gender || 'male',
       // Pass raw email/name values for downstream trial/group class inserts
       parentEmail: row.parent_email,
       parentName: row.parent_name,
@@ -676,7 +679,7 @@ export default function RegistrarDashboard() {
           studentName: selectedAdmission.studentName,
           parentEmail: (selectedAdmission as any).parentEmail || `${selectedAdmission.id}@test.com`,
           timezone: selectedAdmission.timezone,
-          gender: selectedAdmission.genderPreference
+          gender: (selectedAdmission as any).studentGender || 'male'
         })
       })
 
@@ -720,7 +723,7 @@ export default function RegistrarDashboard() {
           studentName: selectedAdmission.studentName,
           parentEmail: (selectedAdmission as any).parentEmail || `${selectedAdmission.id}@test.com`,
           timezone: selectedAdmission.timezone,
-          gender: selectedAdmission.genderPreference
+          gender: (selectedAdmission as any).studentGender || 'male'
         })
       })
 
@@ -1627,14 +1630,29 @@ export default function RegistrarDashboard() {
                   <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
                   <p className="font-bold text-sm">Teacher Registered Successfully!</p>
                 </div>
-                <div className="leading-relaxed space-y-1">
+                <div className="leading-relaxed space-y-1 w-full">
                   <p>
-                    Ustadh/Ustadha <strong>{onboardSuccessMsg.name}</strong> has been onboarded with Teacher Portal ID: <strong className="font-mono text-zinc-950 bg-white px-1.5 py-0.5 border border-emerald-250 rounded">{onboardSuccessMsg.id}</strong>.
+                    Teacher <strong>{onboardSuccessMsg.name}</strong> has been onboarded with Teacher Portal ID: <strong className="font-mono text-zinc-950 bg-white px-1.5 py-0.5 border border-emerald-250 rounded">{onboardSuccessMsg.id}</strong>.
                   </p>
                   {onboardSuccessMsg.email && (
-                    <div className="bg-white/80 border border-emerald-200/50 p-3 rounded-xl space-y-1 font-mono text-[11px] text-zinc-700 mt-2">
-                      <p><strong>Email:</strong> {onboardSuccessMsg.email}</p>
-                      <p><strong>Temp Password:</strong> {onboardSuccessMsg.password}</p>
+                    <div className="bg-white/80 border border-emerald-200/50 p-4 rounded-xl flex items-center justify-between gap-4 mt-2">
+                      <div className="space-y-1 font-mono text-[11px] text-zinc-700 select-text">
+                        <p><strong>Email:</strong> {onboardSuccessMsg.email}</p>
+                        <p><strong>Temp Password:</strong> {onboardSuccessMsg.password}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const text = `Email: ${onboardSuccessMsg.email}\nPassword: ${onboardSuccessMsg.password}`
+                          navigator.clipboard.writeText(text)
+                          setCopiedCredentials(true)
+                          setTimeout(() => setCopiedCredentials(false), 2000)
+                        }}
+                        className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-650 hover:text-zinc-900 active:scale-95 font-bold transition-all text-[10px] select-none"
+                      >
+                        <Copy className="w-3 h-3" />
+                        {copiedCredentials ? 'Copied!' : 'Copy'}
+                      </button>
                     </div>
                   )}
                   <p className="text-[10px] text-emerald-900/80 italic mt-2">
