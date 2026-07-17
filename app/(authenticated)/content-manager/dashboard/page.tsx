@@ -16,7 +16,9 @@ import {
   AlertCircle,
   Calendar,
   DollarSign,
-  User
+  User,
+  MessageSquare,
+  Star
 } from 'lucide-react'
 import GeometricPattern from '@/components/GeometricPattern'
 import BackToFounderBanner from '@/components/BackToFounderBanner'
@@ -225,13 +227,14 @@ export default function ContentManagerDashboard() {
     window.location.href = '/staff/login'
   }
 
-  const [activeTab, setActiveTab] = useState<'announcements' | 'courses' | 'fee-cards' | 'profile-requests'>('announcements')
+  const [activeTab, setActiveTab] = useState<'announcements' | 'courses' | 'fee-cards' | 'profile-requests' | 'feedback-reviews'>('announcements')
 
   // --- States ---
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [courses, setCourses] = useState<Course[]>([])
   const [feeCards, setFeeCards] = useState<FeeCard[]>([])
   const [profileRequests, setProfileRequests] = useState<any[]>([])
+  const [feedbacks, setFeedbacks] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -293,30 +296,55 @@ export default function ContentManagerDashboard() {
     }
   }
 
+  // Handle Resolving Feedback Submissions
+  const handleResolveFeedback = async (feedbackId: string, action: 'approve' | 'reject') => {
+    try {
+      const res = await fetch('/api/content-manager/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feedbackId, action })
+      })
+
+      if (!res.ok) {
+        const errData = await res.json()
+        throw new Error(errData.error || 'Failed to resolve feedback')
+      }
+
+      triggerToast(`User feedback submission has been successfully ${action === 'approve' ? 'approved & published' : 'rejected'}.`)
+      await fetchData()
+    } catch (err: any) {
+      alert(`Error: ${err.message}`)
+    }
+  }
+
   // --- Data Fetching ---
   const fetchData = async () => {
     try {
       setLoading(true)
       setError(null)
       
-      const [annRes, coursesRes, feeRes, reqRes] = await Promise.all([
+      const [annRes, coursesRes, feeRes, reqRes, feedbackRes] = await Promise.all([
         fetch('/api/content/announcements'),
         fetch('/api/content/courses'),
         fetch('/api/content/fee-cards'),
-        fetch('/api/content-manager/profile-requests')
+        fetch('/api/content-manager/profile-requests'),
+        fetch('/api/content-manager/feedback')
       ])
       
       if (!annRes.ok) throw new Error('Failed to fetch announcements')
       if (!coursesRes.ok) throw new Error('Failed to fetch courses')
       if (!feeRes.ok) throw new Error('Failed to fetch fee cards')
       if (!reqRes.ok) throw new Error('Failed to fetch profile requests')
+      if (!feedbackRes.ok) throw new Error('Failed to fetch feedback reviews')
       
       const annData = await annRes.json()
       const coursesData = await coursesRes.json()
       const feeData = await feeRes.json()
       const reqData = await reqRes.json()
+      const feedbackData = await feedbackRes.json()
 
       setProfileRequests(reqData.requests || [])
+      setFeedbacks(feedbackData.feedbacks || [])
       
       // Map Announcements (using home page 2026-06-30 fallback, or fallback to current time)
       const referenceDate = new Date('2026-06-30T12:00:00')
@@ -731,6 +759,26 @@ export default function ContentManagerDashboard() {
             )}
           </button>
 
+          {/* Feedback Reviews Tab link */}
+          <button 
+            onClick={() => setActiveTab('feedback-reviews')}
+            className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-bold font-sans transition-all duration-150 active:scale-[0.98] ${
+              activeTab === 'feedback-reviews' 
+                ? 'bg-[#1B6B3A] text-white shadow-xs' 
+                : 'text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <MessageSquare className="h-4 w-4 shrink-0" />
+              <span>Feedback Reviews</span>
+            </div>
+            {feedbacks.filter(f => f.status === 'pending').length > 0 && (
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-500 text-white animate-pulse">
+                {feedbacks.filter(f => f.status === 'pending').length}
+              </span>
+            )}
+          </button>
+
         </nav>
 
         {/* Sidebar Footer User Info */}
@@ -768,6 +816,8 @@ export default function ContentManagerDashboard() {
               {activeTab === 'announcements' && 'Announcements Board'}
               {activeTab === 'courses' && 'Courses Catalog Directory'}
               {activeTab === 'fee-cards' && 'Fee Cards Configuration'}
+              {activeTab === 'profile-requests' && 'Teacher Profile Requests'}
+              {activeTab === 'feedback-reviews' && 'Website Feedback Moderation'}
             </h2>
             <span className="text-[10px] font-mono font-bold text-[#1B6B3A] border border-[#1B6B3A]/20 bg-[#1B6B3A]/5 px-2 py-0.5 rounded">
               Edit Mode
@@ -1221,6 +1271,101 @@ export default function ContentManagerDashboard() {
                           </div>
                         </div>
 
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+              )}
+
+            </div>
+          )}
+
+          {/* ========================================== */}
+          {/* TAB 5: FEEDBACK REVIEWS                    */}
+          {/* ========================================== */}
+          {activeTab === 'feedback-reviews' && (
+            <div className="space-y-6 max-w-5xl animate-fade-in">
+              
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-800">
+                  Website Feedback Moderation
+                </h3>
+                <p className="text-[11px] text-zinc-700 mt-0.5">
+                  Moderate student, parent, and guardian feedback submissions for the public landing page testimonials.
+                </p>
+              </div>
+
+              {feedbacks.length === 0 ? (
+                <div className="bg-white border border-zinc-200 rounded-3xl p-12 text-center max-w-2xl shadow-xs">
+                  <span className="block text-4xl mb-4">💬</span>
+                  <h4 className="text-sm font-bold text-zinc-850">No feedback submitted yet</h4>
+                  <p className="text-xs text-zinc-550 mt-1">Submitted feedback messages will appear here for review.</p>
+                </div>
+              ) : (
+                <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+                  {feedbacks.map(fb => (
+                    <div 
+                      key={fb.id} 
+                      className={`bg-white border rounded-3xl p-6 shadow-xs space-y-4 flex flex-col justify-between hover:shadow-sm transition-all duration-200 ${
+                        fb.status === 'approved' ? 'border-emerald-200/60 bg-emerald-50/5' :
+                        fb.status === 'rejected' ? 'border-rose-200/40 opacity-75' : 'border-zinc-250'
+                      }`}
+                    >
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-start gap-4">
+                          <div>
+                            <h4 className="text-xs font-bold text-zinc-950">{fb.author_name}</h4>
+                            <span className="inline-block text-[9px] uppercase tracking-wider font-bold bg-zinc-100 text-zinc-650 px-2 py-0.5 rounded mt-1">
+                              {fb.author_role}
+                            </span>
+                          </div>
+                          
+                          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
+                            fb.status === 'approved' ? 'text-emerald-700 bg-emerald-50 border-emerald-150' :
+                            fb.status === 'rejected' ? 'text-rose-700 bg-rose-50 border-rose-150' :
+                            'text-amber-700 bg-amber-50 border-amber-150'
+                          }`}>
+                            {fb.status}
+                          </span>
+                        </div>
+
+                        {/* Stars display */}
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star 
+                              key={i} 
+                              className={`w-3.5 h-3.5 ${
+                                i < fb.rating ? 'fill-[#C9A84C] text-[#C9A84C]' : 'text-gray-250 fill-transparent'
+                              }`} 
+                            />
+                          ))}
+                        </div>
+
+                        <p className="text-xs text-zinc-700 leading-relaxed font-medium italic">
+                          &quot;{fb.content}&quot;
+                        </p>
+                      </div>
+
+                      <div className="pt-3 border-t border-zinc-100 flex justify-between items-center text-[10px] text-zinc-500">
+                        <span>Submitted {new Date(fb.created_at).toLocaleDateString()}</span>
+                        
+                        {fb.status === 'pending' && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleResolveFeedback(fb.id, 'reject')}
+                              className="py-1 px-2.5 border border-rose-250 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg transition-all active:scale-95 text-[9px]"
+                            >
+                              Reject
+                            </button>
+                            <button
+                              onClick={() => handleResolveFeedback(fb.id, 'approve')}
+                              className="py-1 px-2.5 bg-[#1B6B3A] hover:bg-[#1B6B3A]/90 text-white font-bold rounded-lg transition-all active:scale-95 shadow-2xs text-[9px]"
+                            >
+                              Approve
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                     </div>

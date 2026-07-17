@@ -15,7 +15,8 @@ export default function PublicNavbar() {
     { name: 'Courses', path: '/courses' },
     { name: 'Teachers', path: '/teachers' },
     { name: 'Fee', path: '/fee' },
-    { name: 'Contact', path: '/contact' }
+    { name: 'Contact', path: '/contact' },
+    { name: 'Feedback', path: '/feedback' }
   ]
 
   return (

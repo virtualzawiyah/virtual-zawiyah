@@ -115,6 +115,26 @@ export default function Home() {
   const isMuted = false
   const isVideoOff = false
 
+  // Dynamic testimonials state
+  const [dynamicTestimonials, setDynamicTestimonials] = useState<any[]>([])
+
+  useEffect(() => {
+    async function loadTestimonials() {
+      try {
+        const res = await fetch('/api/public/feedback')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.success && data.testimonials && data.testimonials.length > 0) {
+            setDynamicTestimonials(data.testimonials)
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load dynamic testimonials:', err)
+      }
+    }
+    loadTestimonials()
+  }, [])
+
   // --- Typewriter Rotating Heading Logic ---
   const [itemIndex, setItemIndex] = useState(0)
   const [text1, setText1] = useState('')
@@ -825,64 +845,101 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            
-            {/* Testimonial 1 */}
-            <div className="bg-white rounded-2xl border border-gray-200/70 p-8 flex flex-col justify-between shadow-sm relative">
-              <div>
-                <Quote className="w-7 h-7 text-[#C9A84C] mb-4 opacity-70" />
-                <p className="text-sm italic text-gray-650 leading-relaxed mb-6">
-                  &quot;We requested a female teacher for our 9-year-old daughter. The strict gender matching gives us total peace of mind. Her teacher, Ustadha Mariam, is incredibly patient and structured. The portal lesson reports keep us fully updated after every class.&quot;
-                </p>
-              </div>
-              <div className="flex items-center gap-3.5 border-t border-gray-100 pt-5">
-                <div className="w-10 h-10 rounded-full bg-[#1B6B3A]/10 text-[#1B6B3A] flex items-center justify-center font-bold text-sm">
-                  KS
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-gray-900">Khalid Siddiqui</h4>
-                  <span className="text-[10px] text-gray-500 block">Parent (UK) • Applied Tajweed 1:1</span>
-                </div>
-              </div>
-            </div>
+            {dynamicTestimonials.length > 0 ? (
+              dynamicTestimonials.map((t: any, idx: number) => (
+                <div key={t.id || idx} className="bg-white rounded-2xl border border-gray-200/70 p-8 flex flex-col justify-between shadow-sm relative hover:shadow-md transition-shadow">
+                  <div>
+                    <Quote className="w-7 h-7 text-[#C9A84C] mb-3 opacity-70" />
+                    
+                    {/* Stars indicator */}
+                    <div className="flex items-center gap-0.5 mb-4">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star 
+                          key={i} 
+                          className={`w-3.5 h-3.5 ${
+                            i < t.rating ? 'fill-[#C9A84C] text-[#C9A84C]' : 'text-gray-200 fill-transparent'
+                          }`} 
+                        />
+                      ))}
+                    </div>
 
-            {/* Testimonial 2 */}
-            <div className="bg-white rounded-2xl border border-gray-200/70 p-8 flex flex-col justify-between shadow-sm relative">
-              <div>
-                <Quote className="w-7 h-7 text-[#C9A84C] mb-4 opacity-70" />
-                <p className="text-sm italic text-gray-650 leading-relaxed mb-6">
-                  &quot;As a working professional in the US, standard fixed local schedules were impossible. The flexible timezone matching here let me coordinate late evening classes directly on the browser. Highly recommend the Quranic Grammar 1:1 syllabus.&quot;
-                </p>
-              </div>
-              <div className="flex items-center gap-3.5 border-t border-gray-100 pt-5">
-                <div className="w-10 h-10 rounded-full bg-[#1B6B3A]/10 text-[#1B6B3A] flex items-center justify-center font-bold text-sm">
-                  ZH
+                    <p className="text-sm italic text-gray-650 leading-relaxed mb-6">
+                      &quot;{t.content}&quot;
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3.5 border-t border-gray-100 pt-5">
+                    <div className="w-10 h-10 rounded-full bg-[#1B6B3A]/10 text-[#1B6B3A] flex items-center justify-center font-extrabold text-sm uppercase">
+                      {t.author_name.split(' ').map((p: any) => p[0]).join('').substring(0, 2)}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-gray-900">{t.author_name}</h4>
+                      <span className="text-[10px] text-gray-500 capitalize block">
+                        {t.author_role} • Scholar Review
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-gray-900">Zaynul Haroon</h4>
-                  <span className="text-[10px] text-gray-500 block">Student (US) • Arabic Grammar 1:1</span>
+              ))
+            ) : (
+              <>
+                {/* Testimonial 1 */}
+                <div className="bg-white rounded-2xl border border-gray-200/70 p-8 flex flex-col justify-between shadow-sm relative">
+                  <div>
+                    <Quote className="w-7 h-7 text-[#C9A84C] mb-4 opacity-70" />
+                    <p className="text-sm italic text-gray-650 leading-relaxed mb-6">
+                      &quot;We requested a female teacher for our 9-year-old daughter. The strict gender matching gives us total peace of mind. Her teacher, Ustadha Mariam, is incredibly patient and structured. The portal lesson reports keep us fully updated after every class.&quot;
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3.5 border-t border-gray-100 pt-5">
+                    <div className="w-10 h-10 rounded-full bg-[#1B6B3A]/10 text-[#1B6B3A] flex items-center justify-center font-bold text-sm">
+                      KS
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm text-gray-900">Khalid Siddiqui</h4>
+                      <span className="text-[10px] text-gray-500 block">Parent (UK) • Applied Tajweed 1:1</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Testimonial 3 */}
-            <div className="bg-white rounded-2xl border border-gray-200/70 p-8 flex flex-col justify-between shadow-sm relative">
-              <div>
-                <Quote className="w-7 h-7 text-[#C9A84C] mb-4 opacity-70" />
-                <p className="text-sm italic text-gray-650 leading-relaxed mb-6">
-                  &quot;I entered Year 2 of the Dars-e-Nizami classical group program. The curriculum is extremely structured, covering deep Fiqh and Hadith. The self-hosted Jitsi classroom is crystal clear and completely browser-only, meaning I can join from my iPad easily.&quot;
-                </p>
-              </div>
-              <div className="flex items-center gap-3.5 border-t border-gray-100 pt-5">
-                <div className="w-10 h-10 rounded-full bg-[#1B6B3A]/10 text-[#1B6B3A] flex items-center justify-center font-bold text-sm">
-                  FM
+                {/* Testimonial 2 */}
+                <div className="bg-white rounded-2xl border border-gray-200/70 p-8 flex flex-col justify-between shadow-sm relative">
+                  <div>
+                    <Quote className="w-7 h-7 text-[#C9A84C] mb-4 opacity-70" />
+                    <p className="text-sm italic text-gray-650 leading-relaxed mb-6">
+                      &quot;As a working professional in the US, standard fixed local schedules were impossible. The flexible timezone matching here let me coordinate late evening classes directly on the browser. Highly recommend the Quranic Grammar 1:1 syllabus.&quot;
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3.5 border-t border-gray-100 pt-5">
+                    <div className="w-10 h-10 rounded-full bg-[#1B6B3A]/10 text-[#1B6B3A] flex items-center justify-center font-bold text-sm">
+                      ZH
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm text-gray-900">Zaynul Haroon</h4>
+                      <span className="text-[10px] text-gray-500 block">Student (US) • Arabic Grammar 1:1</span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-gray-900">Faheem Malik</h4>
-                  <span className="text-[10px] text-gray-500 block">Student (Canada) • Dars-e-Nizami Group</span>
-                </div>
-              </div>
-            </div>
 
+                {/* Testimonial 3 */}
+                <div className="bg-white rounded-2xl border border-gray-200/70 p-8 flex flex-col justify-between shadow-sm relative">
+                  <div>
+                    <Quote className="w-7 h-7 text-[#C9A84C] mb-4 opacity-70" />
+                    <p className="text-sm italic text-gray-650 leading-relaxed mb-6">
+                      &quot;I entered Year 2 of the Dars-e-Nizami classical group program. The curriculum is extremely structured, covering deep Fiqh and Hadith. The self-hosted Jitsi classroom is crystal clear and completely browser-only, meaning I can join from my iPad easily.&quot;
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3.5 border-t border-gray-100 pt-5">
+                    <div className="w-10 h-10 rounded-full bg-[#1B6B3A]/10 text-[#1B6B3A] flex items-center justify-center font-bold text-sm">
+                      FM
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm text-gray-900">Faheem Malik</h4>
+                      <span className="text-[10px] text-gray-500 block">Student (Canada) • Dars-e-Nizami Group</span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>
