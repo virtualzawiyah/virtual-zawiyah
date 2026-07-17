@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Award, Globe } from 'lucide-react'
 import PublicNavbar from '@/components/PublicNavbar'
 import PublicFooter from '@/components/PublicFooter'
 import GeometricPattern from '@/components/GeometricPattern'
+import { supabase } from '@/lib/supabaseClient'
 
 type FilterType = "All" | "Male" | "Female"
 
@@ -83,8 +84,55 @@ const genderColors: Record<"Male" | "Female", { bg: string; text: string }> = {
 
 export default function TeachersPage() {
   const [filter, setFilter] = useState<FilterType>("All")
+  const [teacherList, setTeacherList] = useState<Teacher[]>(teachers)
+  const [loading, setLoading] = useState(true)
 
-  const filtered = filter === "All" ? teachers : teachers.filter(t => t.gender === filter)
+  useEffect(() => {
+    async function loadTeachers() {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('full_name, gender, avatar_url, education, experience, teacher_type')
+          .eq('role', 'teacher')
+          .eq('status', 'Active')
+
+        if (error) throw error
+
+        if (data && data.length > 0) {
+          const mapped = data.map((t: any) => {
+            const nameClean = t.full_name
+            const genderClean = t.gender === 'female' ? 'Female' : 'Male' as "Male" | "Female"
+            
+            // Try to find matching hardcoded teacher for default languages/courses
+            const match = teachers.find(ht => 
+              ht.name.toLowerCase().includes(nameClean.toLowerCase()) || 
+              nameClean.toLowerCase().includes(ht.name.toLowerCase())
+            )
+            
+            return {
+              name: nameClean,
+              gender: genderClean,
+              qualifications: t.education || match?.qualifications || 'Qualified Scholar, Tajweed Instructor',
+              courses: t.teacher_type === 'Group' 
+                ? 'Tajweed Group Class, Dars-e-Nizami' 
+                : (match?.courses || '1:1 Quran Recitation & Islamic Studies'),
+              languages: match?.languages || 'English, Urdu, Arabic',
+              bio: t.experience || match?.bio || 'Dedicated faculty scholar teaching at Virtual Zawiyah.',
+              avatar: t.avatar_url || match?.avatar || nameClean.split(' ').map((p: any) => p[0]).join('').substring(0,2).toUpperCase()
+            }
+          })
+          setTeacherList(mapped)
+        }
+      } catch (err) {
+        console.error('Error fetching dynamic teachers:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadTeachers()
+  }, [])
+
+  const filtered = filter === "All" ? teacherList : teacherList.filter(t => t.gender === filter)
 
   return (
     <div className="public-page min-h-screen flex flex-col font-sans">
@@ -151,12 +199,21 @@ export default function TeachersPage() {
               >
                 {/* Avatar */}
                 <div className="flex flex-col items-center text-center mb-6">
-                  <div
-                    className="w-24 h-24 rounded-full flex items-center justify-center mb-4 border-2 font-serif font-bold text-2xl text-primary"
-                    style={{ background: "#E8F5EE", borderColor: "rgba(27,107,58,0.25)" }}
-                  >
-                    {teacher.avatar}
-                  </div>
+                  {teacher.avatar && (teacher.avatar.startsWith('http') || teacher.avatar.startsWith('/')) ? (
+                    <img 
+                      src={teacher.avatar} 
+                      alt={teacher.name} 
+                      className="w-24 h-24 rounded-full object-cover mb-4 border-2 shadow-sm"
+                      style={{ borderColor: "rgba(27,107,58,0.25)" }}
+                    />
+                  ) : (
+                    <div
+                      className="w-24 h-24 rounded-full flex items-center justify-center mb-4 border-2 font-serif font-bold text-2xl text-primary animate-pulse-slow"
+                      style={{ background: "#E8F5EE", borderColor: "rgba(27,107,58,0.25)" }}
+                    >
+                      {teacher.avatar}
+                    </div>
+                  )}
                   <span
                     className="mb-3 text-[10px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-full"
                     style={{ 

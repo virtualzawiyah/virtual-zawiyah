@@ -314,6 +314,7 @@ export default function TeacherLayout({
 
   const isDashboardActive = pathname === '/teacher/dashboard'
   const isWalletActive = pathname === '/teacher/wallet'
+  const isProfileActive = pathname === '/teacher/profile'
 
   return (
     <div className="h-screen w-full bg-[#FAFAF7] text-zinc-800 font-sans relative flex flex-col overflow-hidden">
@@ -339,7 +340,7 @@ export default function TeacherLayout({
           <div className="flex bg-zinc-100 rounded-xl p-0.5 border border-zinc-200">
             <Link
               href="/teacher/dashboard"
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+              className={`px-2 py-1 text-[10px] font-bold rounded-lg transition-all ${
                 isDashboardActive
                   ? 'bg-[#1B6B3A] text-white shadow-xs'
                   : 'text-zinc-650 hover:text-zinc-900'
@@ -349,13 +350,23 @@ export default function TeacherLayout({
             </Link>
             <Link
               href="/teacher/wallet"
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+              className={`px-2 py-1 text-[10px] font-bold rounded-lg transition-all ${
                 isWalletActive
                   ? 'bg-[#1B6B3A] text-white shadow-xs'
                   : 'text-zinc-650 hover:text-zinc-900'
               }`}
             >
               Wallet
+            </Link>
+            <Link
+              href="/teacher/profile"
+              className={`px-2 py-1 text-[10px] font-bold rounded-lg transition-all ${
+                isProfileActive
+                  ? 'bg-[#1B6B3A] text-white shadow-xs'
+                  : 'text-zinc-650 hover:text-zinc-900'
+              }`}
+            >
+              Profile
             </Link>
           </div>
         </div>
@@ -388,10 +399,10 @@ export default function TeacherLayout({
 
           {/* Portal Navigation Section */}
           <div className="px-4 py-3 border-b border-zinc-100 shrink-0">
-            <div className="grid grid-cols-2 gap-1 bg-zinc-100 rounded-xl p-1 border border-zinc-200">
+            <div className="grid grid-cols-3 gap-1 bg-zinc-100 rounded-xl p-1 border border-zinc-200">
               <Link 
                 href="/teacher/dashboard" 
-                className={`flex items-center justify-center gap-1.5 p-2 rounded-lg text-xs font-bold transition-all ${
+                className={`flex flex-col items-center justify-center p-1 rounded-lg text-[9px] font-bold transition-all ${
                   isDashboardActive 
                     ? 'bg-white text-[#1B6B3A] shadow-xs' 
                     : 'text-zinc-650 hover:text-zinc-900'
@@ -403,7 +414,7 @@ export default function TeacherLayout({
               </Link>
               <Link 
                 href="/teacher/wallet" 
-                className={`flex items-center justify-center gap-1.5 p-2 rounded-lg text-xs font-bold transition-all ${
+                className={`flex flex-col items-center justify-center p-1 rounded-lg text-[9px] font-bold transition-all ${
                   isWalletActive 
                     ? 'bg-white text-[#1B6B3A] shadow-xs' 
                     : 'text-zinc-650 hover:text-zinc-900'
@@ -411,7 +422,19 @@ export default function TeacherLayout({
                 title="My Wallet"
               >
                 <Wallet className="h-4 w-4" />
-                <span>My Wallet</span>
+                <span>Wallet</span>
+              </Link>
+              <Link 
+                href="/teacher/profile" 
+                className={`flex flex-col items-center justify-center p-1 rounded-lg text-[9px] font-bold transition-all ${
+                  isProfileActive 
+                    ? 'bg-white text-[#1B6B3A] shadow-xs' 
+                    : 'text-zinc-650 hover:text-zinc-900'
+                }`}
+                title="My Profile"
+              >
+                <UserCheck className="h-4 w-4" />
+                <span>Profile</span>
               </Link>
             </div>
           </div>

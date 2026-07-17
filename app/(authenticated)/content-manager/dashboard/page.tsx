@@ -15,7 +15,8 @@ import {
   Check, 
   AlertCircle,
   Calendar,
-  DollarSign
+  DollarSign,
+  User
 } from 'lucide-react'
 import GeometricPattern from '@/components/GeometricPattern'
 import BackToFounderBanner from '@/components/BackToFounderBanner'
@@ -224,12 +225,13 @@ export default function ContentManagerDashboard() {
     window.location.href = '/staff/login'
   }
 
-  const [activeTab, setActiveTab] = useState<'announcements' | 'courses' | 'fee-cards'>('announcements')
+  const [activeTab, setActiveTab] = useState<'announcements' | 'courses' | 'fee-cards' | 'profile-requests'>('announcements')
 
   // --- States ---
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [courses, setCourses] = useState<Course[]>([])
   const [feeCards, setFeeCards] = useState<FeeCard[]>([])
+  const [profileRequests, setProfileRequests] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -270,25 +272,51 @@ export default function ContentManagerDashboard() {
     }, 5000)
   }
 
+  // Handle Resolving Teacher Profile Change Request
+  const handleResolveProfileRequest = async (requestId: string, action: 'approve' | 'reject') => {
+    try {
+      const res = await fetch('/api/content-manager/profile-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId, action })
+      })
+
+      if (!res.ok) {
+        const errData = await res.json()
+        throw new Error(errData.error || 'Failed to resolve request')
+      }
+
+      triggerToast(`Teacher profile update request has been successfully ${action === 'approve' ? 'approved & updated' : 'rejected'}.`)
+      await fetchData()
+    } catch (err: any) {
+      alert(`Error: ${err.message}`)
+    }
+  }
+
   // --- Data Fetching ---
   const fetchData = async () => {
     try {
       setLoading(true)
       setError(null)
       
-      const [annRes, coursesRes, feeRes] = await Promise.all([
+      const [annRes, coursesRes, feeRes, reqRes] = await Promise.all([
         fetch('/api/content/announcements'),
         fetch('/api/content/courses'),
-        fetch('/api/content/fee-cards')
+        fetch('/api/content/fee-cards'),
+        fetch('/api/content-manager/profile-requests')
       ])
       
       if (!annRes.ok) throw new Error('Failed to fetch announcements')
       if (!coursesRes.ok) throw new Error('Failed to fetch courses')
       if (!feeRes.ok) throw new Error('Failed to fetch fee cards')
+      if (!reqRes.ok) throw new Error('Failed to fetch profile requests')
       
       const annData = await annRes.json()
       const coursesData = await coursesRes.json()
       const feeData = await feeRes.json()
+      const reqData = await reqRes.json()
+
+      setProfileRequests(reqData.requests || [])
       
       // Map Announcements (using home page 2026-06-30 fallback, or fallback to current time)
       const referenceDate = new Date('2026-06-30T12:00:00')
@@ -681,6 +709,26 @@ export default function ContentManagerDashboard() {
               <CreditCard className="h-4 w-4 shrink-0" />
               <span>Fee Cards Manager</span>
             </div>
+          </button>
+
+          {/* Profile Requests Tab link */}
+          <button 
+            onClick={() => setActiveTab('profile-requests')}
+            className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-bold font-sans transition-all duration-150 active:scale-[0.98] ${
+              activeTab === 'profile-requests' 
+                ? 'bg-[#1B6B3A] text-white shadow-xs' 
+                : 'text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <User className="h-4 w-4 shrink-0" />
+              <span>Profile Requests</span>
+            </div>
+            {profileRequests.length > 0 && (
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-500 text-white animate-pulse">
+                {profileRequests.length}
+              </span>
+            )}
           </button>
 
         </nav>
@@ -1386,6 +1434,131 @@ export default function ContentManagerDashboard() {
                 </div>
               </div>
             )}
+
+          {/* ========================================== */}
+          {/* TAB 4: PROFILE REQUESTS                    */}
+          {/* ========================================== */}
+          {activeTab === 'profile-requests' && (
+            <div className="space-y-6 max-w-5xl animate-fade-in">
+              
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-800">
+                  Teacher Profile Change Requests
+                </h3>
+                <p className="text-[11px] text-zinc-700 mt-0.5">
+                  Review and resolve pending updates submitted by teachers for the public faculty directory.
+                </p>
+              </div>
+
+              {profileRequests.length === 0 ? (
+                <div className="bg-white border border-zinc-200 rounded-3xl p-12 text-center max-w-2xl shadow-xs">
+                  <span className="block text-4xl mb-4">🎉</span>
+                  <h4 className="text-sm font-bold text-zinc-850">All caught up!</h4>
+                  <p className="text-xs text-zinc-550 mt-1">There are no pending profile change requests for review.</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {profileRequests.map(req => (
+                    <div 
+                      key={req.id} 
+                      className="bg-white border border-zinc-250 rounded-3xl p-6 shadow-sm space-y-4 hover:border-zinc-355 transition-all"
+                    >
+                      {/* Request Header */}
+                      <div className="flex justify-between items-center border-b border-zinc-150 pb-3">
+                        <div className="flex items-center gap-3">
+                          {req.new_avatar_url ? (
+                            <img 
+                              src={req.new_avatar_url} 
+                              alt="Avatar Requested" 
+                              className="w-10 h-10 rounded-full object-cover border border-zinc-200 shadow-xs"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-emerald-50 border border-[#1B6B3A]/20 flex items-center justify-center font-bold text-sm text-[#1B6B3A]">
+                              {req.profiles?.full_name ? req.profiles.full_name.split(' ').map((p: any) => p[0]).join('').substring(0, 2).toUpperCase() : 'T'}
+                            </div>
+                          )}
+                          <div>
+                            <h4 className="text-xs font-bold text-zinc-950">{req.profiles?.full_name || 'Unknown Teacher'}</h4>
+                            <span className="block text-[9px] text-zinc-500 font-mono">Submitted on {new Date(req.created_at).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleResolveProfileRequest(req.id, 'reject')}
+                            className="py-1.5 px-3 border border-rose-250 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[10px] font-bold rounded-lg transition-all active:scale-95"
+                          >
+                            Reject Edits
+                          </button>
+                          <button
+                            onClick={() => handleResolveProfileRequest(req.id, 'approve')}
+                            className="py-1.5 px-3 bg-[#1B6B3A] hover:bg-[#1B6B3A]/90 text-white text-[10px] font-bold rounded-lg transition-all active:scale-95 shadow-2xs"
+                          >
+                            Approve & Update
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Request Comparison Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        
+                        {/* Live Profile */}
+                        <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-4 space-y-3">
+                          <span className="block text-[8px] font-bold uppercase tracking-wider text-zinc-400">Current Live Profile</span>
+                          
+                          <div>
+                            <span className="font-bold text-zinc-650 block text-[10px]">Photo</span>
+                            {req.profiles?.avatar_url ? (
+                              <p className="text-[10px] text-zinc-505 truncate select-all">{req.profiles.avatar_url}</p>
+                            ) : (
+                              <p className="text-[10px] text-zinc-400 italic">No image URL configured</p>
+                            )}
+                          </div>
+
+                          <div className="pt-2 border-t border-zinc-200/60">
+                            <span className="font-bold text-zinc-650 block text-[10px]">Qualifications</span>
+                            <p className="text-zinc-600 italic leading-relaxed text-[11px] mt-0.5">{req.profiles?.education || 'Empty'}</p>
+                          </div>
+
+                          <div className="pt-2 border-t border-zinc-200/60">
+                            <span className="font-bold text-zinc-650 block text-[10px]">Biography</span>
+                            <p className="text-zinc-600 italic leading-relaxed text-[11px] mt-0.5">{req.profiles?.experience || 'Empty'}</p>
+                          </div>
+                        </div>
+
+                        {/* Proposed Edits */}
+                        <div className="bg-emerald-50/20 border border-emerald-200/30 rounded-2xl p-4 space-y-3">
+                          <span className="block text-[8px] font-bold uppercase tracking-wider text-[#1B6B3A]">Proposed Edits</span>
+                          
+                          <div>
+                            <span className="font-bold text-zinc-700 block text-[10px]">Photo</span>
+                            {req.new_avatar_url ? (
+                              <p className="text-[10px] text-zinc-800 font-semibold truncate select-all">{req.new_avatar_url}</p>
+                            ) : (
+                              <p className="text-[10px] text-zinc-400 italic">No change requested</p>
+                            )}
+                          </div>
+
+                          <div className="pt-2 border-t border-emerald-100">
+                            <span className="font-bold text-zinc-700 block text-[10px]">Qualifications</span>
+                            <p className="text-zinc-850 font-bold leading-relaxed text-[11px] mt-0.5">{req.new_education || 'Empty'}</p>
+                          </div>
+
+                          <div className="pt-2 border-t border-emerald-100">
+                            <span className="font-bold text-zinc-700 block text-[10px]">Biography</span>
+                            <p className="text-zinc-850 font-bold leading-relaxed text-[11px] mt-0.5">{req.new_experience || 'Empty'}</p>
+                          </div>
+                        </div>
+
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+              )}
+
+            </div>
+          )}
 
           </div>
         </div>
