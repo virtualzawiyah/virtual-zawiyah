@@ -242,7 +242,7 @@ export default function ContentManagerDashboard() {
   const [successToast, setSuccessToast] = useState<string | null>(null)
 
   // --- Modal Forms state ---
-  const [activeModal, setActiveModal] = useState<'create-announcement' | 'edit-announcement' | 'create-course' | 'edit-course' | 'edit-feecard' | 'confirm-remove-course' | null>(null)
+  const [activeModal, setActiveModal] = useState<'create-announcement' | 'edit-announcement' | 'create-course' | 'edit-course' | 'edit-feecard' | 'create-feecard' | 'confirm-remove-course' | null>(null)
 
   // Selected Entities
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null)
@@ -263,6 +263,8 @@ export default function ContentManagerDashboard() {
   const [courseCategory, setCourseCategory] = useState<'1:1' | 'Group'>('1:1')
 
   // --- Fee Card Form fields ---
+  const [feeTitle, setFeeTitle] = useState('')
+  const [feeCategory, setFeeCategory] = useState<'1:1' | 'Group'>('1:1')
   const [feePrice, setFeePrice] = useState('')
   const [feeFeatures, setFeeFeatures] = useState<string[]>([])
   const [newFeatureText, setNewFeatureText] = useState('')
@@ -314,6 +316,58 @@ export default function ContentManagerDashboard() {
       await fetchData()
     } catch (err: any) {
       alert(`Error: ${err.message}`)
+    }
+  }
+
+  // Handle Deleting Fee Card
+  const handleDeleteFeeCard = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this fee card? It will be removed from public pricing sheets.')) return
+    try {
+      const res = await fetch(`/api/content/fee-cards?id=${id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const errData = await res.json()
+        throw new Error(errData.error || 'Failed to delete fee card')
+      }
+      triggerToast('Fee card deleted successfully.')
+      await fetchData()
+    } catch (err: any) {
+      alert(`Error deleting fee card: ${err.message}`)
+    }
+  }
+
+  // Open Create Fee Card Modal
+  const openCreateFeeCard = () => {
+    setFeeTitle('')
+    setFeePrice('60')
+    setFeeCategory('1:1')
+    setFeeFeatures(['12 live sessions per month', 'Dedicated personal teacher', '30-minute focused session', 'Progress reports', 'Flexible scheduling'])
+    setNewFeatureText('')
+    setActiveModal('create-feecard')
+  }
+
+  // Handle Submitting New Fee Card
+  const handleCreateFeeCard = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const res = await fetch('/api/content/fee-cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: feeTitle,
+          program_type: feeCategory,
+          base_fee: feePrice,
+          features: feeFeatures
+        })
+      })
+      if (!res.ok) {
+        const errData = await res.json()
+        throw new Error(errData.error || 'Failed to create fee card')
+      }
+      triggerToast('New fee card created successfully!')
+      setActiveModal(null)
+      await fetchData()
+    } catch (err: any) {
+      alert(`Error creating fee card: ${err.message}`)
     }
   }
 
@@ -1097,13 +1151,23 @@ export default function ContentManagerDashboard() {
           {activeTab === 'fee-cards' && (
             <div className="space-y-6 max-w-5xl animate-fade-in">
               
-              <div>
-                <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-800">
-                  Public Landing Page Fee Cards
-                </h3>
-                <p className="text-[11px] text-zinc-700 mt-0.5">
-                  Directly customize the pricing tables and included course features displayed on the pricing structure sheets.
-                </p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-800">
+                    Public Landing Page Fee Cards
+                  </h3>
+                  <p className="text-[11px] text-zinc-700 mt-0.5">
+                    Directly customize the pricing tables, add new fee cards, or remove cards from the public pricing sheets.
+                  </p>
+                </div>
+                
+                <button
+                  onClick={openCreateFeeCard}
+                  className="py-2.5 px-4 bg-[#1B6B3A] hover:bg-[#1B6B3A]/90 text-white rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5 shadow-sm shrink-0 self-start sm:self-auto"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>+ Add New Fee Card</span>
+                </button>
               </div>
 
               {/* Cards Grid */}
@@ -1123,13 +1187,24 @@ export default function ContentManagerDashboard() {
                           <span className="block text-[10px] text-zinc-500 mt-0.5">Subscription Plan Structure</span>
                         </div>
                         
-                        <button
-                          onClick={() => openEditFeeCard(card)}
-                          className="py-1.5 px-3 border border-zinc-200 hover:bg-zinc-50 rounded-xl text-[10px] font-bold text-zinc-700 flex items-center gap-1.5 active:scale-95 transition-all shadow-2xs"
-                        >
-                          <Edit className="h-3 w-3" />
-                          <span>Configure Features</span>
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => openEditFeeCard(card)}
+                            className="py-1.5 px-3 border border-zinc-200 hover:bg-zinc-50 rounded-xl text-[10px] font-bold text-zinc-700 flex items-center gap-1.5 active:scale-95 transition-all shadow-2xs"
+                            title="Configure Features & Price"
+                          >
+                            <Edit className="h-3 w-3" />
+                            <span>Edit</span>
+                          </button>
+                          
+                          <button
+                            onClick={() => handleDeleteFeeCard(card.id)}
+                            className="p-1.5 border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-[10px] font-bold transition-all active:scale-95"
+                            title="Delete Fee Card"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
 
                       <div className="py-4 border-y border-zinc-100 flex items-baseline gap-1">
@@ -1666,6 +1741,115 @@ export default function ContentManagerDashboard() {
                     className="py-2 px-4 bg-[#1B6B3A] text-white hover:bg-[#1B6B3A]/90 font-bold rounded-xl text-xs active:scale-[0.98] transition-all shadow-xs"
                   >
                     Save Changes
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* --- Case 3.5: Create New Fee Card --- */}
+            {activeModal === 'create-feecard' && (
+              <form onSubmit={handleCreateFeeCard} className="space-y-4">
+                
+                {/* Course/Plan Title */}
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Fee Card Title / Syllabus</label>
+                  <input 
+                    type="text"
+                    required
+                    value={feeTitle}
+                    onChange={(e) => setFeeTitle(e.target.value)}
+                    placeholder="e.g. Applied Tajweed (Advanced)"
+                    className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-bold bg-white"
+                  />
+                </div>
+
+                {/* Category & Fee Price */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Program Category</label>
+                    <select
+                      value={feeCategory}
+                      onChange={(e) => setFeeCategory(e.target.value as '1:1' | 'Group')}
+                      className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-semibold bg-white"
+                    >
+                      <option value="1:1">1:1 Mentorship</option>
+                      <option value="Group">Structured Group</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Monthly Fee Rate ($)</label>
+                    <input 
+                      type="text"
+                      required
+                      value={feePrice}
+                      onChange={(e) => setFeePrice(e.target.value)}
+                      placeholder="60"
+                      className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-bold bg-zinc-50"
+                    />
+                  </div>
+                </div>
+
+                {/* Features List edit config */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">
+                    Included Course Features ({feeFeatures.length})
+                  </label>
+
+                  <div className="space-y-2 max-h-40 overflow-y-auto pr-1 border border-zinc-100 rounded-xl p-2 bg-zinc-50/50">
+                    {feeFeatures.map((feat, idx) => (
+                      <div key={idx} className="flex items-center gap-2 bg-white border border-zinc-200 p-2 rounded-xl text-xs">
+                        <span className="flex-1 text-zinc-850 font-medium font-sans leading-tight">{feat}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFeature(idx)}
+                          className="p-1 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors shrink-0"
+                          title="Remove line"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2 pt-1">
+                    <input 
+                      type="text"
+                      value={newFeatureText}
+                      onChange={(e) => setNewFeatureText(e.target.value)}
+                      placeholder="e.g. Flexible scheduling"
+                      className="flex-1 text-xs p-2 rounded-lg border border-zinc-300 focus:outline-none focus:ring-1 focus:ring-[#1B6B3A] text-zinc-800 placeholder-zinc-500 font-medium bg-white"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          handleAddFeature()
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddFeature}
+                      className="py-2 px-3 border border-zinc-300 bg-white hover:bg-zinc-50 text-[10px] font-bold text-zinc-850 rounded-lg active:scale-95 transition-all flex items-center gap-1.5"
+                    >
+                      <Plus className="h-3 w-3" />
+                      <span>Add</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100">
+                  <button
+                    type="button"
+                    onClick={() => setActiveModal(null)}
+                    className="py-2 px-4 border border-zinc-300 text-zinc-700 hover:bg-zinc-50 font-bold rounded-xl text-xs active:scale-95 transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="py-2 px-4 bg-[#1B6B3A] text-white hover:bg-[#1B6B3A]/90 font-bold rounded-xl text-xs active:scale-[0.98] transition-all shadow-xs"
+                  >
+                    Create Fee Card
                   </button>
                 </div>
               </form>

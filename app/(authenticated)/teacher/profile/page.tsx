@@ -12,7 +12,8 @@ import {
   Loader2, 
   AlertCircle,
   FileText,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Upload
 } from 'lucide-react'
 
 interface ProfileState {
@@ -225,20 +226,65 @@ export default function TeacherProfilePage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               
-              {/* Photo URL */}
-              <div className="space-y-1.5">
+              {/* Photo Upload & Preview */}
+              <div className="space-y-2">
                 <label className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider flex items-center gap-1.5">
-                  <ImageIcon className="w-3.5 h-3.5 text-zinc-400" /> Photo URL
+                  <Upload className="w-3.5 h-3.5 text-zinc-400" /> Upload Profile Picture File
                 </label>
-                <input
-                  type="url"
-                  placeholder="https://example.com/your-photo.jpg"
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  disabled={hasPendingRequest || isSubmitting}
-                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-zinc-200 bg-white placeholder-zinc-350 text-zinc-800 focus:outline-hidden focus:border-[#1B6B3A] transition-all"
-                />
-                <span className="block text-[9px] text-zinc-400 italic">Please paste a URL pointing to your professional headshot image.</span>
+                
+                <div className="flex flex-col sm:flex-row items-center gap-4 p-4 border-2 border-dashed border-zinc-200 hover:border-[#1B6B3A]/40 rounded-2xl bg-zinc-50/60 transition-colors">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="profile-file-input"
+                    disabled={hasPendingRequest || isSubmitting}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        if (file.size > 5 * 1024 * 1024) {
+                          alert('Image file size must be less than 5MB')
+                          return
+                        }
+                        const reader = new FileReader()
+                        reader.onloadend = () => {
+                          if (typeof reader.result === 'string') {
+                            setAvatarUrl(reader.result)
+                          }
+                        }
+                        reader.readAsDataURL(file)
+                      }
+                    }}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="profile-file-input"
+                    className={`cursor-pointer px-4 py-2.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded-xl text-xs font-bold text-zinc-800 shadow-xs flex items-center gap-2 transition-all ${
+                      hasPendingRequest || isSubmitting ? 'pointer-events-none opacity-50' : ''
+                    }`}
+                  >
+                    <Upload className="w-4 h-4 text-[#1B6B3A]" />
+                    <span>Choose Image File...</span>
+                  </label>
+                  <span className="text-[10px] text-zinc-500 font-medium">
+                    {avatarUrl && avatarUrl.startsWith('data:') 
+                      ? '✓ Image file loaded & preview ready' 
+                      : 'Upload PNG, JPG or WebP (Max 5MB)'}
+                  </span>
+                </div>
+
+                <details className="mt-2 text-[10px] text-zinc-500">
+                  <summary className="cursor-pointer font-semibold text-zinc-600 hover:text-[#1B6B3A] py-1">
+                    Or paste an image URL instead
+                  </summary>
+                  <input
+                    type="url"
+                    placeholder="https://example.com/your-photo.jpg"
+                    value={avatarUrl.startsWith('data:') ? '' : avatarUrl}
+                    onChange={(e) => setAvatarUrl(e.target.value)}
+                    disabled={hasPendingRequest || isSubmitting}
+                    className="w-full text-xs px-3.5 py-2 mt-1 rounded-xl border border-zinc-200 bg-white placeholder-zinc-350 text-zinc-800 focus:outline-hidden focus:border-[#1B6B3A] transition-all"
+                  />
+                </details>
               </div>
 
               {/* Education */}

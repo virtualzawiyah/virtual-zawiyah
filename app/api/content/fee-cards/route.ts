@@ -142,3 +142,99 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 })
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    const supabaseUserClient = createRouteHandlerClient({ cookies })
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    const authorized = await checkAuth(supabaseUserClient, supabaseAdmin)
+    if (!authorized) {
+      return NextResponse.json({ error: 'Forbidden: Insufficient privileges' }, { status: 403 })
+    }
+
+    const { title, program_type, base_fee, features } = await request.json()
+
+    if (!title || !base_fee) {
+      return NextResponse.json({ error: 'Missing required title or fee price' }, { status: 400 })
+    }
+
+    const cleanFee = Number(String(base_fee).replace('$', ''))
+    const programType = program_type || '1:1'
+
+    const { data: newCourse, error } = await supabaseAdmin
+      .from('courses')
+      .insert([{
+        title,
+        program_type: programType,
+        base_fee: cleanFee,
+        currency: 'USD',
+        active: true
+      }])
+      .select()
+      .single()
+
+    if (error) throw error
+
+    if (features && Array.isArray(features)) {
+      updateCourseMetadata(title, { features }, programType)
+    }
+
+    const meta = getCourseMetadata(newCourse.title, newCourse.program_type)
+
+    return NextResponse.json({
+      success: true,
+      feeCard: {
+        id: newCourse.id,
+        title: `${newCourse.title} (${newCourse.program_type})`,
+        price: `$${Number(newCourse.base_fee)}`,
+        base_fee: Number(newCourse.base_fee),
+        program_type: newCourse.program_type,
+        currency: newCourse.currency,
+        features: meta.features,
+        title_original: newCourse.title,
+        active: newCourse.active
+      }
+    })
+  } catch (err: any) {
+    console.error('Fee Cards POST error:', err)
+    return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const supabaseUserClient = createRouteHandlerClient({ cookies })
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    const authorized = await checkAuth(supabaseUserClient, supabaseAdmin)
+    if (!authorized) {
+      return NextResponse.json({ error: 'Forbidden: Insufficient privileges' }, { status: 403 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing fee card ID' }, { status: 400 })
+    }
+
+    const { error } = await supabaseAdmin
+      .from('courses')
+      .update({ active: false })
+      .eq('id', id)
+
+    if (error) throw error
+
+    return NextResponse.json({ success: true, message: 'Fee card deleted successfully' })
+  } catch (err: any) {
+    console.error('Fee Cards DELETE error:', err)
+    return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 })
+  }
+}

@@ -84,9 +84,17 @@ export async function GET(request: Request) {
       }
 
       // Check if student has class scheduled for today
-      const todaySched = (schedules || []).find(s => 
-        s.assignment_id === a.id && s.day_of_week === todayDayOfWeek
-      )
+      const studentSchedules = (schedules || []).filter(s => s.assignment_id === a.id)
+      const todaySched = studentSchedules.find(s => s.day_of_week === todayDayOfWeek)
+
+      const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      let schedule_text = 'Flexible Schedule (Mon–Sat)'
+
+      if (studentSchedules.length > 0) {
+        const days = studentSchedules.map(s => DAY_NAMES[s.day_of_week]).filter(Boolean).join(', ')
+        const time = studentSchedules[0].start_time ? studentSchedules[0].start_time.substring(0, 5) : ''
+        schedule_text = `${days}${time ? ` at ${time} (UTC+5)` : ''}`
+      }
 
       return {
         id: studentProfile.id,
@@ -96,7 +104,8 @@ export async function GET(request: Request) {
         courseName,
         assignment_id: a.id,
         scheduled_time: todaySched ? todaySched.start_time.substring(0, 5) : null,
-        duration_minutes: todaySched ? todaySched.duration_minutes : null
+        duration_minutes: todaySched ? todaySched.duration_minutes : null,
+        schedule_text
       }
     }).filter(Boolean)
 
