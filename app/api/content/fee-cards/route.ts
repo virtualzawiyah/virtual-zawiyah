@@ -159,7 +159,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden: Insufficient privileges' }, { status: 403 })
     }
 
-    const { title, program_type, base_fee, features } = await request.json()
+    const { title, program_type, base_fee, features, duration_months } = await request.json()
 
     if (!title || !base_fee) {
       return NextResponse.json({ error: 'Missing required title or fee price' }, { status: 400 })
@@ -175,6 +175,7 @@ export async function POST(request: Request) {
         program_type: programType,
         base_fee: cleanFee,
         currency: 'USD',
+        duration_months: duration_months ? Number(duration_months) : 12,
         active: true
       }])
       .select()
