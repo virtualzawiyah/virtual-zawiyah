@@ -5,6 +5,9 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { getCourseMetadata, updateCourseMetadata } from '@/lib/contentStore'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 async function checkAuth(supabaseUserClient: any, supabaseAdmin: any) {
   const { data: { session }, error: sessionError } = await supabaseUserClient.auth.getSession()
   if (sessionError || !session) {
@@ -34,14 +37,11 @@ export async function GET(request: Request) {
 
     const authorized = await checkAuth(supabaseUserClient, supabaseAdmin)
 
-    let query = supabaseAdmin.from('courses').select('*')
-
-    if (!authorized) {
-      // Public view: only show active courses
-      query = query.eq('active', true)
-    }
-
-    const { data: coursesData, error } = await query.order('created_at', { ascending: false })
+    const { data: coursesData, error } = await supabaseAdmin
+      .from('courses')
+      .select('*')
+      .eq('active', true)
+      .order('created_at', { ascending: false })
 
     if (error) throw error
 
@@ -217,13 +217,19 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Missing course ID' }, { status: 400 })
     }
 
-    // Soft delete: set active = false
+    // Hard delete course row
     const { error } = await supabaseAdmin
       .from('courses')
-      .update({ active: false })
+      .delete()
       .eq('id', id)
 
-    if (error) throw error
+    if (error) {
+      // Fallback to soft delete if foreign keys prevent hard delete
+      await supabaseAdmin
+        .from('courses')
+        .update({ active: false })
+        .eq('id', id)
+    }
 
     return NextResponse.json({ success: true })
   } catch (err: any) {

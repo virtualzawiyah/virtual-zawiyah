@@ -423,14 +423,16 @@ export default function ContentManagerDashboard() {
       })
       setAnnouncements(mappedAnnouncements)
       
-      // Map Courses
-      const mappedCourses = coursesData.map((c: any) => ({
-        id: c.id,
-        name: c.title,
-        description: c.description || '',
-        price: `$${Number(c.base_fee)}`,
-        category: c.program_type === 'group' ? 'Group' : '1:1'
-      }))
+      // Map Courses (filter active courses)
+      const mappedCourses = coursesData
+        .filter((c: any) => c.active !== false)
+        .map((c: any) => ({
+          id: c.id,
+          name: c.title,
+          description: c.description || '',
+          price: `$${Number(c.base_fee)}`,
+          category: c.program_type === 'group' ? 'Group' : '1:1'
+        }))
       setCourses(mappedCourses)
       
       // Map Fee Cards

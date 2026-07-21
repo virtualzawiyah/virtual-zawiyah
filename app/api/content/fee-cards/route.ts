@@ -5,6 +5,9 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { getCourseMetadata, updateCourseMetadata } from '@/lib/contentStore'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 async function checkAuth(supabaseUserClient: any, supabaseAdmin: any) {
   const { data: { session }, error: sessionError } = await supabaseUserClient.auth.getSession()
   if (sessionError || !session) {
@@ -227,10 +230,15 @@ export async function DELETE(request: Request) {
 
     const { error } = await supabaseAdmin
       .from('courses')
-      .update({ active: false })
+      .delete()
       .eq('id', id)
 
-    if (error) throw error
+    if (error) {
+      await supabaseAdmin
+        .from('courses')
+        .update({ active: false })
+        .eq('id', id)
+    }
 
     return NextResponse.json({ success: true, message: 'Fee card deleted successfully' })
   } catch (err: any) {
