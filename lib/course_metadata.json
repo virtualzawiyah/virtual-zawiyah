@@ -1,6 +1,6 @@
 {
   "quran reading with tajweed": {
-    "description": "Learn to read the Holy Quran correctly with proper Tajweed rules.",
+    "description": "Learn to read the Holy Quran correctly with proper Tajweed rules. Suitable for beginners and intermediate learners.",
     "features": [
       "12 live sessions per month",
       "Dedicated personal teacher",
@@ -9,9 +9,149 @@
       "Flexible scheduling"
     ],
     "icon": "📖",
-    "highlights": ["Makhaarij (articulation points)", "Rules of Noon Sakinah & Tanween"],
-    "duration": "30 min per session (3 days/week)",
+    "highlights": [
+      "Makhaarij (articulation points)",
+      "Rules of Noon Sakinah & Tanween",
+      "Rules of Madd",
+      "Practice with Quran passages"
+    ],
+    "duration": "30 / 60 min per session",
     "freeTrial": true
+  },
+  "applied tajweed (basic & advanced)": {
+    "description": "A focused course on mastering the foundational rules of Tajweed with practical application and recitation evaluation.",
+    "features": [
+      "12 live sessions per month",
+      "Dedicated personal teacher",
+      "30-minute focused session",
+      "Progress reports",
+      "Flexible scheduling"
+    ],
+    "icon": "🎯",
+    "highlights": [
+      "All Tajweed rules systematically",
+      "Audio feedback and correction",
+      "Practical recitation exercises",
+      "Recitation evaluation reports"
+    ],
+    "duration": "30 / 60 min per session",
+    "freeTrial": true
+  },
+  "quran memorization (hifz)": {
+    "description": "Embark on the noble journey of becoming a Hafiz or Hafizah with personalized memorization & daily revision techniques.",
+    "features": [
+      "12 live sessions per month",
+      "Dedicated personal teacher",
+      "30-minute focused session",
+      "Progress reports",
+      "Flexible scheduling"
+    ],
+    "icon": "🌙",
+    "highlights": [
+      "Personalized memorization plan",
+      "Daily revision (muraja'ah) sessions",
+      "Tajweed-accurate memorization",
+      "Progress tracking and reports"
+    ],
+    "duration": "30 / 60 min per session",
+    "freeTrial": true
+  },
+  "40 hadith memorization": {
+    "description": "Memorize Imam Nawawi's collection of 40 essential Hadiths — the prophetic traditions every Muslim should know.",
+    "features": [
+      "12 live sessions per month",
+      "Dedicated personal teacher",
+      "30-minute focused session",
+      "Progress reports",
+      "Flexible scheduling"
+    ],
+    "icon": "📜",
+    "highlights": [
+      "Full Arabic text memorization",
+      "Meaning and explanation of each Hadith",
+      "Chain of narration introduction",
+      "Regular revision"
+    ],
+    "duration": "30 / 60 min per session",
+    "freeTrial": true
+  },
+  "quran translation & tafseer": {
+    "description": "Understand the meaning of the Quran in English. Connect with the Quran's message, themes, and wisdom beyond recitation.",
+    "features": [
+      "12 live sessions per month",
+      "Dedicated personal teacher",
+      "30-minute focused session",
+      "Progress reports",
+      "Flexible scheduling"
+    ],
+    "icon": "🌐",
+    "highlights": [
+      "Word-for-word translation",
+      "Thematic understanding",
+      "Tafsir introduction",
+      "Contemporary application"
+    ],
+    "duration": "30 / 60 min per session",
+    "freeTrial": true
+  },
+  "arabic grammar (sarf & nahw)": {
+    "description": "Master classical Arabic grammar — the key that unlocks the Quran, Hadith, and classical Islamic scholarship.",
+    "features": [
+      "12 live sessions per month",
+      "Dedicated personal teacher",
+      "30-minute focused session",
+      "Progress reports",
+      "Flexible scheduling"
+    ],
+    "icon": "✍️",
+    "highlights": [
+      "Arabic word morphology (Sarf)",
+      "Arabic sentence structure (Nahw)",
+      "Classical text reading",
+      "Application to Quranic Arabic"
+    ],
+    "duration": "30 / 60 min per session",
+    "freeTrial": true
+  },
+  "dars-e-nizami — classical islamic curriculum": {
+    "description": "The complete 8-year classical Islamic scholarship curriculum. Subjects include Fiqh, Hadith, Tafsir, Aqeedah, and Mantiq.",
+    "features": [
+      "20 live sessions per month",
+      "Group sessions",
+      "120-minute session",
+      "Structured curriculum",
+      "Deeper coverage per session",
+      "Q&A time included"
+    ],
+    "icon": "🕌",
+    "highlights": [
+      "8-year structured curriculum",
+      "Fiqh, Hadith, Tafsir, Aqeedah",
+      "Mantiq, Balagha, and more",
+      "Select Year 1 to 8 at enrollment"
+    ],
+    "duration": "120 min per session (5 days/week)",
+    "freeTrial": false
+  },
+  "tajweed — 2-year structured group program": {
+    "description": "A comprehensive two-year group course covering all Tajweed rules from beginner to advanced level alongside peers.",
+    "features": [
+      "20 live sessions per month",
+      "Group sessions",
+      "120-minute session",
+      "Structured curriculum",
+      "Deeper coverage per session",
+      "Q&A time included"
+    ],
+    "icon": "✨",
+    "highlights": [
+      "Complete Tajweed rules over 2 years",
+      "Group recitation practice",
+      "Regular assessments",
+      "Certificate upon completion"
+    ],
+    "duration": "120 min per session (5 days/week)",
+    "freeTrial": false
   },
   "standard": {
     "description": "Standard 1:1 mentorship for steady, consistent progress.",

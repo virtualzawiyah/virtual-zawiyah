@@ -105,6 +105,8 @@ const ACADEMIC_COURSES = [
   }
 ]
 
+import { getCourseMetadata } from '@/lib/contentStore'
+
 export async function GET() {
   try {
     const supabaseAdmin = createClient(
@@ -129,16 +131,16 @@ export async function GET() {
     })
 
     if (dbAcademicCourses.length > 0) {
-      // Enrich database academic courses
+      // Enrich database academic courses using contentStore
       const enriched = dbAcademicCourses.map(c => {
-        const foundCatalog = ACADEMIC_COURSES.find(ac => ac.title.toLowerCase().includes(c.title.toLowerCase()))
+        const meta = getCourseMetadata(c.title, c.program_type)
         return {
           ...c,
-          icon: foundCatalog?.icon || '📖',
-          description: foundCatalog?.description || 'Comprehensive Islamic education course taught by qualified scholars.',
-          duration: foundCatalog?.duration || '30 / 60 min per session',
-          freeTrial: foundCatalog?.freeTrial !== undefined ? foundCatalog.freeTrial : true,
-          highlights: foundCatalog?.highlights || ["Qualified scholar instruction", "Flexible schedule & progress tracking"]
+          icon: meta.icon || '📖',
+          description: c.description || meta.description,
+          duration: meta.duration || '30 / 60 min per session',
+          freeTrial: meta.freeTrial !== undefined ? meta.freeTrial : true,
+          highlights: meta.highlights || []
         }
       })
       return NextResponse.json(enriched)
