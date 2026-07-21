@@ -273,6 +273,7 @@ export default function ContentManagerDashboard() {
   const [courseHighlights, setCourseHighlights] = useState<string[]>([])
   const [newHighlightText, setNewHighlightText] = useState('')
   const [draggedHighlightIdx, setDraggedHighlightIdx] = useState<number | null>(null)
+  const [courseIcon, setCourseIcon] = useState('📖')
 
   // --- Fee Card Form fields ---
   const [feeTitle, setFeeTitle] = useState('')
@@ -602,6 +603,7 @@ export default function ContentManagerDashboard() {
     setCourseCategory('1:1')
     setCourseHighlights(['Qualified scholar instruction', 'Flexible schedule & progress tracking', '3-Day Free Trial included'])
     setNewHighlightText('')
+    setCourseIcon('📖')
     setActiveModal('create-course')
   }
 
@@ -617,7 +619,8 @@ export default function ContentManagerDashboard() {
           base_fee: Number(coursePrice.replace('$', '')),
           program_type: courseCategory === 'Group' ? 'group' : '1:1',
           duration_months: 12,
-          highlights: courseHighlights
+          highlights: courseHighlights,
+          icon: courseIcon
         })
       })
       
@@ -642,6 +645,7 @@ export default function ContentManagerDashboard() {
     setCourseCategory(course.category)
     setCourseHighlights(course.highlights || [])
     setNewHighlightText('')
+    setCourseIcon(course.icon || '📖')
     setActiveModal('edit-course')
   }
 
@@ -659,7 +663,8 @@ export default function ContentManagerDashboard() {
           base_fee: Number(coursePrice.replace('$', '')),
           program_type: courseCategory === 'Group' ? 'group' : '1:1',
           duration_months: 12,
-          highlights: courseHighlights
+          highlights: courseHighlights,
+          icon: courseIcon
         })
       })
       
@@ -1764,6 +1769,27 @@ export default function ContentManagerDashboard() {
                     >
                       <option value="1:1">1:1 Private Course</option>
                       <option value="Group">Group Study Course</option>
+                    </select>
+                  </div>
+
+                  {/* Icon Selection */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Course Icon Emoji</label>
+                    <select
+                      value={courseIcon}
+                      onChange={(e) => setCourseIcon(e.target.value)}
+                      className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-medium bg-zinc-50"
+                    >
+                      <option value="📖">📖 Quran Reading</option>
+                      <option value="🎯">🎯 Tajweed Target</option>
+                      <option value="🌙">🌙 Quran Memorization (Hifz)</option>
+                      <option value="📜">📜 Hadith Scroll</option>
+                      <option value="🌐">🌐 Translation Globe</option>
+                      <option value="✍️">✍️ Arabic Grammar</option>
+                      <option value="🕌">🕌 Mosque / Classical</option>
+                      <option value="✨">✨ Sparkles / Tajweed Group</option>
+                      <option value="📚">📚 General Books</option>
+                      <option value="🎓">🎓 Graduation Cap</option>
                     </select>
                   </div>
 
