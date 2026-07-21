@@ -85,6 +85,30 @@ const GROUP_PLANS = [
 export default function EnrollmentPage() {
   const [activeTab, setActiveTab] = useState<'admission' | 'trial'>('admission')
   
+  // Dynamic API Loaded Courses & Fee Plans
+  const [dynamicCourses, setDynamicCourses] = useState<string[]>(COURSES)
+  const [dynamicFeePlans, setDynamicFeePlans] = useState<any[]>([])
+
+  useEffect(() => {
+    fetch('/api/public/courses')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setDynamicCourses(data.map((c: any) => c.title || c.name))
+        }
+      })
+      .catch(err => console.error('Error loading enrollment courses:', err))
+
+    fetch('/api/public/fee-cards')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setDynamicFeePlans(data)
+        }
+      })
+      .catch(err => console.error('Error loading enrollment fee cards:', err))
+  }, [])
+  
   // Shared Form Fields
   const [studentName, setStudentName] = useState('')
   const [parentEmail, setParentEmail] = useState('')
@@ -609,7 +633,7 @@ export default function EnrollmentPage() {
                     className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white outline-none h-10 focus:border-primary transition-all"
                   >
                     <option value="">Select a course</option>
-                    {COURSES.map(c => <option key={c} value={c}>{c}</option>)}
+                    {dynamicCourses.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
 
@@ -639,9 +663,17 @@ export default function EnrollmentPage() {
                       className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white outline-none h-10 focus:border-primary transition-all"
                     >
                       <option value="">Select a plan</option>
-                      {(classFormat === "One-on-One" ? ONE_ON_ONE_PLANS : GROUP_PLANS).map(p => (
-                        <option key={p.value} value={p.value}>{p.label}</option>
-                      ))}
+                      {dynamicFeePlans.length > 0 ? (
+                        dynamicFeePlans
+                          .filter((p: any) => classFormat === 'Group' ? p.program_type === 'group' : p.program_type !== 'group')
+                          .map((p: any) => (
+                            <option key={p.id} value={p.title}>{p.title_original || p.title} — ${p.base_fee || p.price}/month ({p.duration})</option>
+                          ))
+                      ) : (
+                        (classFormat === "One-on-One" ? ONE_ON_ONE_PLANS : GROUP_PLANS).map(p => (
+                          <option key={p.value} value={p.value}>{p.label}</option>
+                        ))
+                      )}
                     </select>
                   </div>
                 )}

@@ -27,6 +27,89 @@ async function checkAuth(supabaseUserClient: any, supabaseAdmin: any) {
   return true
 }
 
+const DEFAULT_ACADEMIC_COURSES = [
+  {
+    id: 'ac-1',
+    title: 'Quran Reading with Tajweed',
+    program_type: '1:1',
+    base_fee: 60,
+    currency: 'USD',
+    duration_months: 12,
+    active: true,
+    description: 'Learn to read the Holy Quran correctly with proper Tajweed rules. Suitable for beginners and intermediate learners.'
+  },
+  {
+    id: 'ac-2',
+    title: 'Applied Tajweed (Basic & Advanced)',
+    program_type: '1:1',
+    base_fee: 60,
+    currency: 'USD',
+    duration_months: 12,
+    active: true,
+    description: 'A focused course on mastering the foundational rules of Tajweed with practical application and recitation evaluation.'
+  },
+  {
+    id: 'ac-3',
+    title: 'Quran Memorization (Hifz)',
+    program_type: '1:1',
+    base_fee: 100,
+    currency: 'USD',
+    duration_months: 12,
+    active: true,
+    description: 'Embark on the noble journey of becoming a Hafiz or Hafizah with personalized memorization & daily revision techniques.'
+  },
+  {
+    id: 'ac-4',
+    title: '40 Hadith Memorization',
+    program_type: '1:1',
+    base_fee: 60,
+    currency: 'USD',
+    duration_months: 12,
+    active: true,
+    description: "Memorize Imam Nawawi's collection of 40 essential Hadiths — the prophetic traditions every Muslim should know."
+  },
+  {
+    id: 'ac-5',
+    title: 'Quran Translation & Tafseer',
+    program_type: '1:1',
+    base_fee: 60,
+    currency: 'USD',
+    duration_months: 12,
+    active: true,
+    description: "Understand the meaning of the Quran in English. Connect with the Quran's message, themes, and wisdom beyond recitation."
+  },
+  {
+    id: 'ac-6',
+    title: 'Arabic Grammar (Sarf & Nahw)',
+    program_type: '1:1',
+    base_fee: 60,
+    currency: 'USD',
+    duration_months: 12,
+    active: true,
+    description: 'Master classical Arabic grammar — the key that unlocks the Quran, Hadith, and classical Islamic scholarship.'
+  },
+  {
+    id: 'ac-7',
+    title: 'Dars-e-Nizami — Classical Islamic Curriculum',
+    program_type: 'group',
+    base_fee: 10,
+    currency: 'USD',
+    duration_months: 12,
+    active: true,
+    description: 'The complete 8-year classical Islamic scholarship curriculum. Subjects include Fiqh, Hadith, Tafsir, Aqeedah, and Mantiq.'
+  },
+  {
+    id: 'ac-8',
+    title: 'Tajweed — 2-Year Structured Group Program',
+    program_type: 'group',
+    base_fee: 10,
+    currency: 'USD',
+    duration_months: 12,
+    active: true,
+    description: 'A comprehensive two-year group course covering all Tajweed rules from beginner to advanced level alongside peers.'
+  }
+]
+
 export async function GET(request: Request) {
   try {
     const supabaseUserClient = createRouteHandlerClient({ cookies })
@@ -45,12 +128,20 @@ export async function GET(request: Request) {
 
     if (error) throw error
 
+    // Filter rows that are academic subjects vs fee cards
+    const academicRows = (coursesData || []).filter(c => {
+      const t = c.title.toLowerCase()
+      return t.includes('quran') || t.includes('tajweed') || t.includes('hadith') || t.includes('arabic') || t.includes('dars-e-nizami') || t.includes('memorization')
+    })
+
+    const finalCourses = academicRows.length > 0 ? academicRows : DEFAULT_ACADEMIC_COURSES
+
     // Enrich courses with metadata from contentStore
-    const enrichedCourses = (coursesData || []).map(course => {
+    const enrichedCourses = finalCourses.map(course => {
       const meta = getCourseMetadata(course.title, course.program_type)
       return {
         ...course,
-        description: meta.description,
+        description: course.description || meta.description,
         icon: meta.icon,
         highlights: meta.highlights,
         duration: meta.duration,
@@ -61,7 +152,7 @@ export async function GET(request: Request) {
     return NextResponse.json(enrichedCourses)
   } catch (err: any) {
     console.error('Courses GET error:', err)
-    return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json(DEFAULT_ACADEMIC_COURSES)
   }
 }
 
