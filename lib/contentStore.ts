@@ -173,58 +173,32 @@ export function getCourseMetadata(title: string, programType: string): CourseMet
     return metadata[key]
   }
   
-  const is60 = key.includes('60') || key.includes('hour') || key.includes('extended') || key.includes('immersion')
-  const is5Days = key.includes('5 day') || key.includes('5-day') || key.includes('daily') || key.includes('intensive')
-  const isWeekend = programType === 'weekend' || key.includes('weekend') || key.includes('sat')
-
-  let defaultFeatures: string[] = []
-  let defaultDuration = '30 min per session'
-
-  if (programType === 'group' || key.includes('group')) {
-    defaultDuration = '120 min · 5 days/week'
-    defaultFeatures = [
-      '20 live group sessions/month (5 days/week)',
-      '120-minute structured interactive class',
-      'Learn alongside peers with live Q&A',
-      'Comprehensive curriculum for all subjects',
-      'Certificate upon course completion'
-    ]
-  } else if (isWeekend) {
-    defaultDuration = is60 ? '60 min per session (Sat & Sun)' : '30 min per session (Sat & Sun)'
-    defaultFeatures = [
-      '8 dedicated 1:1 sessions/month (Sat & Sun)',
-      'Personal dedicated teacher (Male/Female)',
-      is60 ? '60-minute in-depth sessions' : '30-minute focused sessions',
-      'Learn any subject (Quran, Tajweed, Arabic, Hifz, Fiqh)',
-      'Tailored weekend routine & progress reports'
-    ]
-  } else if (is5Days) {
-    defaultDuration = is60 ? '60 min per session (5 days/week)' : '30 min per session (5 days/week)'
-    defaultFeatures = [
-      '20 live 1:1 sessions/month (5 days/week, Mon–Fri)',
-      'Personal dedicated teacher (Male/Female)',
-      is60 ? '60-minute daily comprehensive lessons' : '30-minute daily focused lessons',
-      'Learn any subject tailored to student goals',
-      'Accelerated progress & monthly report cards'
-    ]
-  } else {
-    defaultDuration = is60 ? '60 min per session (3 days/week)' : '30 min per session (3 days/week)'
-    defaultFeatures = [
-      '12 live 1:1 sessions/month (3 days/week)',
-      'Personal dedicated teacher (Male/Female)',
-      is60 ? '60-minute extended 1:1 sessions' : '30-minute focused 1:1 sessions',
-      'Learn any subject at your own pace',
-      '3-Day Free Trial & flexible scheduling'
-    ]
-  }
-
+  // Default fallback for dynamically added courses
   return {
-    description: 'Learn any subject of your choice under qualified guidance tailored for your personal pace.',
-    features: defaultFeatures,
-    icon: isWeekend ? '📅' : programType === 'group' ? '🕌' : '📖',
+    description: 'Learn and progress under professional guidance tailored for your needs.',
+    features: programType === '1:1' ? [
+      '12 live sessions per month',
+      'Dedicated personal teacher',
+      '30-minute focused session',
+      'Progress reports',
+      'Flexible scheduling'
+    ] : programType === 'weekend' ? [
+      '8 dedicated weekend sessions/month',
+      'Personal one-on-one teacher',
+      '30-minute focused session',
+      'Perfect for working adults & school students',
+      'Consistent weekend routine',
+      'Progress reports'
+    ] : [
+      '20 live sessions per month',
+      'Group sessions',
+      '120-minute session',
+      'Structured curriculum'
+    ],
+    icon: programType === '1:1' ? '📖' : programType === 'weekend' ? '📅' : '🕌',
     highlights: [],
-    duration: defaultDuration,
-    freeTrial: programType !== 'group'
+    duration: programType === '1:1' ? '30 / 60 / 90 min per session' : programType === 'weekend' ? '30 min' : '120 min · 5 days/week',
+    freeTrial: programType === '1:1' || programType === 'weekend'
   }
 }
 
