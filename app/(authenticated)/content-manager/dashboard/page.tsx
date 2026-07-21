@@ -1773,24 +1773,36 @@ export default function ContentManagerDashboard() {
                   </div>
 
                   {/* Icon Selection */}
-                  <div>
+                  <div className="col-span-2">
                     <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Course Icon Emoji</label>
-                    <select
-                      value={courseIcon}
-                      onChange={(e) => setCourseIcon(e.target.value)}
-                      className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-medium bg-zinc-50"
-                    >
-                      <option value="📖">📖 Quran Reading</option>
-                      <option value="🎯">🎯 Tajweed Target</option>
-                      <option value="🌙">🌙 Quran Memorization (Hifz)</option>
-                      <option value="📜">📜 Hadith Scroll</option>
-                      <option value="🌐">🌐 Translation Globe</option>
-                      <option value="✍️">✍️ Arabic Grammar</option>
-                      <option value="🕌">🕌 Mosque / Classical</option>
-                      <option value="✨">✨ Sparkles / Tajweed Group</option>
-                      <option value="📚">📚 General Books</option>
-                      <option value="🎓">🎓 Graduation Cap</option>
-                    </select>
+                    <div className="flex gap-2 items-center">
+                      <input 
+                        type="text"
+                        required
+                        maxLength={4}
+                        value={courseIcon}
+                        onChange={(e) => setCourseIcon(e.target.value)}
+                        placeholder="e.g. 📖"
+                        className="w-16 text-center text-lg p-2 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 bg-zinc-50 font-sans"
+                      />
+                      <div className="flex-1 flex flex-wrap gap-1.5 p-2 rounded-xl border border-dashed border-zinc-200 bg-zinc-50/50">
+                        {['📖', '🎯', '🌙', '📜', '🌐', '✍️', '🕌', '✨', '📚', '🎓', '⭐', '✏️', '🔑'].map((emoji) => (
+                          <button
+                            key={emoji}
+                            type="button"
+                            onClick={() => setCourseIcon(emoji)}
+                            className={`w-8 h-8 flex items-center justify-center rounded-lg border text-sm active:scale-90 transition-all ${
+                              courseIcon === emoji 
+                                ? 'bg-[#1B6B3A] text-white border-[#1B6B3A]' 
+                                : 'bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300'
+                            }`}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <span className="text-[9px] text-zinc-500 mt-1 block">Type or paste any custom emoji in the box, or click one of the quick presets.</span>
                   </div>
 
                   {/* Price */}
