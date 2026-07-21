@@ -8,23 +8,10 @@ import PublicNavbar from '@/components/PublicNavbar'
 import PublicFooter from '@/components/PublicFooter'
 import GeometricPattern from '@/components/GeometricPattern'
 
-const weekendPlan = {
-  price: 100,
-  duration: "30 min",
-  label: "Saturday & Sunday",
-  features: [
-    "8 dedicated weekend sessions/month",
-    "Personal one-on-one teacher",
-    "30-minute focused session",
-    "Perfect for working adults & school students",
-    "Consistent weekend routine",
-    "Progress reports",
-  ],
-}
-
 export default function PricingPage() {
   const [oneOnOnePlans, setOneOnOnePlans] = useState<any[]>([])
   const [groupPlans, setGroupPlans] = useState<any[]>([])
+  const [weekendPlans, setWeekendPlans] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -38,6 +25,7 @@ export default function PricingPage() {
         const oneOnOne = data
           .filter((fc: any) => fc.program_type === '1:1')
           .map((fc: any, idx: number) => ({
+            id: fc.id,
             duration: '30 min',
             label: fc.title_original || fc.title,
             price: fc.base_fee,
@@ -49,7 +37,18 @@ export default function PricingPage() {
         const group = data
           .filter((fc: any) => fc.program_type === 'group')
           .map((fc: any) => ({
+            id: fc.id,
             duration: '120 min',
+            label: fc.title_original || fc.title,
+            price: fc.base_fee,
+            features: fc.features || []
+          }))
+
+        const weekend = data
+          .filter((fc: any) => fc.program_type === 'weekend' || (fc.title_original && fc.title_original.toLowerCase().includes('weekend')))
+          .map((fc: any) => ({
+            id: fc.id,
+            duration: '30 min',
             label: fc.title_original || fc.title,
             price: fc.base_fee,
             features: fc.features || []
@@ -57,6 +56,7 @@ export default function PricingPage() {
 
         setOneOnOnePlans(oneOnOne)
         setGroupPlans(group)
+        setWeekendPlans(weekend)
       })
       .catch(err => {
         console.error('Error fetching fee cards:', err)
@@ -249,53 +249,59 @@ export default function PricingPage() {
       )}
 
       {/* Weekend Plan */}
-      <section className="py-24 bg-white relative z-10">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-14 animate-fade-in-up">
-            <div className="inline-flex items-center gap-2 mb-3 px-4 py-2 rounded-full bg-[#E8F5EE] border border-primary/10">
-              <Calendar className="w-4 h-4 text-primary" />
-              <span className="text-sm font-semibold text-primary">Weekend Classes</span>
-            </div>
-            <h2 className="font-serif font-bold text-3xl md:text-4xl text-gray-900">Dedicated Weekend Plan</h2>
-            <p className="mt-3 max-w-xl mx-auto text-base text-gray-650">
-              Perfect for students who can only attend on weekends — a consistent Saturday & Sunday routine at a dedicated rate.
-            </p>
-          </div>
-
-          <div
-            className="max-w-lg mx-auto rounded-2xl overflow-hidden shadow-xl border-2 animate-fade-in-up"
-            style={{ borderColor: "#C9A84C" }}
-          >
-            {/* Gold header bar */}
-            <div className="py-4 text-center font-bold text-xs uppercase tracking-widest bg-[#C9A84C] text-white">
-              Saturday & Sunday · One-on-One
-            </div>
-            <div className="p-10 bg-white">
-              <div className="text-center mb-8 border-b border-gray-150 pb-6">
-                <div className="flex items-end justify-center gap-1">
-                  <span className="font-serif font-bold text-primary" style={{ fontSize: "4.5rem", lineHeight: 1 }}>$100</span>
-                  <span className="text-base mb-2 text-gray-500">/month</span>
-                </div>
-                <p className="text-xs mt-2 text-gray-400 font-semibold">30 minutes per session</p>
+      {weekendPlans.length > 0 && (
+        <section className="py-24 bg-white relative z-10">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-14 animate-fade-in-up">
+              <div className="inline-flex items-center gap-2 mb-3 px-4 py-2 rounded-full bg-[#E8F5EE] border border-primary/10">
+                <Calendar className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold text-primary">Weekend Classes</span>
               </div>
-              <ul className="space-y-4 mb-8">
-                {weekendPlan.features.map((f, i) => (
-                  <li key={i} className="flex items-start gap-3 text-xs text-gray-700">
-                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
-                    <span>{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link 
-                href="/enrollment" 
-                className="w-full inline-flex items-center justify-center bg-primary hover:bg-primary/95 text-white font-semibold py-3.5 px-6 rounded-md shadow-md text-sm text-center"
-              >
-                Apply for Weekend Classes
-              </Link>
+              <h2 className="font-serif font-bold text-3xl md:text-4xl text-gray-900">
+                {weekendPlans[0].label || 'Dedicated Weekend Plan'}
+              </h2>
+              <p className="mt-3 max-w-xl mx-auto text-base text-gray-650">
+                Perfect for students who can only attend on weekends — a consistent Saturday & Sunday routine at a dedicated rate.
+              </p>
+            </div>
+
+            <div
+              className="max-w-lg mx-auto rounded-2xl overflow-hidden shadow-xl border-2 animate-fade-in-up"
+              style={{ borderColor: "#C9A84C" }}
+            >
+              {/* Gold header bar */}
+              <div className="py-4 text-center font-bold text-xs uppercase tracking-widest bg-[#C9A84C] text-white">
+                Saturday & Sunday · One-on-One
+              </div>
+              <div className="p-10 bg-white">
+                <div className="text-center mb-8 border-b border-gray-150 pb-6">
+                  <div className="flex items-end justify-center gap-1">
+                    <span className="font-serif font-bold text-primary" style={{ fontSize: "4.5rem", lineHeight: 1 }}>
+                      ${weekendPlans[0].price}
+                    </span>
+                    <span className="text-base mb-2 text-gray-500">/month</span>
+                  </div>
+                  <p className="text-xs mt-2 text-gray-400 font-semibold">30 minutes per session</p>
+                </div>
+                <ul className="space-y-4 mb-8">
+                  {weekendPlans[0].features.map((f: any, i: number) => (
+                    <li key={i} className="flex items-start gap-3 text-xs text-gray-700">
+                      <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link 
+                  href="/enrollment" 
+                  className="w-full inline-flex items-center justify-center bg-primary hover:bg-primary/95 text-white font-semibold py-3.5 px-6 rounded-md shadow-md text-sm text-center"
+                >
+                  Apply for Weekend Classes
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Notes & FAQ */}
       <section className="py-20 relative z-10" style={{ background: "#FAFAF7" }}>

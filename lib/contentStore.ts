@@ -128,6 +128,21 @@ const DEFAULT_METADATA: Record<string, CourseMetadata> = {
     highlights: ["Complete Tajweed rules over 2 years", "Group recitation practice", "Regular assessments", "Certificate upon completion"],
     duration: '120 min · 5 days/week',
     freeTrial: false
+  },
+  'dedicated weekend plan': {
+    description: 'Saturday & Sunday dedicated one-on-one sessions at a special rate.',
+    features: [
+      '8 dedicated weekend sessions/month',
+      'Personal one-on-one teacher',
+      '30-minute focused session',
+      'Perfect for working adults & school students',
+      'Consistent weekend routine',
+      'Progress reports'
+    ],
+    icon: '📅',
+    highlights: ["Saturday & Sunday classes", "Flexible scheduling", "Dedicated teacher"],
+    duration: '30 min',
+    freeTrial: true
   }
 }
 
@@ -167,16 +182,23 @@ export function getCourseMetadata(title: string, programType: string): CourseMet
       '30-minute focused session',
       'Progress reports',
       'Flexible scheduling'
+    ] : programType === 'weekend' ? [
+      '8 dedicated weekend sessions/month',
+      'Personal one-on-one teacher',
+      '30-minute focused session',
+      'Perfect for working adults & school students',
+      'Consistent weekend routine',
+      'Progress reports'
     ] : [
       '20 live sessions per month',
       'Group sessions',
       '120-minute session',
       'Structured curriculum'
     ],
-    icon: programType === '1:1' ? '📖' : '🕌',
+    icon: programType === '1:1' ? '📖' : programType === 'weekend' ? '📅' : '🕌',
     highlights: [],
-    duration: programType === '1:1' ? '30 / 60 / 90 min per session' : '120 min · 5 days/week',
-    freeTrial: programType === '1:1'
+    duration: programType === '1:1' ? '30 / 60 / 90 min per session' : programType === 'weekend' ? '30 min' : '120 min · 5 days/week',
+    freeTrial: programType === '1:1' || programType === 'weekend'
   }
 }
 

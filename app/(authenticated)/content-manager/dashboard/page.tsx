@@ -264,7 +264,7 @@ export default function ContentManagerDashboard() {
 
   // --- Fee Card Form fields ---
   const [feeTitle, setFeeTitle] = useState('')
-  const [feeCategory, setFeeCategory] = useState<'1:1' | 'Group'>('1:1')
+  const [feeCategory, setFeeCategory] = useState<'1:1' | 'Group' | 'Weekend'>('1:1')
   const [feePrice, setFeePrice] = useState('')
   const [feeFeatures, setFeeFeatures] = useState<string[]>([])
   const [newFeatureText, setNewFeatureText] = useState('')
@@ -349,12 +349,18 @@ export default function ContentManagerDashboard() {
   const handleCreateFeeCard = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      const mappedProgramType = feeCategory === 'Group' ? 'group' : '1:1'
+      let finalTitle = feeTitle
+      if (feeCategory === 'Weekend' && !finalTitle.toLowerCase().includes('weekend')) {
+        finalTitle = `${feeTitle} (Weekend)`
+      }
+
       const res = await fetch('/api/content/fee-cards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: feeTitle,
-          program_type: feeCategory,
+          title: finalTitle,
+          program_type: mappedProgramType,
           base_fee: feePrice,
           features: feeFeatures
         })
@@ -1771,11 +1777,12 @@ export default function ContentManagerDashboard() {
                     <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Program Category</label>
                     <select
                       value={feeCategory}
-                      onChange={(e) => setFeeCategory(e.target.value as '1:1' | 'Group')}
+                      onChange={(e) => setFeeCategory(e.target.value as '1:1' | 'Group' | 'Weekend')}
                       className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-semibold bg-white"
                     >
                       <option value="1:1">1:1 Mentorship</option>
                       <option value="Group">Structured Group</option>
+                      <option value="Weekend">Dedicated Weekend</option>
                     </select>
                   </div>
 
