@@ -271,8 +271,8 @@ export default function ContentManagerDashboard() {
 
   // --- Fee Card Form fields ---
   const [feeTitle, setFeeTitle] = useState('')
-  const [feeDuration, setFeeDuration] = useState('30-minute focused session')
-  const [feeCategory, setFeeCategory] = useState<'1:1' | 'Group' | 'Weekend'>('1:1')
+  const [feeDuration, setFeeDuration] = useState('30-minute focused session (3 days/week)')
+  const [feeCategory, setFeeCategory] = useState<'3days' | '5days' | 'weekend' | 'group'>('3days')
   const [feePrice, setFeePrice] = useState('')
   const [feeFeatures, setFeeFeatures] = useState<string[]>([])
   const [newFeatureText, setNewFeatureText] = useState('')
@@ -347,9 +347,9 @@ export default function ContentManagerDashboard() {
   // Open Create Fee Card Modal
   const openCreateFeeCard = () => {
     setFeeTitle('')
-    setFeeDuration('30-minute focused session')
+    setFeeDuration('30-minute focused session (3 days/week)')
     setFeePrice('60')
-    setFeeCategory('1:1')
+    setFeeCategory('3days')
     setFeeFeatures(['12 live sessions per month', 'Dedicated personal teacher', '30-minute focused session', 'Progress reports', 'Flexible scheduling'])
     setNewFeatureText('')
     setActiveModal('create-feecard')
@@ -359,10 +359,12 @@ export default function ContentManagerDashboard() {
   const handleCreateFeeCard = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const mappedProgramType = feeCategory === 'Group' ? 'group' : '1:1'
+      const mappedProgramType = feeCategory === 'group' ? 'group' : '1:1'
       let finalTitle = feeTitle
-      if (feeCategory === 'Weekend' && !finalTitle.toLowerCase().includes('weekend')) {
+      if (feeCategory === 'weekend' && !finalTitle.toLowerCase().includes('weekend')) {
         finalTitle = `${feeTitle} (Weekend)`
+      } else if (feeCategory === '5days' && !finalTitle.toLowerCase().includes('5 days') && !finalTitle.toLowerCase().includes('intensive')) {
+        finalTitle = `${feeTitle} (5 Days/Week)`
       }
 
       const res = await fetch('/api/content/fee-cards', {
@@ -694,7 +696,17 @@ export default function ContentManagerDashboard() {
     setFeeTitle(card.title_original || card.title || '')
     setFeePrice(card.price ? String(card.price).replace('$', '') : '')
     setFeeDuration(card.duration || '30-minute focused session')
-    setFeeCategory(card.program_type === 'weekend' ? 'Weekend' : card.program_type === 'group' ? 'Group' : '1:1')
+    
+    let cat: '3days' | '5days' | 'weekend' | 'group' = '3days'
+    const titleLower = (card.title_original || card.title || '').toLowerCase()
+    if (card.program_type === 'group') {
+      cat = 'group'
+    } else if (card.program_type === 'weekend' || titleLower.includes('weekend')) {
+      cat = 'weekend'
+    } else if (titleLower.includes('5 days') || titleLower.includes('intensive') || titleLower.includes('20 sessions')) {
+      cat = '5days'
+    }
+    setFeeCategory(cat)
     setFeeFeatures([...card.features])
     setNewFeatureText('')
     setActiveModal('edit-feecard')
@@ -1748,6 +1760,27 @@ export default function ContentManagerDashboard() {
                 {/* 2. Class Duration & 3. Monthly Fee */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Package Schedule Track</label>
+                    <select
+                      value={feeCategory}
+                      onChange={(e) => {
+                        const val = e.target.value as '3days' | '5days' | 'weekend' | 'group'
+                        setFeeCategory(val)
+                        if (val === '3days') setFeeDuration('30-minute focused session (3 days/week)')
+                        else if (val === '5days') setFeeDuration('30-minute focused session (5 days/week)')
+                        else if (val === 'weekend') setFeeDuration('30-minute focused session (Sat & Sun)')
+                        else if (val === 'group') setFeeDuration('120-minute session (5 days/week)')
+                      }}
+                      className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-semibold bg-white"
+                    >
+                      <option value="3days">3 Days / Week (1:1)</option>
+                      <option value="5days">5 Days / Week (1:1 Intensive)</option>
+                      <option value="weekend">Weekend (Sat & Sun)</option>
+                      <option value="group">Group Program (5 Days / Week)</option>
+                    </select>
+                  </div>
+
+                  <div>
                     <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">2. Class Duration</label>
                     <input 
                       type="text"
@@ -1758,20 +1791,21 @@ export default function ContentManagerDashboard() {
                       className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-semibold bg-white"
                     />
                   </div>
+                </div>
 
-                  <div>
-                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">3. Monthly Fee Rate (USD)</label>
-                    <div className="relative">
-                      <span className="absolute left-2.5 top-3 text-xs text-zinc-800 font-bold font-mono">$</span>
-                      <input 
-                        type="text"
-                        required
-                        value={feePrice.replace('$', '')}
-                        onChange={(e) => setFeePrice(`$${e.target.value}`)}
-                        placeholder="60"
-                        className="w-full text-xs p-2.5 pl-7 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-bold bg-zinc-50"
-                      />
-                    </div>
+                {/* 3. Monthly Fee Rate */}
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">3. Monthly Fee Rate (USD)</label>
+                  <div className="relative">
+                    <span className="absolute left-2.5 top-3 text-xs text-zinc-800 font-bold font-mono">$</span>
+                    <input 
+                      type="text"
+                      required
+                      value={feePrice.replace('$', '')}
+                      onChange={(e) => setFeePrice(`$${e.target.value}`)}
+                      placeholder="60"
+                      className="w-full text-xs p-2.5 pl-7 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-bold bg-zinc-50"
+                    />
                   </div>
                 </div>
 
@@ -1902,47 +1936,55 @@ export default function ContentManagerDashboard() {
                   />
                 </div>
 
-                {/* 2. Class Duration */}
-                <div>
-                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">2. Class Duration</label>
-                  <input 
-                    type="text"
-                    required
-                    value={feeDuration}
-                    onChange={(e) => setFeeDuration(e.target.value)}
-                    placeholder="e.g. 30-minute focused session"
-                    className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-semibold bg-white"
-                  />
-                </div>
-
-                {/* Program Category & 3. Monthly Fee Rate */}
+                {/* Program Schedule Track & 2. Class Duration */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Program Category</label>
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Package Schedule Track</label>
                     <select
                       value={feeCategory}
-                      onChange={(e) => setFeeCategory(e.target.value as '1:1' | 'Group' | 'Weekend')}
+                      onChange={(e) => {
+                        const val = e.target.value as '3days' | '5days' | 'weekend' | 'group'
+                        setFeeCategory(val)
+                        if (val === '3days') setFeeDuration('30-minute focused session (3 days/week)')
+                        else if (val === '5days') setFeeDuration('30-minute focused session (5 days/week)')
+                        else if (val === 'weekend') setFeeDuration('30-minute focused session (Sat & Sun)')
+                        else if (val === 'group') setFeeDuration('120-minute session (5 days/week)')
+                      }}
                       className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-semibold bg-white"
                     >
-                      <option value="1:1">1:1 Mentorship</option>
-                      <option value="Group">Structured Group</option>
-                      <option value="Weekend">Dedicated Weekend</option>
+                      <option value="3days">3 Days / Week (1:1)</option>
+                      <option value="5days">5 Days / Week (1:1 Intensive)</option>
+                      <option value="weekend">Weekend (Sat & Sun)</option>
+                      <option value="group">Group Program (5 Days / Week)</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">3. Monthly Fee Rate (USD)</label>
-                    <div className="relative">
-                      <span className="absolute left-2.5 top-3 text-xs text-zinc-800 font-bold font-mono">$</span>
-                      <input 
-                        type="text"
-                        required
-                        value={feePrice}
-                        onChange={(e) => setFeePrice(e.target.value)}
-                        placeholder="60"
-                        className="w-full text-xs p-2.5 pl-7 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-bold bg-zinc-50"
-                      />
-                    </div>
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">2. Class Duration</label>
+                    <input 
+                      type="text"
+                      required
+                      value={feeDuration}
+                      onChange={(e) => setFeeDuration(e.target.value)}
+                      placeholder="e.g. 30-minute focused session"
+                      className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-semibold bg-white"
+                    />
+                  </div>
+                </div>
+
+                {/* 3. Monthly Fee Rate */}
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">3. Monthly Fee Rate (USD)</label>
+                  <div className="relative">
+                    <span className="absolute left-2.5 top-3 text-xs text-zinc-800 font-bold font-mono">$</span>
+                    <input 
+                      type="text"
+                      required
+                      value={feePrice}
+                      onChange={(e) => setFeePrice(e.target.value)}
+                      placeholder="60"
+                      className="w-full text-xs p-2.5 pl-7 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-bold bg-zinc-50"
+                    />
                   </div>
                 </div>
 
