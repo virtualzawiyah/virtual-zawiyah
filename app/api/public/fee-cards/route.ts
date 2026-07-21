@@ -33,6 +33,7 @@ export async function GET() {
         base_fee: Number(course.base_fee),
         program_type: course.program_type,
         currency: course.currency,
+        duration: meta.duration,
         features: meta.features,
         title_original: course.title,
         active: course.active

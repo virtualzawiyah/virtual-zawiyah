@@ -26,7 +26,7 @@ export default function PricingPage() {
           .filter((fc: any) => fc.program_type === '1:1')
           .map((fc: any, idx: number) => ({
             id: fc.id,
-            duration: '30 min',
+            duration: fc.duration || '30 min',
             label: fc.title_original || fc.title,
             price: fc.base_fee,
             perLesson: Math.round(Number(fc.base_fee) / 12),
@@ -38,7 +38,7 @@ export default function PricingPage() {
           .filter((fc: any) => fc.program_type === 'group')
           .map((fc: any) => ({
             id: fc.id,
-            duration: '120 min',
+            duration: fc.duration || '120 min',
             label: fc.title_original || fc.title,
             price: fc.base_fee,
             features: fc.features || []
@@ -48,7 +48,7 @@ export default function PricingPage() {
           .filter((fc: any) => fc.program_type === 'weekend' || (fc.title_original && fc.title_original.toLowerCase().includes('weekend')))
           .map((fc: any) => ({
             id: fc.id,
-            duration: '30 min',
+            duration: fc.duration || '30 min',
             label: fc.title_original || fc.title,
             price: fc.base_fee,
             features: fc.features || []

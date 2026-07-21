@@ -18,7 +18,10 @@ import {
   DollarSign,
   User,
   MessageSquare,
-  Star
+  Star,
+  ChevronUp,
+  ChevronDown,
+  GripVertical
 } from 'lucide-react'
 import GeometricPattern from '@/components/GeometricPattern'
 import BackToFounderBanner from '@/components/BackToFounderBanner'
@@ -46,7 +49,11 @@ interface Course {
 interface FeeCard {
   id: string
   title: string
+  title_original?: string
   price: string
+  base_fee?: number
+  program_type?: string
+  duration?: string
   features: string[]
 }
 
@@ -264,10 +271,12 @@ export default function ContentManagerDashboard() {
 
   // --- Fee Card Form fields ---
   const [feeTitle, setFeeTitle] = useState('')
+  const [feeDuration, setFeeDuration] = useState('30-minute focused session')
   const [feeCategory, setFeeCategory] = useState<'1:1' | 'Group' | 'Weekend'>('1:1')
   const [feePrice, setFeePrice] = useState('')
   const [feeFeatures, setFeeFeatures] = useState<string[]>([])
   const [newFeatureText, setNewFeatureText] = useState('')
+  const [draggedFeatureIdx, setDraggedFeatureIdx] = useState<number | null>(null)
 
   // Toast helper
   const triggerToast = (msg: string) => {
@@ -338,6 +347,7 @@ export default function ContentManagerDashboard() {
   // Open Create Fee Card Modal
   const openCreateFeeCard = () => {
     setFeeTitle('')
+    setFeeDuration('30-minute focused session')
     setFeePrice('60')
     setFeeCategory('1:1')
     setFeeFeatures(['12 live sessions per month', 'Dedicated personal teacher', '30-minute focused session', 'Progress reports', 'Flexible scheduling'])
@@ -362,6 +372,7 @@ export default function ContentManagerDashboard() {
           title: finalTitle,
           program_type: mappedProgramType,
           base_fee: feePrice,
+          duration: feeDuration,
           features: feeFeatures
         })
       })
@@ -445,7 +456,11 @@ export default function ContentManagerDashboard() {
       const mappedFeeCards = feeData.map((fc: any) => ({
         id: fc.id,
         title: fc.title,
+        title_original: fc.title_original,
         price: fc.price,
+        base_fee: fc.base_fee,
+        program_type: fc.program_type,
+        duration: fc.duration || '30-minute focused session',
         features: fc.features || []
       }))
       setFeeCards(mappedFeeCards)
@@ -676,7 +691,10 @@ export default function ContentManagerDashboard() {
   // --- Action Handlers: Fee Cards ---
   const openEditFeeCard = (card: FeeCard) => {
     setSelectedFeeCard(card)
-    setFeePrice(card.price)
+    setFeeTitle(card.title_original || card.title || '')
+    setFeePrice(card.price ? String(card.price).replace('$', '') : '')
+    setFeeDuration(card.duration || '30-minute focused session')
+    setFeeCategory(card.program_type === 'weekend' ? 'Weekend' : card.program_type === 'group' ? 'Group' : '1:1')
     setFeeFeatures([...card.features])
     setNewFeatureText('')
     setActiveModal('edit-feecard')
@@ -692,6 +710,50 @@ export default function ContentManagerDashboard() {
     setFeeFeatures(feeFeatures.filter((_, idx) => idx !== index))
   }
 
+  const handleMoveFeatureUp = (index: number) => {
+    if (index <= 0) return
+    setFeeFeatures(prev => {
+      const updated = [...prev]
+      const temp = updated[index]
+      updated[index] = updated[index - 1]
+      updated[index - 1] = temp
+      return updated
+    })
+  }
+
+  const handleMoveFeatureDown = (index: number) => {
+    setFeeFeatures(prev => {
+      if (index >= prev.length - 1) return prev
+      const updated = [...prev]
+      const temp = updated[index]
+      updated[index] = updated[index + 1]
+      updated[index + 1] = temp
+      return updated
+    })
+  }
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedFeatureIdx(index)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault()
+    if (draggedFeatureIdx === null || draggedFeatureIdx === targetIndex) return
+    setFeeFeatures(prev => {
+      const updated = [...prev]
+      const [movedItem] = updated.splice(draggedFeatureIdx, 1)
+      updated.splice(targetIndex, 0, movedItem)
+      return updated
+    })
+    setDraggedFeatureIdx(null)
+  }
+
   const handleSaveFeeCard = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedFeeCard) return
@@ -701,7 +763,9 @@ export default function ContentManagerDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: selectedFeeCard.id,
+          title: feeTitle,
           base_fee: Number(feePrice.replace('$', '')),
+          duration: feeDuration,
           features: feeFeatures
         })
       })
@@ -1668,37 +1732,104 @@ export default function ContentManagerDashboard() {
             {activeModal === 'edit-feecard' && (
               <form onSubmit={handleSaveFeeCard} className="space-y-4">
                 
-                {/* Price configuration */}
+                {/* 1. Card Title */}
                 <div>
-                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Pricing Structure Rate</label>
-                  <div className="relative">
-                    <span className="absolute left-2.5 top-3 text-xs text-zinc-800 font-bold font-mono">$</span>
+                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">1. Card Title</label>
+                  <input 
+                    type="text"
+                    required
+                    value={feeTitle}
+                    onChange={(e) => setFeeTitle(e.target.value)}
+                    placeholder="e.g. Applied Tajweed (Advanced)"
+                    className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-bold bg-white"
+                  />
+                </div>
+
+                {/* 2. Class Duration & 3. Monthly Fee */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">2. Class Duration</label>
                     <input 
                       type="text"
                       required
-                      value={feePrice.replace('$', '')}
-                      onChange={(e) => setFeePrice(`$${e.target.value}`)}
-                      placeholder="60"
-                      className="w-full text-xs p-2.5 pl-7 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-bold bg-zinc-50"
+                      value={feeDuration}
+                      onChange={(e) => setFeeDuration(e.target.value)}
+                      placeholder="e.g. 30-minute focused session"
+                      className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-semibold bg-white"
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">3. Monthly Fee Rate (USD)</label>
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-3 text-xs text-zinc-800 font-bold font-mono">$</span>
+                      <input 
+                        type="text"
+                        required
+                        value={feePrice.replace('$', '')}
+                        onChange={(e) => setFeePrice(`$${e.target.value}`)}
+                        placeholder="60"
+                        className="w-full text-xs p-2.5 pl-7 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-bold bg-zinc-50"
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* Features List edit config */}
+                {/* 4. Package Features List with Reordering */}
                 <div className="space-y-2">
-                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">
-                    Feature Inclusions ({feeFeatures.length})
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider">
+                      4. Package Features ({feeFeatures.length})
+                    </label>
+                    <span className="text-[10px] text-zinc-650 font-medium">Use ▲/▼ or drag handle to reorder</span>
+                  </div>
 
                   {/* Feature Rows */}
-                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1 border border-zinc-100 rounded-xl p-2 bg-zinc-50/50">
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1 border border-zinc-200 rounded-xl p-2 bg-zinc-50/50">
                     {feeFeatures.map((feat, idx) => (
-                      <div key={idx} className="flex items-center gap-2 bg-white border border-zinc-200 p-2 rounded-xl text-xs">
-                        <span className="flex-1 text-zinc-850 font-medium font-sans leading-tight">{feat}</span>
+                      <div 
+                        key={idx} 
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, idx)}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, idx)}
+                        className={`flex items-center gap-1.5 bg-white border border-zinc-200 p-2 rounded-xl text-xs transition-all ${draggedFeatureIdx === idx ? 'opacity-40 bg-zinc-100 border-dashed border-zinc-400' : 'hover:border-zinc-300 shadow-2xs'}`}
+                      >
+                        {/* Drag handle */}
+                        <div className="cursor-grab active:cursor-grabbing text-zinc-400 hover:text-zinc-600 p-0.5 shrink-0" title="Drag to reorder">
+                          <GripVertical className="h-4 w-4" />
+                        </div>
+
+                        {/* Feature Text */}
+                        <span className="flex-1 text-zinc-850 font-medium font-sans leading-tight select-none">{feat}</span>
+
+                        {/* Up Button */}
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => handleMoveFeatureUp(idx)}
+                          className="p-1 hover:bg-zinc-100 text-zinc-600 disabled:opacity-20 disabled:hover:bg-transparent rounded-md transition-colors shrink-0"
+                          title="Move Up"
+                        >
+                          <ChevronUp className="h-3.5 w-3.5" />
+                        </button>
+
+                        {/* Down Button */}
+                        <button
+                          type="button"
+                          disabled={idx === feeFeatures.length - 1}
+                          onClick={() => handleMoveFeatureDown(idx)}
+                          className="p-1 hover:bg-zinc-100 text-zinc-600 disabled:opacity-20 disabled:hover:bg-transparent rounded-md transition-colors shrink-0"
+                          title="Move Down"
+                        >
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        </button>
+
+                        {/* Remove Button */}
                         <button
                           type="button"
                           onClick={() => handleRemoveFeature(idx)}
-                          className="p-1 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors shrink-0"
+                          className="p-1 hover:bg-rose-50 text-rose-600 rounded-md transition-colors shrink-0 ml-0.5"
                           title="Remove line"
                         >
                           <X className="h-3.5 w-3.5" />
@@ -1731,7 +1862,7 @@ export default function ContentManagerDashboard() {
                       className="py-2 px-3 border border-zinc-300 bg-white hover:bg-zinc-50 text-[10px] font-bold text-zinc-850 rounded-lg active:scale-95 transition-all flex items-center gap-1.5"
                     >
                       <Plus className="h-3 w-3" />
-                      <span>Add</span>
+                      <span>Add Feature</span>
                     </button>
                   </div>
                 </div>
@@ -1758,9 +1889,9 @@ export default function ContentManagerDashboard() {
             {activeModal === 'create-feecard' && (
               <form onSubmit={handleCreateFeeCard} className="space-y-4">
                 
-                {/* Course/Plan Title */}
+                {/* 1. Card Title */}
                 <div>
-                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Fee Card Title / Syllabus</label>
+                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">1. Card Title</label>
                   <input 
                     type="text"
                     required
@@ -1771,7 +1902,20 @@ export default function ContentManagerDashboard() {
                   />
                 </div>
 
-                {/* Category & Fee Price */}
+                {/* 2. Class Duration */}
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">2. Class Duration</label>
+                  <input 
+                    type="text"
+                    required
+                    value={feeDuration}
+                    onChange={(e) => setFeeDuration(e.target.value)}
+                    placeholder="e.g. 30-minute focused session"
+                    className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-semibold bg-white"
+                  />
+                </div>
+
+                {/* Program Category & 3. Monthly Fee Rate */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Program Category</label>
@@ -1787,38 +1931,84 @@ export default function ContentManagerDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Monthly Fee Rate ($)</label>
-                    <input 
-                      type="text"
-                      required
-                      value={feePrice}
-                      onChange={(e) => setFeePrice(e.target.value)}
-                      placeholder="60"
-                      className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-bold bg-zinc-50"
-                    />
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">3. Monthly Fee Rate (USD)</label>
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-3 text-xs text-zinc-800 font-bold font-mono">$</span>
+                      <input 
+                        type="text"
+                        required
+                        value={feePrice}
+                        onChange={(e) => setFeePrice(e.target.value)}
+                        placeholder="60"
+                        className="w-full text-xs p-2.5 pl-7 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-bold bg-zinc-50"
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* Features List edit config */}
+                {/* 4. Package Features List with Reordering */}
                 <div className="space-y-2">
-                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">
-                    Included Course Features ({feeFeatures.length})
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider">
+                      4. Package Features ({feeFeatures.length})
+                    </label>
+                    <span className="text-[10px] text-zinc-650 font-medium">Use ▲/▼ or drag handle to reorder</span>
+                  </div>
 
-                  <div className="space-y-2 max-h-40 overflow-y-auto pr-1 border border-zinc-100 rounded-xl p-2 bg-zinc-50/50">
+                  <div className="space-y-2 max-h-40 overflow-y-auto pr-1 border border-zinc-200 rounded-xl p-2 bg-zinc-50/50">
                     {feeFeatures.map((feat, idx) => (
-                      <div key={idx} className="flex items-center gap-2 bg-white border border-zinc-200 p-2 rounded-xl text-xs">
-                        <span className="flex-1 text-zinc-850 font-medium font-sans leading-tight">{feat}</span>
+                      <div 
+                        key={idx} 
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, idx)}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, idx)}
+                        className={`flex items-center gap-1.5 bg-white border border-zinc-200 p-2 rounded-xl text-xs transition-all ${draggedFeatureIdx === idx ? 'opacity-40 bg-zinc-100 border-dashed border-zinc-400' : 'hover:border-zinc-300 shadow-2xs'}`}
+                      >
+                        {/* Drag handle */}
+                        <div className="cursor-grab active:cursor-grabbing text-zinc-400 hover:text-zinc-600 p-0.5 shrink-0" title="Drag to reorder">
+                          <GripVertical className="h-4 w-4" />
+                        </div>
+
+                        {/* Feature Text */}
+                        <span className="flex-1 text-zinc-850 font-medium font-sans leading-tight select-none">{feat}</span>
+
+                        {/* Up Button */}
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => handleMoveFeatureUp(idx)}
+                          className="p-1 hover:bg-zinc-100 text-zinc-600 disabled:opacity-20 disabled:hover:bg-transparent rounded-md transition-colors shrink-0"
+                          title="Move Up"
+                        >
+                          <ChevronUp className="h-3.5 w-3.5" />
+                        </button>
+
+                        {/* Down Button */}
+                        <button
+                          type="button"
+                          disabled={idx === feeFeatures.length - 1}
+                          onClick={() => handleMoveFeatureDown(idx)}
+                          className="p-1 hover:bg-zinc-100 text-zinc-600 disabled:opacity-20 disabled:hover:bg-transparent rounded-md transition-colors shrink-0"
+                          title="Move Down"
+                        >
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        </button>
+
+                        {/* Remove Button */}
                         <button
                           type="button"
                           onClick={() => handleRemoveFeature(idx)}
-                          className="p-1 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors shrink-0"
+                          className="p-1 hover:bg-rose-50 text-rose-600 rounded-md transition-colors shrink-0 ml-0.5"
                           title="Remove line"
                         >
                           <X className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     ))}
+                    {feeFeatures.length === 0 && (
+                      <p className="text-[10px] text-zinc-500 italic text-center py-4">No features configured. Add a feature line below.</p>
+                    )}
                   </div>
 
                   <div className="flex gap-2 pt-1">
@@ -1841,7 +2031,7 @@ export default function ContentManagerDashboard() {
                       className="py-2 px-3 border border-zinc-300 bg-white hover:bg-zinc-50 text-[10px] font-bold text-zinc-850 rounded-lg active:scale-95 transition-all flex items-center gap-1.5"
                     >
                       <Plus className="h-3 w-3" />
-                      <span>Add</span>
+                      <span>Add Feature</span>
                     </button>
                   </div>
                 </div>

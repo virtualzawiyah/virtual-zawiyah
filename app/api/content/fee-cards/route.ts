@@ -59,6 +59,7 @@ export async function GET(request: Request) {
         base_fee: Number(course.base_fee),
         program_type: course.program_type,
         currency: course.currency,
+        duration: meta.duration,
         features: meta.features,
         // Also keep course fields for full compliance
         title_original: course.title,
@@ -87,7 +88,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json()
-    const { id, base_fee, features } = body
+    const { id, title: newTitleInput, base_fee, features, duration } = body
 
     if (!id) {
       return NextResponse.json({ error: 'Missing course ID' }, { status: 400 })
@@ -110,6 +111,9 @@ export async function PATCH(request: Request) {
       const cleanFee = String(base_fee).replace('$', '')
       updates.base_fee = Number(cleanFee)
     }
+    if (newTitleInput !== undefined && newTitleInput.trim() !== '') {
+      updates.title = newTitleInput.trim()
+    }
 
     // Update in database
     const { data: updatedCourse, error } = await supabaseAdmin
@@ -121,12 +125,16 @@ export async function PATCH(request: Request) {
 
     if (error) throw error
 
-    // Update features list in contentStore
-    if (features !== undefined && Array.isArray(features)) {
-      updateCourseMetadata(course.title, { features }, course.program_type)
+    // Update features list and duration in contentStore
+    const targetTitle = updatedCourse.title || course.title
+    if (features !== undefined || duration !== undefined) {
+      updateCourseMetadata(targetTitle, {
+        ...(features && { features }),
+        ...(duration && { duration })
+      }, course.program_type)
     }
 
-    const meta = getCourseMetadata(course.title, course.program_type)
+    const meta = getCourseMetadata(targetTitle, course.program_type)
     const priceStr = `$${Number(updatedCourse.base_fee)}`
 
     return NextResponse.json({
@@ -159,7 +167,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden: Insufficient privileges' }, { status: 403 })
     }
 
-    const { title, program_type, base_fee, features, duration_months } = await request.json()
+    const { title, program_type, base_fee, features, duration, duration_months } = await request.json()
 
     if (!title || !base_fee) {
       return NextResponse.json({ error: 'Missing required title or fee price' }, { status: 400 })
@@ -183,8 +191,11 @@ export async function POST(request: Request) {
 
     if (error) throw error
 
-    if (features && Array.isArray(features)) {
-      updateCourseMetadata(title, { features }, programType)
+    if ((features && Array.isArray(features)) || duration) {
+      updateCourseMetadata(title, {
+        ...(features && { features }),
+        ...(duration && { duration })
+      }, programType)
     }
 
     const meta = getCourseMetadata(newCourse.title, newCourse.program_type)
