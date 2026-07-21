@@ -170,7 +170,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { title, program_type, base_fee, duration_months, description } = body
+    const { title, program_type, base_fee, duration_months, description, highlights, icon } = body
 
     if (!title || !program_type || base_fee === undefined) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -192,9 +192,13 @@ export async function POST(request: Request) {
 
     if (error) throw error
 
-    // Store description in contentStore
-    if (description) {
-      updateCourseMetadata(title, { description }, program_type)
+    // Store metadata in contentStore
+    if (description || (highlights && Array.isArray(highlights)) || icon) {
+      updateCourseMetadata(title, {
+        ...(description && { description }),
+        ...(highlights && { highlights }),
+        ...(icon && { icon })
+      }, program_type)
     }
 
     const meta = getCourseMetadata(title, program_type)
@@ -227,7 +231,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json()
-    const { id, title, program_type, base_fee, duration_months, description, active } = body
+    const { id, title, program_type, base_fee, duration_months, description, highlights, icon, active } = body
 
     if (!id) {
       return NextResponse.json({ error: 'Missing course ID' }, { status: 400 })
@@ -260,16 +264,20 @@ export async function PATCH(request: Request) {
 
     if (error) throw error
 
-    // If description changed or title changed, update metadata
+    // If description/highlights/icon changed or title changed, update metadata
     const finalTitle = title !== undefined ? title : existingCourse.title
     const finalProgramType = program_type !== undefined ? program_type : existingCourse.program_type
 
-    if (description !== undefined) {
-      updateCourseMetadata(finalTitle, { description }, finalProgramType)
+    if (description !== undefined || (highlights && Array.isArray(highlights)) || icon !== undefined) {
+      updateCourseMetadata(finalTitle, {
+        ...(description !== undefined && { description }),
+        ...(highlights && { highlights }),
+        ...(icon !== undefined && { icon })
+      }, finalProgramType)
     } else if (title !== undefined && title.toLowerCase() !== existingCourse.title.toLowerCase()) {
-      // Transfer old description to the new title key in metadata
+      // Transfer old metadata to the new title key in metadata
       const oldMeta = getCourseMetadata(existingCourse.title, existingCourse.program_type)
-      updateCourseMetadata(finalTitle, { description: oldMeta.description }, finalProgramType)
+      updateCourseMetadata(finalTitle, { description: oldMeta.description, highlights: oldMeta.highlights, icon: oldMeta.icon }, finalProgramType)
     }
 
     const meta = getCourseMetadata(finalTitle, finalProgramType)

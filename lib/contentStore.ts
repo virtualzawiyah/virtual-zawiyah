@@ -301,7 +301,9 @@ export function updateCourseMetadata(title: string, updates: Partial<CourseMetad
   const current = metadata[key] || getCourseMetadata(title, programType)
   metadata[key] = {
     ...current,
-    ...updates
+    ...updates,
+    ...(updates.highlights && { highlights: updates.highlights }),
+    ...(updates.icon && { icon: updates.icon })
   }
   saveMetadata(metadata)
 }

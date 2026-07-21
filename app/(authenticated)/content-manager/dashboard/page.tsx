@@ -44,6 +44,8 @@ interface Course {
   description: string
   price: string
   category: '1:1' | 'Group'
+  highlights?: string[]
+  icon?: string
 }
 
 interface FeeCard {
@@ -268,6 +270,9 @@ export default function ContentManagerDashboard() {
   const [courseDescription, setCourseDescription] = useState('')
   const [coursePrice, setCoursePrice] = useState('')
   const [courseCategory, setCourseCategory] = useState<'1:1' | 'Group'>('1:1')
+  const [courseHighlights, setCourseHighlights] = useState<string[]>([])
+  const [newHighlightText, setNewHighlightText] = useState('')
+  const [draggedHighlightIdx, setDraggedHighlightIdx] = useState<number | null>(null)
 
   // --- Fee Card Form fields ---
   const [feeTitle, setFeeTitle] = useState('')
@@ -450,7 +455,9 @@ export default function ContentManagerDashboard() {
           name: c.title,
           description: c.description || '',
           price: `$${Number(c.base_fee)}`,
-          category: c.program_type === 'group' ? 'Group' : '1:1'
+          category: c.program_type === 'group' ? 'Group' : '1:1',
+          highlights: c.highlights || [],
+          icon: c.icon || '📖'
         }))
       setCourses(mappedCourses)
       
@@ -593,6 +600,8 @@ export default function ContentManagerDashboard() {
     setCourseDescription('')
     setCoursePrice('$60')
     setCourseCategory('1:1')
+    setCourseHighlights(['Qualified scholar instruction', 'Flexible schedule & progress tracking', '3-Day Free Trial included'])
+    setNewHighlightText('')
     setActiveModal('create-course')
   }
 
@@ -607,7 +616,8 @@ export default function ContentManagerDashboard() {
           description: courseDescription,
           base_fee: Number(coursePrice.replace('$', '')),
           program_type: courseCategory === 'Group' ? 'group' : '1:1',
-          duration_months: 12
+          duration_months: 12,
+          highlights: courseHighlights
         })
       })
       
@@ -617,7 +627,7 @@ export default function ContentManagerDashboard() {
       }
       
       setActiveModal(null)
-      triggerToast(`Course "${courseName}" added successfully to the public ${courseCategory} registry database listing.`)
+      triggerToast(`Course "${courseName}" added successfully with ${courseHighlights.length} specialities.`)
       await fetchData()
     } catch (err: any) {
       alert(`Error: ${err.message}`)
@@ -630,6 +640,8 @@ export default function ContentManagerDashboard() {
     setCourseDescription(course.description)
     setCoursePrice(course.price)
     setCourseCategory(course.category)
+    setCourseHighlights(course.highlights || [])
+    setNewHighlightText('')
     setActiveModal('edit-course')
   }
 
@@ -646,7 +658,8 @@ export default function ContentManagerDashboard() {
           description: courseDescription,
           base_fee: Number(coursePrice.replace('$', '')),
           program_type: courseCategory === 'Group' ? 'group' : '1:1',
-          duration_months: 12
+          duration_months: 12,
+          highlights: courseHighlights
         })
       })
       
@@ -656,11 +669,61 @@ export default function ContentManagerDashboard() {
       }
       
       setActiveModal(null)
-      triggerToast(`Course details for "${courseName}" updated successfully in directory listing.`)
+      triggerToast(`Course details & specialities for "${courseName}" updated successfully.`)
       await fetchData()
     } catch (err: any) {
       alert(`Error: ${err.message}`)
     }
+  }
+
+  const handleAddHighlight = () => {
+    if (!newHighlightText.trim()) return
+    setCourseHighlights([...courseHighlights, newHighlightText.trim()])
+    setNewHighlightText('')
+  }
+
+  const handleRemoveHighlight = (index: number) => {
+    setCourseHighlights(courseHighlights.filter((_, idx) => idx !== index))
+  }
+
+  const handleMoveHighlightUp = (index: number) => {
+    if (index <= 0) return
+    setCourseHighlights(prev => {
+      const updated = [...prev]
+      const temp = updated[index]
+      updated[index] = updated[index - 1]
+      updated[index - 1] = temp
+      return updated
+    })
+  }
+
+  const handleMoveHighlightDown = (index: number) => {
+    if (index >= courseHighlights.length - 1) return
+    setCourseHighlights(prev => {
+      const updated = [...prev]
+      const temp = updated[index]
+      updated[index] = updated[index + 1]
+      updated[index + 1] = temp
+      return updated
+    })
+  }
+
+  const handleDragStartHighlight = (e: React.DragEvent, index: number) => {
+    setDraggedHighlightIdx(index)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDropHighlight = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault()
+    if (draggedHighlightIdx === null || draggedHighlightIdx === dropIndex) return
+    setCourseHighlights(prev => {
+      const updated = [...prev]
+      const draggedItem = updated[draggedHighlightIdx]
+      updated.splice(draggedHighlightIdx, 1)
+      updated.splice(dropIndex, 0, draggedItem)
+      return updated
+    })
+    setDraggedHighlightIdx(null)
   }
 
   const confirmRemoveCourse = (course: Course) => {
@@ -1720,6 +1783,97 @@ export default function ContentManagerDashboard() {
                     </div>
                   </div>
 
+                </div>
+
+                {/* Course Specialities / Highlights List with Reordering */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider">
+                      Course Specialities / Key Highlights ({courseHighlights.length})
+                    </label>
+                    <span className="text-[10px] text-zinc-650 font-medium">Use ▲/▼ or drag handle to reorder</span>
+                  </div>
+
+                  <div className="space-y-2 max-h-44 overflow-y-auto pr-1 border border-zinc-200 rounded-xl p-2 bg-zinc-50/50">
+                    {courseHighlights.map((high, idx) => (
+                      <div 
+                        key={idx} 
+                        draggable
+                        onDragStart={(e) => handleDragStartHighlight(e, idx)}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDropHighlight(e, idx)}
+                        className={`flex items-center gap-1.5 bg-white border border-zinc-200 p-2 rounded-xl text-xs transition-all ${draggedHighlightIdx === idx ? 'opacity-40 bg-zinc-100 border-dashed border-zinc-400' : 'hover:border-zinc-300 shadow-2xs'}`}
+                      >
+                        {/* Drag handle */}
+                        <div className="cursor-grab active:cursor-grabbing text-zinc-400 hover:text-zinc-600 p-0.5 shrink-0" title="Drag to reorder">
+                          <GripVertical className="h-4 w-4" />
+                        </div>
+
+                        {/* Speciality Text */}
+                        <span className="flex-1 text-zinc-850 font-medium font-sans leading-tight select-none">{high}</span>
+
+                        {/* Up Button */}
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => handleMoveHighlightUp(idx)}
+                          className="p-1 hover:bg-zinc-100 text-zinc-600 disabled:opacity-20 disabled:hover:bg-transparent rounded-md transition-colors shrink-0"
+                          title="Move Up"
+                        >
+                          <ChevronUp className="h-3.5 w-3.5" />
+                        </button>
+
+                        {/* Down Button */}
+                        <button
+                          type="button"
+                          disabled={idx === courseHighlights.length - 1}
+                          onClick={() => handleMoveHighlightDown(idx)}
+                          className="p-1 hover:bg-zinc-100 text-zinc-600 disabled:opacity-20 disabled:hover:bg-transparent rounded-md transition-colors shrink-0"
+                          title="Move Down"
+                        >
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        </button>
+
+                        {/* Remove Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveHighlight(idx)}
+                          className="p-1 hover:bg-rose-50 text-rose-600 rounded-md transition-colors shrink-0 ml-0.5"
+                          title="Remove line"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                    {courseHighlights.length === 0 && (
+                      <p className="text-[10px] text-zinc-500 italic text-center py-4">No specialities added yet. Add a key course highlight below.</p>
+                    )}
+                  </div>
+
+                  {/* Add Speciality Line Input */}
+                  <div className="flex gap-2 pt-1.5">
+                    <input 
+                      type="text"
+                      value={newHighlightText}
+                      onChange={(e) => setNewHighlightText(e.target.value)}
+                      placeholder="e.g. Makhaarij (articulation points)"
+                      className="flex-1 text-xs p-2 rounded-lg border border-zinc-300 focus:outline-none focus:ring-1 focus:ring-[#1B6B3A] text-zinc-800 placeholder-zinc-500 font-medium bg-white"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          handleAddHighlight()
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddHighlight}
+                      className="py-2 px-3 border border-zinc-300 bg-white hover:bg-zinc-50 text-[10px] font-bold text-zinc-850 rounded-lg active:scale-95 transition-all flex items-center gap-1.5"
+                    >
+                      <Plus className="h-3 w-3" />
+                      <span>Add Speciality</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100">
