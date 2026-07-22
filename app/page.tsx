@@ -207,14 +207,8 @@ export default function Home() {
         return res.json()
       })
       .then(data => {
-        const referenceDate = new Date('2026-06-30T12:00:00')
-        const active = data.find((ann: any) => {
-          const start = new Date(ann.start_date + 'T00:00:00')
-          const end = new Date(ann.end_date + 'T23:59:59')
-          return referenceDate >= start && referenceDate <= end
-        })
-
-        if (active) {
+        if (Array.isArray(data) && data.length > 0) {
+          const active = data[0]
           let appliesTo = 'All'
           if (active.applies_to === '1:1') appliesTo = '1:1 Only'
           if (active.applies_to === 'group') appliesTo = 'Group Only'
@@ -222,10 +216,12 @@ export default function Home() {
           setActiveAnnouncement({
             title: active.title,
             message: active.content,
-            startDate: active.start_date,
-            endDate: active.end_date,
+            startDate: active.start_date || '',
+            endDate: active.end_date || '',
             appliesTo
           })
+        } else {
+          setActiveAnnouncement(null)
         }
       })
       .catch(err => console.error('Error fetching active announcement:', err))

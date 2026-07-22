@@ -430,10 +430,10 @@ export default function ContentManagerDashboard() {
       setProfileRequests(reqData.requests || [])
       setFeedbacks(feedbackData.feedbacks || [])
       
-      // Map Announcements using real-time today date string
+      // Map Announcements using end_date expiration check
       const todayStr = new Date().toISOString().split('T')[0]
       const mappedAnnouncements = annData.map((ann: any) => {
-        const isActive = todayStr >= ann.start_date && todayStr <= ann.end_date
+        const isActive = !ann.end_date || ann.end_date >= todayStr
         
         let appliesTo: 'All' | '1:1 Only' | 'Group Only' = 'All'
         if (ann.applies_to === '1:1') appliesTo = '1:1 Only'

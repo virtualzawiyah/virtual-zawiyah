@@ -15,8 +15,6 @@ export async function GET() {
       .from('announcements')
       .select('id, title, content, applies_to, start_date, end_date, created_at')
       .neq('title', '__course_metadata_json__')
-      .lte('start_date', todayStr)
-      .gte('end_date', todayStr)
       .order('created_at', { ascending: false })
 
     if (error) throw error
