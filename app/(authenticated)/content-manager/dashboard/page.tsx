@@ -503,20 +503,31 @@ export default function ContentManagerDashboard() {
 
   // --- Action Handlers: Announcements ---
   const openCreateAnnouncement = () => {
+    const today = new Date().toISOString().split('T')[0]
+    const thirtyDaysLater = new Date()
+    thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30)
+    const thirtyDaysLaterStr = thirtyDaysLater.toISOString().split('T')[0]
+
     setAnnTitle('')
     setAnnMessage('')
     setAnnAppliesTo('All')
-    setAnnStartDate('')
-    setAnnEndDate('')
+    setAnnStartDate(today)
+    setAnnEndDate(thirtyDaysLaterStr)
     setActiveModal('create-announcement')
   }
 
+  const [isSubmittingAnn, setIsSubmittingAnn] = useState(false)
+
   const handleCreateAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isSubmittingAnn) return
+    setIsSubmittingAnn(true)
     try {
       let mappedAppliesTo = 'all'
       if (annAppliesTo === '1:1 Only') mappedAppliesTo = '1:1'
       if (annAppliesTo === 'Group Only') mappedAppliesTo = 'group'
+      
+      const todayStr = new Date().toISOString().split('T')[0]
       
       const res = await fetch('/api/content/announcements', {
         method: 'POST',
@@ -525,8 +536,8 @@ export default function ContentManagerDashboard() {
           title: annTitle,
           content: annMessage,
           applies_to: mappedAppliesTo,
-          start_date: annStartDate || '2026-06-22',
-          end_date: annEndDate || '2026-07-22'
+          start_date: annStartDate || todayStr,
+          end_date: annEndDate || todayStr
         })
       })
       
@@ -536,10 +547,12 @@ export default function ContentManagerDashboard() {
       }
       
       setActiveModal(null)
-      triggerToast(`Announcement "${annTitle}" published successfully! This will now appear as a popup on the public website landing page.`)
+      triggerToast(`Announcement "${annTitle}" published successfully! This is now live on the public website landing page.`)
       await fetchData()
     } catch (err: any) {
       alert(`Error: ${err.message}`)
+    } finally {
+      setIsSubmittingAnn(false)
     }
   }
 
