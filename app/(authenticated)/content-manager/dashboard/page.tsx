@@ -21,7 +21,8 @@ import {
   Star,
   ChevronUp,
   ChevronDown,
-  GripVertical
+  GripVertical,
+  Save
 } from 'lucide-react'
 import GeometricPattern from '@/components/GeometricPattern'
 import BackToFounderBanner from '@/components/BackToFounderBanner'
@@ -266,7 +267,7 @@ export default function ContentManagerDashboard() {
   const [annStartDate, setAnnStartDate] = useState('')
   const [annEndDate, setAnnEndDate] = useState('')
 
-  // --- Course Form fields ---
+  // --- Course Form fields & Drag State ---
   const [courseName, setCourseName] = useState('')
   const [courseDescription, setCourseDescription] = useState('')
   const [coursePrice, setCoursePrice] = useState('')
@@ -275,6 +276,9 @@ export default function ContentManagerDashboard() {
   const [newHighlightText, setNewHighlightText] = useState('')
   const [draggedHighlightIdx, setDraggedHighlightIdx] = useState<number | null>(null)
   const [courseIcon, setCourseIcon] = useState('📖')
+  const [draggedCourseId, setDraggedCourseId] = useState<string | null>(null)
+  const [hasUnsavedCourseOrder, setHasUnsavedCourseOrder] = useState(false)
+  const [isSavingCourseOrder, setIsSavingCourseOrder] = useState(false)
 
   // --- Fee Card Form fields ---
   const [feeTitle, setFeeTitle] = useState('')
@@ -742,77 +746,66 @@ export default function ContentManagerDashboard() {
     setDraggedHighlightIdx(null)
   }
 
-  const handleMoveCourseUp = async (course: Course) => {
-    const list = courses.filter(c => c.category === course.category)
-    const index = list.findIndex(c => c.id === course.id)
-    if (index <= 0) return
-    
-    const prevCourse = list[index - 1]
-    const currentOrder = courses.map((c, idx) => ({ id: c.id, order: c.sortOrder !== undefined ? c.sortOrder : idx }))
-    
-    const targetItem = currentOrder.find(o => o.id === course.id)
-    const prevItem = currentOrder.find(o => o.id === prevCourse.id)
-    
-    if (targetItem && prevItem) {
-      const temp = targetItem.order
-      targetItem.order = prevItem.order
-      prevItem.order = temp
-      
-      try {
-        await Promise.all([
-          fetch('/api/content/courses', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: course.id, sortOrder: targetItem.order })
-          }),
-          fetch('/api/content/courses', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: prevCourse.id, sortOrder: prevItem.order })
-          })
-        ])
-        triggerToast(`Reordered "${course.name}" above "${prevCourse.name}".`)
-        await fetchData()
-      } catch (err: any) {
-        alert(`Error reordering courses: ${err.message}`)
-      }
-    }
+  const handleCourseDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedCourseId(id)
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', id)
   }
 
-  const handleMoveCourseDown = async (course: Course) => {
-    const list = courses.filter(c => c.category === course.category)
-    const index = list.findIndex(c => c.id === course.id)
-    if (index >= list.length - 1) return
-    
-    const nextCourse = list[index + 1]
-    const currentOrder = courses.map((c, idx) => ({ id: c.id, order: c.sortOrder !== undefined ? c.sortOrder : idx }))
-    
-    const targetItem = currentOrder.find(o => o.id === course.id)
-    const nextItem = currentOrder.find(o => o.id === nextCourse.id)
-    
-    if (targetItem && nextItem) {
-      const temp = targetItem.order
-      targetItem.order = nextItem.order
-      nextItem.order = temp
-      
-      try {
-        await Promise.all([
-          fetch('/api/content/courses', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: course.id, sortOrder: targetItem.order })
-          }),
-          fetch('/api/content/courses', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: nextCourse.id, sortOrder: nextItem.order })
-          })
-        ])
-        triggerToast(`Reordered "${course.name}" below "${nextCourse.name}".`)
-        await fetchData()
-      } catch (err: any) {
-        alert(`Error reordering courses: ${err.message}`)
-      }
+  const handleCourseDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+
+  const handleCourseDrop = (e: React.DragEvent, targetId: string, category: '1:1' | 'Group') => {
+    e.preventDefault()
+    if (!draggedCourseId || draggedCourseId === targetId) return
+
+    setCourses(prevCourses => {
+      const categoryCourses = prevCourses.filter(c => c.category === category)
+      const otherCourses = prevCourses.filter(c => c.category !== category)
+
+      const fromIndex = categoryCourses.findIndex(c => c.id === draggedCourseId)
+      const toIndex = categoryCourses.findIndex(c => c.id === targetId)
+
+      if (fromIndex === -1 || toIndex === -1) return prevCourses
+
+      const updatedCategoryCourses = [...categoryCourses]
+      const [movedItem] = updatedCategoryCourses.splice(fromIndex, 1)
+      updatedCategoryCourses.splice(toIndex, 0, movedItem)
+
+      const reorderedCategory = updatedCategoryCourses.map((item, idx) => ({
+        ...item,
+        sortOrder: idx
+      }))
+
+      setHasUnsavedCourseOrder(true)
+      return [...otherCourses, ...reorderedCategory]
+    })
+
+    setDraggedCourseId(null)
+  }
+
+  const handleSaveCourseOrder = async () => {
+    setIsSavingCourseOrder(true)
+    try {
+      const patches = courses.map((course, idx) => {
+        const orderVal = course.sortOrder !== undefined ? course.sortOrder : idx
+        return fetch('/api/content/courses', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: course.id, sortOrder: orderVal })
+        })
+      })
+
+      await Promise.all(patches)
+      setHasUnsavedCourseOrder(false)
+      triggerToast('Course order saved successfully! The updated course order is now live on the public website.')
+      await fetchData()
+    } catch (err: any) {
+      alert(`Error saving course order: ${err.message}`)
+    } finally {
+      setIsSavingCourseOrder(false)
     }
   }
 
@@ -1261,21 +1254,39 @@ export default function ContentManagerDashboard() {
               {/* Header Action Row */}
               <div className="flex justify-between items-center gap-4 flex-wrap">
                 <div>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-800">
-                    Course Catalog Database
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-800 flex items-center gap-2">
+                    <span>Course Catalog Database</span>
+                    {hasUnsavedCourseOrder && (
+                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-amber-100 text-amber-800 border border-amber-300 animate-pulse">
+                        Unsaved Order Changes
+                      </span>
+                    )}
                   </h3>
                   <p className="text-[11px] text-zinc-700 mt-0.5">
-                    Manage the directory of academic course offerings visible on the public website.
+                    Drag & drop course cards using the drag handle to reorder them, then click "Save Changes" to apply to the public website.
                   </p>
                 </div>
                 
-                <button
-                  onClick={openCreateCourse}
-                  className="py-2 px-3 bg-[#1B6B3A] text-white hover:bg-[#1B6B3A]/90 font-bold rounded-xl text-xs transition-all active:scale-[0.98] flex items-center gap-2 shadow-xs"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Add New Course</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  {hasUnsavedCourseOrder && (
+                    <button
+                      onClick={handleSaveCourseOrder}
+                      disabled={isSavingCourseOrder}
+                      className="py-2 px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all active:scale-[0.98] flex items-center gap-1.5 shadow-md border border-emerald-500 animate-bounce"
+                    >
+                      <Save className="h-4 w-4" />
+                      <span>{isSavingCourseOrder ? 'Saving Order...' : 'Save Changes'}</span>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={openCreateCourse}
+                    className="py-2 px-3 bg-[#1B6B3A] text-white hover:bg-[#1B6B3A]/90 font-bold rounded-xl text-xs transition-all active:scale-[0.98] flex items-center gap-2 shadow-xs"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>Add New Course</span>
+                  </button>
+                </div>
               </div>
 
               {/* Two Group layout */}
@@ -1293,11 +1304,27 @@ export default function ContentManagerDashboard() {
                   </div>
 
                   <div className="space-y-3">
-                    {courses.filter(c => c.category === '1:1').map((course, idx, list) => (
+                    {courses.filter(c => c.category === '1:1').map((course) => (
                       <div 
                         key={course.id} 
-                        className="bg-white border border-zinc-200 rounded-2xl p-4 flex justify-between items-start gap-4 hover:border-zinc-300 transition-colors shadow-2xs"
+                        draggable
+                        onDragStart={(e) => handleCourseDragStart(e, course.id)}
+                        onDragOver={handleCourseDragOver}
+                        onDrop={(e) => handleCourseDrop(e, course.id, '1:1')}
+                        className={`bg-white border rounded-2xl p-4 flex justify-between items-start gap-3 transition-all shadow-2xs ${
+                          draggedCourseId === course.id 
+                            ? 'opacity-40 border-dashed border-[#1B6B3A] bg-emerald-50/50 scale-[0.99]' 
+                            : 'border-zinc-200 hover:border-zinc-300'
+                        }`}
                       >
+                        {/* Drag Handle Icon */}
+                        <div 
+                          className="cursor-grab active:cursor-grabbing p-1.5 hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 rounded-lg transition-colors border border-transparent hover:border-zinc-200 shrink-0 self-center"
+                          title="Drag to reorder course"
+                        >
+                          <GripVertical className="h-4 w-4" />
+                        </div>
+
                         <div className="space-y-1 min-w-0 flex-1">
                           <div className="flex items-center gap-2">
                             <span className="text-lg">{course.icon || '📖'}</span>
@@ -1319,44 +1346,20 @@ export default function ContentManagerDashboard() {
                         </div>
 
                         <div className="flex items-center gap-1 shrink-0 self-center">
-                          {/* Reorder Buttons */}
-                          <div className="flex flex-col gap-0.5">
-                            <button
-                              type="button"
-                              disabled={idx === 0}
-                              onClick={() => handleMoveCourseUp(course)}
-                              className="p-1 hover:bg-zinc-150 text-zinc-650 disabled:opacity-20 rounded-md transition-colors"
-                              title="Move Course Up"
-                            >
-                              <ChevronUp className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              disabled={idx === list.length - 1}
-                              onClick={() => handleMoveCourseDown(course)}
-                              className="p-1 hover:bg-zinc-150 text-zinc-650 disabled:opacity-20 rounded-md transition-colors"
-                              title="Move Course Down"
-                            >
-                              <ChevronDown className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-
-                          <div className="flex flex-col gap-1 ml-1.5">
-                            <button
-                              onClick={() => openEditCourse(course)}
-                              className="p-2 border border-zinc-200 hover:bg-zinc-50 text-zinc-700 rounded-xl transition-colors active:scale-95"
-                              title="Edit Course"
-                            >
-                              <Edit className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              onClick={() => confirmRemoveCourse(course)}
-                              className="p-2 border border-rose-100 hover:bg-rose-50 text-rose-600 rounded-xl transition-colors active:scale-95"
-                              title="Remove Course"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => openEditCourse(course)}
+                            className="p-2 border border-zinc-200 hover:bg-zinc-50 text-zinc-700 rounded-xl transition-colors active:scale-95"
+                            title="Edit Course"
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            onClick={() => confirmRemoveCourse(course)}
+                            className="p-2 border border-rose-100 hover:bg-rose-50 text-rose-600 rounded-xl transition-colors active:scale-95"
+                            title="Remove Course"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -1375,11 +1378,27 @@ export default function ContentManagerDashboard() {
                   </div>
 
                   <div className="space-y-3">
-                    {courses.filter(c => c.category === 'Group').map((course, idx, list) => (
+                    {courses.filter(c => c.category === 'Group').map((course) => (
                       <div 
                         key={course.id} 
-                        className="bg-white border border-zinc-200 rounded-2xl p-4 flex justify-between items-start gap-4 hover:border-zinc-300 transition-colors shadow-2xs"
+                        draggable
+                        onDragStart={(e) => handleCourseDragStart(e, course.id)}
+                        onDragOver={handleCourseDragOver}
+                        onDrop={(e) => handleCourseDrop(e, course.id, 'Group')}
+                        className={`bg-white border rounded-2xl p-4 flex justify-between items-start gap-3 transition-all shadow-2xs ${
+                          draggedCourseId === course.id 
+                            ? 'opacity-40 border-dashed border-amber-600 bg-amber-50/50 scale-[0.99]' 
+                            : 'border-zinc-200 hover:border-zinc-300'
+                        }`}
                       >
+                        {/* Drag Handle Icon */}
+                        <div 
+                          className="cursor-grab active:cursor-grabbing p-1.5 hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 rounded-lg transition-colors border border-transparent hover:border-zinc-200 shrink-0 self-center"
+                          title="Drag to reorder course"
+                        >
+                          <GripVertical className="h-4 w-4" />
+                        </div>
+
                         <div className="space-y-1 min-w-0 flex-1">
                           <div className="flex items-center gap-2">
                             <span className="text-lg">{course.icon || '🕌'}</span>
@@ -1401,44 +1420,20 @@ export default function ContentManagerDashboard() {
                         </div>
 
                         <div className="flex items-center gap-1 shrink-0 self-center">
-                          {/* Reorder Buttons */}
-                          <div className="flex flex-col gap-0.5">
-                            <button
-                              type="button"
-                              disabled={idx === 0}
-                              onClick={() => handleMoveCourseUp(course)}
-                              className="p-1 hover:bg-zinc-150 text-zinc-650 disabled:opacity-20 rounded-md transition-colors"
-                              title="Move Course Up"
-                            >
-                              <ChevronUp className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              disabled={idx === list.length - 1}
-                              onClick={() => handleMoveCourseDown(course)}
-                              className="p-1 hover:bg-zinc-150 text-zinc-650 disabled:opacity-20 rounded-md transition-colors"
-                              title="Move Course Down"
-                            >
-                              <ChevronDown className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-
-                          <div className="flex flex-col gap-1 ml-1.5">
-                            <button
-                              onClick={() => openEditCourse(course)}
-                              className="p-2 border border-zinc-200 hover:bg-zinc-50 text-zinc-700 rounded-xl transition-colors active:scale-95"
-                              title="Edit Course"
-                            >
-                              <Edit className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              onClick={() => confirmRemoveCourse(course)}
-                              className="p-2 border border-rose-100 hover:bg-rose-50 text-rose-600 rounded-xl transition-colors active:scale-95"
-                              title="Remove Course"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => openEditCourse(course)}
+                            className="p-2 border border-zinc-200 hover:bg-zinc-50 text-zinc-700 rounded-xl transition-colors active:scale-95"
+                            title="Edit Course"
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            onClick={() => confirmRemoveCourse(course)}
+                            className="p-2 border border-rose-100 hover:bg-rose-50 text-rose-600 rounded-xl transition-colors active:scale-95"
+                            title="Remove Course"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
                         </div>
                       </div>
                     ))}
