@@ -14,7 +14,8 @@ import {
   LogOut,
   Sliders,
   Award,
-  Copy
+  Copy,
+  Trash2
 } from 'lucide-react'
 import BackToFounderBanner from '@/components/BackToFounderBanner'
 import NotificationBell from '@/components/NotificationBell'
@@ -613,22 +614,12 @@ export default function RegistrarDashboard() {
       setIsLoadingClasses(true)
       setClassesFetchError(null)
       try {
-        const { data, error } = await supabase
-          .from('group_classes')
-          .select(`
-            id,
-            class_name,
-            year_level,
-            max_capacity,
-            enrolled_count,
-            teacher_id,
-            profiles:teacher_id ( full_name ),
-            courses:course_id ( title )
-          `)
+        const response = await fetch('/api/registrar/group-classes')
+        const result = await response.json()
+        if (!response.ok) throw new Error(result.error || 'Failed to load group classes')
 
-        if (error) throw error
-
-        const filtered = (data || [])
+        const data = result.classes || []
+        const filtered = data
           .filter((cls: any) => {
             const courseTitle = cls.courses?.title || ''
             const classYear = cls.year_level?.toString() || ''
@@ -661,6 +652,27 @@ export default function RegistrarDashboard() {
   }, [selectedAdmissionId, admissions])
 
   const selectedAdmission = admissions.find(a => a.id === selectedAdmissionId)
+
+  // --- Delete Application Handler ---
+  const handleDeleteAdmission = async (admissionId: string, studentName: string) => {
+    const confirmed = window.confirm(`Are you sure you want to permanently delete the application for "${studentName}"? This action cannot be undone.`)
+    if (!confirmed) return
+
+    try {
+      const response = await fetch(`/api/registrar/admissions/delete?id=${admissionId}`, {
+        method: 'DELETE'
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || 'Failed to delete application')
+
+      alert(`Application for "${studentName}" deleted successfully.`)
+      setSelectedAdmissionId(null)
+      await fetchAdmissions()
+    } catch (err: any) {
+      console.error('Error deleting application:', err)
+      alert(`Deletion failed: ${err.message}`)
+    }
+  }
 
   // --- Admission Action Handlers ---
   const handleAssignTrial = async (teacherId: string, teacherName: string) => {
@@ -1196,13 +1208,25 @@ export default function RegistrarDashboard() {
                             </p>
                           )}
                         </div>
-                        <span className={`text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${
-                          item.type === '1:1'
-                            ? 'bg-emerald-50 text-[#1B6B3A] border-emerald-100'
-                            : 'bg-amber-50 text-amber-700 border-amber-100'
-                        }`}>
-                          {item.type}
-                        </span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className={`text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${
+                            item.type === '1:1'
+                              ? 'bg-emerald-50 text-[#1B6B3A] border-emerald-100'
+                              : 'bg-amber-50 text-amber-700 border-amber-100'
+                          }`}>
+                            {item.type}
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteAdmission(item.id, item.studentName)
+                            }}
+                            className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all"
+                            title="Delete Junk Application"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
                     )
                   })}
@@ -1222,16 +1246,26 @@ export default function RegistrarDashboard() {
                 <div className="space-y-6 animate-fade-in">
                   
                   {/* Student Summary Info */}
-                  <div className="border-b border-zinc-150 pb-5">
-                    <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border ${
-                      selectedAdmission.type === '1:1' 
-                        ? 'bg-emerald-50 text-[#1B6B3A] border-emerald-100' 
-                        : 'bg-amber-50 text-amber-700 border-amber-100'
-                    }`}>
-                      {selectedAdmission.type} Admission Request
-                    </span>
-                    <h2 className="text-xl font-serif font-bold text-zinc-900 mt-2">{selectedAdmission.studentName}</h2>
-                    <p className="text-xs text-zinc-650 mt-1">Requested Course: <strong className="font-semibold text-zinc-800">{selectedAdmission.courseName}</strong></p>
+                  <div className="border-b border-zinc-150 pb-5 flex items-start justify-between gap-4">
+                    <div>
+                      <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border ${
+                        selectedAdmission.type === '1:1' 
+                          ? 'bg-emerald-50 text-[#1B6B3A] border-emerald-100' 
+                          : 'bg-amber-50 text-amber-700 border-amber-100'
+                      }`}>
+                        {selectedAdmission.type} Admission Request
+                      </span>
+                      <h2 className="text-xl font-serif font-bold text-zinc-900 mt-2">{selectedAdmission.studentName}</h2>
+                      <p className="text-xs text-zinc-650 mt-1">Requested Course: <strong className="font-semibold text-zinc-800">{selectedAdmission.courseName}</strong></p>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteAdmission(selectedAdmission.id, selectedAdmission.studentName)}
+                      className="px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:text-rose-800 text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 shadow-xs shrink-0"
+                      title="Permanently Delete Spam/Test Application"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Delete Application
+                    </button>
                   </div>
 
                   {/* 1:1 Preferences & Teacher Matchings */}
