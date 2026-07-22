@@ -128,6 +128,7 @@ interface TeacherLiveMonitorMock {
   currentStatus: 'in_class' | 'idle' | 'leave'
   activeStudent?: string
   activeCourse?: string
+  meetingUrl?: string
   schedules: TeacherScheduleItem[]
 }
 
@@ -388,6 +389,39 @@ export default function SupervisorDashboard() {
       if (altRes.ok) {
         const altData = await altRes.json()
         setAlerts(altData)
+      }
+
+      // Fetch Live Monitor Real DB Data
+      const liveRes = await fetch('/api/supervisor/live-monitor')
+      if (liveRes.ok) {
+        const liveData = await liveRes.json()
+        if (liveData.teachers && Array.isArray(liveData.teachers) && liveData.teachers.length > 0) {
+          const mapped = liveData.teachers.map((t: any) => ({
+            id: t.id,
+            name: t.name,
+            program: t.type || '1:1 Faculty',
+            gender: 'Faculty',
+            avatar: t.name ? t.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : 'T',
+            currentStatus: t.status === 'in_session' ? 'in_class' : t.status,
+            activeStudent: t.activeClass?.studentName,
+            activeCourse: t.activeClass?.course,
+            meetingUrl: t.activeClass?.meetingUrl,
+            schedules: (t.schedules || []).map((s: any) => ({
+              id: s.id,
+              studentName: s.studentName,
+              courseName: s.course,
+              scheduledTime: s.scheduledTime,
+              status: s.status,
+              lessonNotes: s.summary,
+              leaveReason: s.leaveReason,
+              meetingUrl: s.meetingUrl
+            }))
+          }))
+          setTeacherMonitorData(mapped)
+          if (!selectedTeacherId || !mapped.some((m: any) => m.id === selectedTeacherId)) {
+            setSelectedTeacherId(mapped[0].id)
+          }
+        }
       }
 
     } catch (err: any) {
@@ -1024,7 +1058,10 @@ export default function SupervisorDashboard() {
 
                           {selectedTeacher.currentStatus === 'in_class' && (
                             <button
-                              onClick={() => alert(`Launching Supervisor Observer Mode for ${selectedTeacher.name}'s classroom...`)}
+                              onClick={() => {
+                                const url = selectedTeacher.meetingUrl || `https://meet.virtualzawiyah.com/VZ-${selectedTeacher.id}-live`
+                                window.open(url, '_blank')
+                              }}
                               className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 text-xs font-bold rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-2"
                             >
                               <Video className="h-4 w-4" />
