@@ -28,6 +28,19 @@ async function checkAuth(supabaseUserClient: any, supabaseAdmin: any) {
   return { authorized: true, userId: session.user.id }
 }
 
+function parseContentWithDisplayDate(rawContent: string) {
+  let displayDate = ''
+  let content = rawContent || ''
+  if (content.startsWith('__DATE:')) {
+    const endIdx = content.indexOf('__\n')
+    if (endIdx !== -1) {
+      displayDate = content.substring(7, endIdx)
+      content = content.substring(endIdx + 3)
+    }
+  }
+  return { displayDate, content }
+}
+
 export async function GET(request: Request) {
   try {
     const supabaseUserClient = createRouteHandlerClient({ cookies })
@@ -55,7 +68,16 @@ export async function GET(request: Request) {
 
     if (error) throw error
 
-    return NextResponse.json(data)
+    const enriched = (data || []).map((ann: any) => {
+      const { displayDate, content } = parseContentWithDisplayDate(ann.content)
+      return {
+        ...ann,
+        content,
+        display_date: displayDate
+      }
+    })
+
+    return NextResponse.json(enriched)
   } catch (err: any) {
     console.error('Announcements GET error:', err)
     return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 })
@@ -76,7 +98,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { title, content, applies_to, start_date, end_date } = body
+    const { title, content, applies_to, display_date, start_date, end_date } = body
 
     if (!title || !content) {
       return NextResponse.json({ error: 'Title and content are required' }, { status: 400 })
@@ -85,6 +107,11 @@ export async function POST(request: Request) {
     const todayStr = new Date().toISOString().split('T')[0]
     const finalStartDate = start_date || todayStr
     const finalEndDate = end_date || '2099-12-31'
+
+    let finalContent = content
+    if (display_date && display_date.trim()) {
+      finalContent = `__DATE:${display_date.trim()}__\n${content}`
+    }
 
     // Map applies_to to lowercase check constraint ('all', '1:1', 'group')
     let mappedAppliesTo = (applies_to || 'all').toLowerCase()
@@ -96,7 +123,7 @@ export async function POST(request: Request) {
       .from('announcements')
       .insert({
         title,
-        content,
+        content: finalContent,
         applies_to: mappedAppliesTo,
         start_date: finalStartDate,
         end_date: finalEndDate,
@@ -140,7 +167,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json()
-    const { id, action, title, content, applies_to, start_date, end_date } = body
+    const { id, action, title, content, applies_to, display_date, start_date, end_date } = body
 
     if (!id) {
       return NextResponse.json({ error: 'Missing announcement ID' }, { status: 400 })
@@ -157,7 +184,6 @@ export async function PATCH(request: Request) {
       } else if (action === 'activate') {
         const thirtyDaysLater = new Date(now)
         thirtyDaysLater.setDate(now.getDate() + 30)
-        // Also ensure start_date is not in the future when activating
         updates.start_date = now.toISOString().split('T')[0]
         updates.end_date = thirtyDaysLater.toISOString().split('T')[0]
       } else {
@@ -166,7 +192,19 @@ export async function PATCH(request: Request) {
     } else {
       // General edits
       if (title !== undefined) updates.title = title
-      if (content !== undefined) updates.content = content
+      if (content !== undefined || display_date !== undefined) {
+        const { data: existing } = await supabaseAdmin.from('announcements').select('content').eq('id', id).single()
+        const parsed = parseContentWithDisplayDate(existing?.content || '')
+
+        const textPart = content !== undefined ? content : parsed.content
+        const datePart = display_date !== undefined ? display_date : parsed.displayDate
+
+        if (datePart && datePart.trim()) {
+          updates.content = `__DATE:${datePart.trim()}__\n${textPart}`
+        } else {
+          updates.content = textPart
+        }
+      }
       if (applies_to !== undefined) {
         let mappedAppliesTo = applies_to.toLowerCase()
         if (mappedAppliesTo.includes('1:1')) mappedAppliesTo = '1:1'
@@ -174,8 +212,8 @@ export async function PATCH(request: Request) {
         if (mappedAppliesTo.includes('all')) mappedAppliesTo = 'all'
         updates.applies_to = mappedAppliesTo
       }
-      if (start_date !== undefined) updates.start_date = start_date
-      if (end_date !== undefined) updates.end_date = end_date
+      if (start_date !== undefined) updates.start_date = start_date ? start_date : new Date().toISOString().split('T')[0]
+      if (end_date !== undefined) updates.end_date = end_date ? end_date : '2099-12-31'
     }
 
     const { data, error } = await supabaseAdmin

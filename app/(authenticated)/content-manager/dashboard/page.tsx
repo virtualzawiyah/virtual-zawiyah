@@ -34,6 +34,7 @@ interface Announcement {
   title: string
   message: string
   appliesTo: 'All' | '1:1 Only' | 'Group Only'
+  displayDate?: string
   startDate: string
   endDate: string
   isActive: boolean
@@ -264,6 +265,7 @@ export default function ContentManagerDashboard() {
   const [annTitle, setAnnTitle] = useState('')
   const [annMessage, setAnnMessage] = useState('')
   const [annAppliesTo, setAnnAppliesTo] = useState<'All' | '1:1 Only' | 'Group Only'>('All')
+  const [annDisplayDate, setAnnDisplayDate] = useState('')
   const [annStartDate, setAnnStartDate] = useState('')
   const [annEndDate, setAnnEndDate] = useState('')
 
@@ -444,8 +446,9 @@ export default function ContentManagerDashboard() {
           title: ann.title,
           message: ann.content,
           appliesTo,
-          startDate: ann.start_date,
-          endDate: ann.end_date,
+          displayDate: ann.display_date || '',
+          startDate: ann.start_date || '',
+          endDate: ann.end_date || '',
           isActive
         }
       })
@@ -504,6 +507,7 @@ export default function ContentManagerDashboard() {
     setAnnTitle('')
     setAnnMessage('')
     setAnnAppliesTo('All')
+    setAnnDisplayDate('')
     setAnnStartDate('')
     setAnnEndDate('')
     setActiveModal('create-announcement')
@@ -520,8 +524,6 @@ export default function ContentManagerDashboard() {
       if (annAppliesTo === '1:1 Only') mappedAppliesTo = '1:1'
       if (annAppliesTo === 'Group Only') mappedAppliesTo = 'group'
       
-      const todayStr = new Date().toISOString().split('T')[0]
-      
       const res = await fetch('/api/content/announcements', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -529,8 +531,9 @@ export default function ContentManagerDashboard() {
           title: annTitle,
           content: annMessage,
           applies_to: mappedAppliesTo,
-          start_date: annStartDate || todayStr,
-          end_date: annEndDate || todayStr
+          display_date: annDisplayDate,
+          start_date: annStartDate,
+          end_date: annEndDate
         })
       })
       
@@ -554,8 +557,9 @@ export default function ContentManagerDashboard() {
     setAnnTitle(ann.title)
     setAnnMessage(ann.message)
     setAnnAppliesTo(ann.appliesTo)
-    setAnnStartDate(ann.startDate)
-    setAnnEndDate(ann.endDate)
+    setAnnDisplayDate(ann.displayDate || '')
+    setAnnStartDate(ann.startDate || '')
+    setAnnEndDate(ann.endDate || '')
     setActiveModal('edit-announcement')
   }
 
@@ -575,6 +579,7 @@ export default function ContentManagerDashboard() {
           title: annTitle,
           content: annMessage,
           applies_to: mappedAppliesTo,
+          display_date: annDisplayDate,
           start_date: annStartDate,
           end_date: annEndDate
         })
@@ -1242,13 +1247,20 @@ export default function ContentManagerDashboard() {
 
                     <div className="pt-3 border-t border-zinc-100 flex items-center justify-between text-[10px] font-medium">
                       <div className="space-y-0.5">
-                        <span className="text-zinc-500 block text-[9px] uppercase font-bold tracking-wider">Validity Period</span>
+                        <span className="text-zinc-500 block text-[9px] uppercase font-bold tracking-wider">Date Configuration</span>
                         <span className="text-zinc-700 font-bold flex items-center gap-1">
                           <Calendar className="h-3 w-3 text-zinc-500" />
-                          {ann.startDate && ann.endDate && ann.endDate !== '2099-12-31'
-                            ? `${ann.startDate} to ${ann.endDate}`
-                            : 'Active (Manual Control)'
-                          }
+                          {ann.displayDate ? (
+                            <span>Date: {ann.displayDate}</span>
+                          ) : ann.startDate && ann.endDate && ann.endDate !== '2099-12-31' ? (
+                            <span>Dates: {ann.startDate} to {ann.endDate}</span>
+                          ) : ann.endDate && ann.endDate !== '2099-12-31' ? (
+                            <span>Last Date: {ann.endDate}</span>
+                          ) : ann.startDate ? (
+                            <span>Start Date: {ann.startDate}</span>
+                          ) : (
+                            <span className="text-zinc-400 font-normal italic">No Dates Set</span>
+                          )}
                         </span>
                       </div>
                       <div className="space-y-0.5 text-right">
@@ -1857,48 +1869,60 @@ export default function ContentManagerDashboard() {
                   />
                 </div>
 
-                {/* Grid inputs */}
-                <div className="grid gap-4 grid-cols-2">
-                  
-                  {/* Applies To */}
-                  <div>
-                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Applies To Scope</label>
-                    <select
-                      value={annAppliesTo}
-                      onChange={(e) => setAnnAppliesTo(e.target.value as 'All' | '1:1 Only' | 'Group Only')}
-                      className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-medium bg-zinc-50 focus:bg-white"
-                    >
-                      <option value="All">All</option>
-                      <option value="1:1 Only">1:1 Students Only</option>
-                      <option value="Group Only">Group Students Only</option>
-                    </select>
+                {/* Scope & Date Options */}
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Applies To Scope</label>
+                  <select
+                    value={annAppliesTo}
+                    onChange={(e) => setAnnAppliesTo(e.target.value as 'All' | '1:1 Only' | 'Group Only')}
+                    className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-medium bg-zinc-50 focus:bg-white"
+                  >
+                    <option value="All">All Students (Default)</option>
+                    <option value="1:1 Only">1:1 Students Only</option>
+                    <option value="Group Only">Group Students Only</option>
+                  </select>
+                </div>
+
+                {/* 3 Optional Date Fields Grid */}
+                <div className="pt-2 border-t border-zinc-100">
+                  <span className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-2">Optional Date Settings</span>
+                  <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
+                    {/* Single Date */}
+                    <div>
+                      <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-wider mb-1">Date (Optional)</label>
+                      <input 
+                        type="date"
+                        value={annDisplayDate}
+                        onChange={(e) => setAnnDisplayDate(e.target.value)}
+                        className="w-full text-xs p-2 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-medium bg-zinc-50 focus:bg-white"
+                      />
+                      <span className="text-[9px] text-zinc-400 block mt-0.5">Single event date</span>
+                    </div>
+
+                    {/* Start Date */}
+                    <div>
+                      <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-wider mb-1">Start Date (Optional)</label>
+                      <input 
+                        type="date"
+                        value={annStartDate}
+                        onChange={(e) => setAnnStartDate(e.target.value)}
+                        className="w-full text-xs p-2 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-medium bg-zinc-50 focus:bg-white"
+                      />
+                      <span className="text-[9px] text-zinc-400 block mt-0.5">Start of range</span>
+                    </div>
+
+                    {/* Last Date */}
+                    <div>
+                      <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-wider mb-1">Last Date (Optional)</label>
+                      <input 
+                        type="date"
+                        value={annEndDate}
+                        onChange={(e) => setAnnEndDate(e.target.value)}
+                        className="w-full text-xs p-2 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-medium bg-zinc-50 focus:bg-white"
+                      />
+                      <span className="text-[9px] text-zinc-400 block mt-0.5">Deadline / End date</span>
+                    </div>
                   </div>
-
-                  {/* Empty cell for grid layout spacing */}
-                  <div />
-
-                  {/* Start Date */}
-                  <div>
-                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Start Date (Optional)</label>
-                    <input 
-                      type="date"
-                      value={annStartDate}
-                      onChange={(e) => setAnnStartDate(e.target.value)}
-                      className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-medium bg-zinc-50 focus:bg-white"
-                    />
-                  </div>
-
-                  {/* End Date */}
-                  <div>
-                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Expiration Date (Optional)</label>
-                    <input 
-                      type="date"
-                      value={annEndDate}
-                      onChange={(e) => setAnnEndDate(e.target.value)}
-                      className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-medium bg-zinc-50 focus:bg-white"
-                    />
-                  </div>
-
                 </div>
 
                 <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100">

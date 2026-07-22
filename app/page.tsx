@@ -190,8 +190,11 @@ export default function Home() {
   const [activeAnnouncement, setActiveAnnouncement] = useState<{
     title: string
     message: string
-    startDate: string
-    endDate: string
+    displayDate?: string
+    startDate?: string
+    endDate?: string
+    hasCustomStart?: boolean
+    hasCustomEnd?: boolean
     appliesTo: string
   } | null>(null)
 
@@ -213,11 +216,18 @@ export default function Home() {
           if (active.applies_to === '1:1') appliesTo = '1:1 Only'
           if (active.applies_to === 'group') appliesTo = 'Group Only'
 
+          const todayStr = new Date().toISOString().split('T')[0]
+          const hasCustomStart = Boolean(active.start_date && active.start_date !== '2020-01-01' && active.start_date !== todayStr)
+          const hasCustomEnd = Boolean(active.end_date && active.end_date !== '2099-12-31' && active.end_date !== '2030-12-31')
+
           setActiveAnnouncement({
             title: active.title,
             message: active.content,
+            displayDate: active.display_date || '',
             startDate: active.start_date || '',
             endDate: active.end_date || '',
+            hasCustomStart,
+            hasCustomEnd,
             appliesTo
           })
         } else {
@@ -1013,14 +1023,92 @@ export default function Home() {
                 {activeAnnouncement.message}
               </p>
               
-              {activeAnnouncement.appliesTo !== 'All' && (
-                <div className="pt-3 border-t border-gray-100 flex justify-end text-[10px] font-medium text-gray-500">
-                  <div className="text-right">
-                    <span className="block text-[9px] uppercase font-bold tracking-wider">Scope</span>
-                    <span className="text-gray-800 font-bold">{activeAnnouncement.appliesTo}</span>
-                  </div>
-                </div>
-              )}
+              {(() => {
+                const singleDate = activeAnnouncement.displayDate
+                const hasStart = activeAnnouncement.hasCustomStart && activeAnnouncement.startDate
+                const hasEnd = activeAnnouncement.hasCustomEnd && activeAnnouncement.endDate
+
+                if (singleDate) {
+                  return (
+                    <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-[10px] font-medium">
+                      <div>
+                        <span className="block text-[9px] uppercase font-bold tracking-wider text-gray-500">Date</span>
+                        <span className="text-gray-900 font-mono font-bold">{singleDate}</span>
+                      </div>
+                      {activeAnnouncement.appliesTo !== 'All' && (
+                        <div className="text-right">
+                          <span className="block text-[9px] uppercase font-bold tracking-wider text-gray-500">Scope</span>
+                          <span className="text-gray-800 font-bold">{activeAnnouncement.appliesTo}</span>
+                        </div>
+                      )}
+                    </div>
+                  )
+                }
+
+                if (hasStart && hasEnd) {
+                  return (
+                    <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-[10px] font-medium">
+                      <div>
+                        <span className="block text-[9px] uppercase font-bold tracking-wider text-gray-500">Dates</span>
+                        <span className="text-gray-900 font-mono font-bold">{activeAnnouncement.startDate} to {activeAnnouncement.endDate}</span>
+                      </div>
+                      {activeAnnouncement.appliesTo !== 'All' && (
+                        <div className="text-right">
+                          <span className="block text-[9px] uppercase font-bold tracking-wider text-gray-500">Scope</span>
+                          <span className="text-gray-800 font-bold">{activeAnnouncement.appliesTo}</span>
+                        </div>
+                      )}
+                    </div>
+                  )
+                }
+
+                if (hasEnd) {
+                  return (
+                    <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-[10px] font-medium">
+                      <div>
+                        <span className="block text-[9px] uppercase font-bold tracking-wider text-gray-500">Last Date</span>
+                        <span className="text-gray-900 font-mono font-bold">{activeAnnouncement.endDate}</span>
+                      </div>
+                      {activeAnnouncement.appliesTo !== 'All' && (
+                        <div className="text-right">
+                          <span className="block text-[9px] uppercase font-bold tracking-wider text-gray-500">Scope</span>
+                          <span className="text-gray-800 font-bold">{activeAnnouncement.appliesTo}</span>
+                        </div>
+                      )}
+                    </div>
+                  )
+                }
+
+                if (hasStart) {
+                  return (
+                    <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-[10px] font-medium">
+                      <div>
+                        <span className="block text-[9px] uppercase font-bold tracking-wider text-gray-500">Start Date</span>
+                        <span className="text-gray-900 font-mono font-bold">{activeAnnouncement.startDate}</span>
+                      </div>
+                      {activeAnnouncement.appliesTo !== 'All' && (
+                        <div className="text-right">
+                          <span className="block text-[9px] uppercase font-bold tracking-wider text-gray-500">Scope</span>
+                          <span className="text-gray-800 font-bold">{activeAnnouncement.appliesTo}</span>
+                        </div>
+                      )}
+                    </div>
+                  )
+                }
+
+                if (activeAnnouncement.appliesTo !== 'All') {
+                  return (
+                    <div className="pt-3 border-t border-gray-100 flex justify-end text-[10px] font-medium text-gray-500">
+                      <div className="text-right">
+                        <span className="block text-[9px] uppercase font-bold tracking-wider">Scope</span>
+                        <span className="text-gray-800 font-bold">{activeAnnouncement.appliesTo}</span>
+                      </div>
+                    </div>
+                  )
+                }
+
+                return null
+              })()}
             </div>
 
             {/* Actions */}
