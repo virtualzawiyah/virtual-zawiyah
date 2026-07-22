@@ -35,7 +35,10 @@ export async function GET(request: Request) {
 
     const { authorized } = await checkAuth(supabaseUserClient, supabaseAdmin)
 
-    let query = supabaseAdmin.from('announcements').select('id, title, content, applies_to, start_date, end_date, created_at')
+    let query = supabaseAdmin
+      .from('announcements')
+      .select('id, title, content, applies_to, start_date, end_date, created_at')
+      .neq('title', '__course_metadata_json__')
 
     if (!authorized) {
       // Public view: return only active announcements

@@ -14,6 +14,7 @@ export async function GET() {
     const { data, error } = await supabaseAdmin
       .from('announcements')
       .select('id, title, content, applies_to, start_date, end_date, created_at')
+      .neq('title', '__course_metadata_json__')
       .lte('start_date', todayStr)
       .gte('end_date', todayStr)
       .order('created_at', { ascending: false })
