@@ -20,7 +20,14 @@ import {
   Search, 
   FileText,
   Sparkles,
-  Loader2
+  Loader2,
+  Radio,
+  Video,
+  Clock,
+  AlertTriangle,
+  Play,
+  Calendar,
+  UserPlus
 } from 'lucide-react'
 import BackToFounderBanner from '@/components/BackToFounderBanner'
 import NotificationBell from '@/components/NotificationBell'
@@ -102,16 +109,165 @@ interface MonthlyReportMock {
   size: string
 }
 
-// --- Initial Mock Data ---
+interface TeacherScheduleItem {
+  id: string
+  studentName: string
+  courseName: string
+  scheduledTime: string
+  status: 'completed' | 'live' | 'overdue' | 'upcoming' | 'leave'
+  lessonNotes?: string
+  leaveReason?: string
+}
+
+interface TeacherLiveMonitorMock {
+  id: string
+  name: string
+  program: string
+  gender: string
+  avatar: string
+  currentStatus: 'in_class' | 'idle' | 'leave'
+  activeStudent?: string
+  activeCourse?: string
+  schedules: TeacherScheduleItem[]
+}
+
+const INITIAL_TEACHER_MONITOR_DATA: TeacherLiveMonitorMock[] = [
+  {
+    id: 'tch-1',
+    name: 'Ustadh Ahmad',
+    program: '1:1 & Tajweed Faculty',
+    gender: 'Male',
+    avatar: 'UA',
+    currentStatus: 'in_class',
+    activeStudent: 'Tariq Mahmood',
+    activeCourse: 'Applied Tajweed (Basic)',
+    schedules: [
+      {
+        id: 'sch-1',
+        studentName: 'Ahmed Bilal',
+        courseName: 'Applied Tajweed (Basic)',
+        scheduledTime: '13:00 - 13:30',
+        status: 'completed',
+        lessonNotes: 'Makhraj of letters corrected: Tajweed on letter [ق] practiced with Surah Al-Fatiha.'
+      },
+      {
+        id: 'sch-2',
+        studentName: 'Tariq Mahmood',
+        courseName: 'Applied Tajweed (Basic)',
+        scheduledTime: '14:00 - 14:30',
+        status: 'live'
+      },
+      {
+        id: 'sch-3',
+        studentName: 'Omar Farooq',
+        courseName: 'Quran Reading (Nazra)',
+        scheduledTime: '14:30 - 15:00',
+        status: 'overdue'
+      },
+      {
+        id: 'sch-4',
+        studentName: 'Zaynul Haroon',
+        courseName: 'Arabic Grammar (Sarf & Nahw)',
+        scheduledTime: '18:00 - 18:30',
+        status: 'upcoming'
+      },
+      {
+        id: 'sch-5',
+        studentName: 'Bilal Siddiqui',
+        courseName: 'Applied Tajweed (Basic)',
+        scheduledTime: '19:00 - 19:30',
+        status: 'upcoming'
+      }
+    ]
+  },
+  {
+    id: 'tch-2',
+    name: 'Ustadha Mariam',
+    program: '1:1 Female Faculty',
+    gender: 'Female',
+    avatar: 'UM',
+    currentStatus: 'idle',
+    schedules: [
+      {
+        id: 'sch-6',
+        studentName: 'Sara Bilal',
+        courseName: 'Dars-e-Nizami Year 1',
+        scheduledTime: '10:00 - 10:30',
+        status: 'completed',
+        lessonNotes: 'Completed Nahw Mir Chapter 3 exercises with full syntax tree.'
+      },
+      {
+        id: 'sch-7',
+        studentName: 'Fatima Zahra',
+        courseName: 'Quran Reading (Nazra)',
+        scheduledTime: '18:30 - 19:00',
+        status: 'upcoming'
+      },
+      {
+        id: 'sch-8',
+        studentName: 'Ayesha Malik',
+        courseName: '40 Hadith Memorization',
+        scheduledTime: '19:30 - 20:00',
+        status: 'upcoming'
+      }
+    ]
+  },
+  {
+    id: 'tch-3',
+    name: 'Qari Shahid',
+    program: '1:1 Male Faculty',
+    gender: 'Male',
+    avatar: 'QS',
+    currentStatus: 'idle',
+    schedules: [
+      {
+        id: 'sch-9',
+        studentName: 'Suhail Khan',
+        courseName: 'Quran Memorization (Hifz)',
+        scheduledTime: '11:00 - 11:30',
+        status: 'completed',
+        lessonNotes: 'Juz 30 revision completed cleanly.'
+      },
+      {
+        id: 'sch-10',
+        studentName: 'Zohaib Ahmed',
+        courseName: 'Applied Tajweed (Basic)',
+        scheduledTime: '15:00 - 15:30',
+        status: 'leave',
+        leaveReason: 'Approved Excused Leave — Personal Emergency (Substitute Assigned)'
+      }
+    ]
+  },
+  {
+    id: 'tch-4',
+    name: 'Sana Javed',
+    program: '1:1 Female Faculty',
+    gender: 'Female',
+    avatar: 'SJ',
+    currentStatus: 'idle',
+    schedules: [
+      {
+        id: 'sch-11',
+        studentName: 'Rania Regular',
+        courseName: 'Quran Reading with Tajweed',
+        scheduledTime: '19:00 - 19:30',
+        status: 'upcoming'
+      }
+    ]
+  }
+]
 
 const MONTHLY_REPORTS: MonthlyReportMock[] = [
   { id: 'rep-01', title: 'June 2026 — Supervisor Summary Report', date: '2026-06-20', size: '1.2 MB' },
   { id: 'rep-02', title: 'May 2026 — Supervisor Summary Report', date: '2026-05-20', size: '1.4 MB' },
-  { id: 'rep-03', title: 'April 2026 — Supervisor Summary Report', date: '2026-04-20', size: '1.1 MB' }
+  { id: 'rep-03', title: 'April 2026 — Supervisor Summary Report', date: '2026-05-20', size: '1.1 MB' }
 ]
 
 export default function SupervisorDashboard() {
-  const [activeTab, setActiveTab] = useState<'attendance' | 'disputes' | 'changes' | 'classes' | 'disciplinary' | 'reports'>('attendance')
+  const [activeTab, setActiveTab] = useState<'live-monitor' | 'attendance' | 'disputes' | 'changes' | 'classes' | 'disciplinary' | 'reports'>('live-monitor')
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string>('tch-1')
+  const [scheduleFilter, setScheduleFilter] = useState<'all' | 'overdue' | 'live' | 'upcoming' | 'completed' | 'leave'>('all')
+  const [teacherMonitorData, setTeacherMonitorData] = useState<TeacherLiveMonitorMock[]>(INITIAL_TEACHER_MONITOR_DATA)
   
   const [admissions, setAdmissions] = useState<AdmissionRequestMock[]>([])
   
@@ -452,6 +608,11 @@ export default function SupervisorDashboard() {
     window.location.href = '/staff/login'
   }
 
+  const selectedTeacher = teacherMonitorData.find(t => t.id === selectedTeacherId) || teacherMonitorData[0]
+  const allOverdueSchedules = teacherMonitorData.flatMap(t => 
+    t.schedules.filter(s => s.status === 'overdue').map(s => ({ ...s, teacherName: t.name, teacherId: t.id }))
+  )
+
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">
       <BackToFounderBanner />
@@ -475,6 +636,28 @@ export default function SupervisorDashboard() {
         {/* Portal Navigation Items */}
         <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
           
+          <button 
+            onClick={() => {
+              setActiveTab('live-monitor')
+              setSuccessBanner(null)
+            }}
+            className={`flex items-center justify-between w-full p-3 rounded-xl text-xs font-bold transition-all duration-150 ${
+              activeTab === 'live-monitor' 
+                ? 'bg-[#1B6B3A]/10 text-[#1B6B3A] border-l-4 border-[#1B6B3A] shadow-xs' 
+                : 'text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <Radio className="h-4.5 w-4.5 text-[#1B6B3A] animate-pulse" />
+              <span>Live Teacher Monitor</span>
+            </div>
+            {teacherMonitorData.some(t => t.schedules.some(s => s.status === 'overdue')) && (
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-rose-600 text-white animate-pulse">
+                Alarm
+              </span>
+            )}
+          </button>
+
           <button 
             onClick={() => {
               setActiveTab('attendance')
@@ -626,6 +809,7 @@ export default function SupervisorDashboard() {
         {/* Header bar */}
         <header className="h-16 shrink-0 bg-white border-b border-zinc-200 px-8 flex justify-between items-center z-10">
           <h2 className="text-md font-serif font-bold text-zinc-900 capitalize">
+            {activeTab === 'live-monitor' && 'Live Teacher Operations & Monitor'}
             {activeTab === 'attendance' && 'Attendance & Performance Reports'}
             {activeTab === 'disputes' && 'Leave & Makeup Disputes Resolution'}
             {activeTab === 'changes' && 'Teacher Reassignment Requests'}
@@ -670,6 +854,312 @@ export default function SupervisorDashboard() {
                 <p className="font-bold">Supervisor Action Recorded Successfully</p>
                 <p className="mt-1 leading-relaxed">{successBanner}</p>
               </div>
+            </div>
+          )}
+
+          {/* ========================================== */}
+          {/* TAB 0: LIVE TEACHER MONITOR                */}
+          {/* ========================================== */}
+          {activeTab === 'live-monitor' && (
+            <div className="space-y-6 animate-fade-in">
+
+              {/* OVERDUE CLASS ALARM BANNER */}
+              {allOverdueSchedules.length > 0 && (
+                <div className="bg-rose-50 border-2 border-rose-500/50 rounded-2xl p-5 shadow-lg animate-pulse flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2.5 bg-rose-600 text-white rounded-xl shadow-md shrink-0 mt-0.5">
+                      <AlertTriangle className="h-6 w-6 animate-bounce" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-extrabold uppercase tracking-widest bg-rose-600 text-white px-2 py-0.5 rounded">
+                          HIGH-PRIORITY OPERATIONAL ALARM
+                        </span>
+                        <span className="text-xs font-mono font-bold text-rose-700">
+                          {allOverdueSchedules.length} Class(es) Overdue
+                        </span>
+                      </div>
+                      <h3 className="text-base font-bold text-rose-950 font-serif mt-1">
+                        Class time has passed but session has NOT started!
+                      </h3>
+                      <div className="mt-2 space-y-1">
+                        {allOverdueSchedules.map(ovd => (
+                          <p key={ovd.id} className="text-xs text-rose-900 font-semibold flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-rose-600 shrink-0"></span>
+                            <span>Student: <strong className="font-bold text-rose-950">{ovd.studentName}</strong> ({ovd.courseName}) with <strong className="font-bold text-rose-950">{ovd.teacherName}</strong></span>
+                            <span className="font-mono bg-rose-200/80 px-2 py-0.5 rounded text-[10px] text-rose-950 font-bold">Scheduled {ovd.scheduledTime}</span>
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setActiveTab('changes')
+                      setSuccessBanner('Switched to Teacher Change & Substitute Console to assign substitute coverage.')
+                    }}
+                    className="px-4 py-2 bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95 shrink-0 flex items-center gap-1.5"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    Assign Substitute Now
+                  </button>
+                </div>
+              )}
+
+              {/* MASTER-DETAIL LAYOUT: LEFT TEACHER ROSTER & RIGHT OPERATIONS PANEL */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+                {/* LEFT ROSTER (4 COLUMNS): ALL TEACHERS LIST */}
+                <div className="lg:col-span-4 bg-white border border-zinc-200 rounded-2xl p-5 space-y-4 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-bold text-zinc-900 font-serif">Supervised Faculty</h3>
+                      <p className="text-[10px] text-zinc-650 font-medium">Select a teacher to inspect live classroom</p>
+                    </div>
+                    <span className="text-[10px] font-bold font-mono px-2 py-0.5 bg-zinc-100 text-zinc-700 rounded-full border border-zinc-200">
+                      {teacherMonitorData.length} Teachers
+                    </span>
+                  </div>
+
+                  {/* Teacher Cards */}
+                  <div className="space-y-2.5">
+                    {teacherMonitorData.map(teacher => {
+                      const isSelected = selectedTeacherId === teacher.id
+                      const hasOverdue = teacher.schedules.some(s => s.status === 'overdue')
+                      const isInClass = teacher.currentStatus === 'in_class'
+
+                      return (
+                        <div
+                          key={teacher.id}
+                          onClick={() => setSelectedTeacherId(teacher.id)}
+                          className={`p-3.5 rounded-xl border cursor-pointer transition-all duration-150 flex items-center justify-between gap-3 ${
+                            isSelected
+                              ? 'bg-[#1B6B3A]/5 border-[#1B6B3A] shadow-xs'
+                              : hasOverdue
+                              ? 'bg-rose-50/60 border-rose-300 hover:border-rose-400'
+                              : 'bg-white border-zinc-200 hover:border-zinc-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className={`h-9 w-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${
+                              isInClass 
+                                ? 'bg-emerald-600 text-white shadow-xs' 
+                                : hasOverdue 
+                                ? 'bg-rose-600 text-white shadow-xs' 
+                                : 'bg-zinc-100 text-zinc-700 border border-zinc-200'
+                            }`}>
+                              {teacher.avatar}
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="text-xs font-bold text-zinc-900 truncate">{teacher.name}</h4>
+                              <p className="text-[10px] text-zinc-650 truncate">{teacher.program}</p>
+                            </div>
+                          </div>
+
+                          <div className="shrink-0 text-right">
+                            {hasOverdue ? (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider bg-rose-600 text-white px-2 py-0.5 rounded-full animate-pulse">
+                                <AlertTriangle className="h-3 w-3" /> Overdue
+                              </span>
+                            ) : isInClass ? (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-ping"></span> Live Class
+                              </span>
+                            ) : (
+                              <span className="text-[9px] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-600 border border-zinc-200 px-2 py-0.5 rounded-full">
+                                Idle
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* RIGHT OPERATIONS PANEL (8 COLUMNS): SELECTED TEACHER LIVE MONITOR */}
+                <div className="lg:col-span-8 space-y-6">
+
+                  {selectedTeacher && (
+                    <>
+                      {/* REAL-TIME HERO CLASSROOM STATUS BANNER */}
+                      <div className={`rounded-2xl border p-6 transition-all shadow-xs ${
+                        selectedTeacher.currentStatus === 'in_class'
+                          ? 'bg-gradient-to-r from-emerald-900 to-emerald-950 border-emerald-700 text-white'
+                          : 'bg-white border-zinc-200 text-zinc-900'
+                      }`}>
+                        <div className="flex items-start justify-between gap-4 flex-wrap">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              {selectedTeacher.currentStatus === 'in_class' ? (
+                                <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2.5 py-1 rounded-full">
+                                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
+                                  CLASSROOM CURRENTLY LIVE NOW
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest bg-zinc-100 text-zinc-600 border border-zinc-200 px-2.5 py-1 rounded-full">
+                                  <Clock className="h-3 w-3" />
+                                  TEACHER NOT IN CLASS RIGHT NOW
+                                </span>
+                              )}
+                              <span className="text-xs font-semibold opacity-80">
+                                {selectedTeacher.program}
+                              </span>
+                            </div>
+
+                            <h2 className="text-2xl font-serif font-bold mt-2">
+                              {selectedTeacher.name}
+                            </h2>
+
+                            {selectedTeacher.currentStatus === 'in_class' ? (
+                              <p className="text-xs text-emerald-200 font-sans leading-relaxed">
+                                Currently conducting 1:1 Live Session with <strong className="text-white font-bold">{selectedTeacher.activeStudent}</strong> ({selectedTeacher.activeCourse}).
+                              </p>
+                            ) : (
+                              <p className="text-xs text-zinc-650 font-sans leading-relaxed">
+                                Instructor is currently idle. Next class is scheduled on their daily roster.
+                              </p>
+                            )}
+                          </div>
+
+                          {selectedTeacher.currentStatus === 'in_class' && (
+                            <button
+                              onClick={() => alert(`Launching Supervisor Observer Mode for ${selectedTeacher.name}'s classroom...`)}
+                              className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 text-xs font-bold rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-2"
+                            >
+                              <Video className="h-4 w-4" />
+                              Join Observer View
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* CATEGORIZED SCHEDULE FILTERS & BREAKDOWN */}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between flex-wrap gap-3">
+                          <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-800 flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-[#1B6B3A]" />
+                            Today&apos;s Class Schedule Breakdown
+                          </h3>
+
+                          {/* Filter Pills */}
+                          <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl border border-zinc-200 text-[10px] font-bold">
+                            {(['all', 'overdue', 'live', 'upcoming', 'completed', 'leave'] as const).map(f => (
+                              <button
+                                key={f}
+                                onClick={() => setScheduleFilter(f)}
+                                className={`px-2.5 py-1 rounded-lg capitalize transition-all ${
+                                  scheduleFilter === f
+                                    ? 'bg-white text-zinc-900 shadow-xs border border-zinc-250 font-extrabold'
+                                    : 'text-zinc-600 hover:text-zinc-900'
+                                }`}
+                              >
+                                {f}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Schedule Items List */}
+                        <div className="space-y-3">
+                          {selectedTeacher.schedules
+                            .filter(sch => scheduleFilter === 'all' || sch.status === scheduleFilter)
+                            .map(sch => (
+                              <div
+                                key={sch.id}
+                                className={`p-4 rounded-2xl border transition-all shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                                  sch.status === 'overdue'
+                                    ? 'bg-rose-50/80 border-rose-300'
+                                    : sch.status === 'live'
+                                    ? 'bg-emerald-50/80 border-emerald-300'
+                                    : sch.status === 'completed'
+                                    ? 'bg-white border-zinc-200'
+                                    : sch.status === 'leave'
+                                    ? 'bg-amber-50/70 border-amber-200'
+                                    : 'bg-zinc-50/50 border-zinc-200'
+                                }`}
+                              >
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
+                                      sch.status === 'overdue'
+                                        ? 'bg-rose-600 text-white border-rose-600 animate-pulse'
+                                        : sch.status === 'live'
+                                        ? 'bg-emerald-600 text-white border-emerald-600'
+                                        : sch.status === 'completed'
+                                        ? 'bg-zinc-100 text-zinc-700 border-zinc-200'
+                                        : sch.status === 'leave'
+                                        ? 'bg-amber-100 text-amber-900 border-amber-200'
+                                        : 'bg-blue-50 text-blue-800 border-blue-200'
+                                    }`}>
+                                      {sch.status === 'overdue' && '🚨 OVERDUE / UNSTARTED'}
+                                      {sch.status === 'live' && '🟢 LIVE NOW'}
+                                      {sch.status === 'completed' && '✅ COMPLETED'}
+                                      {sch.status === 'upcoming' && '🔵 UPCOMING TODAY'}
+                                      {sch.status === 'leave' && '🟡 APPROVED LEAVE'}
+                                    </span>
+                                    <span className="text-xs font-mono font-bold text-zinc-700">
+                                      {sch.scheduledTime}
+                                    </span>
+                                  </div>
+
+                                  <h4 className="text-sm font-bold text-zinc-900">{sch.studentName}</h4>
+                                  <p className="text-xs text-zinc-650">{sch.courseName}</p>
+
+                                  {sch.lessonNotes && (
+                                    <p className="text-[11px] text-zinc-600 bg-zinc-100 p-2.5 rounded-xl border border-zinc-200 mt-2 italic font-sans leading-relaxed">
+                                      &ldquo;{sch.lessonNotes}&rdquo;
+                                    </p>
+                                  )}
+
+                                  {sch.leaveReason && (
+                                    <p className="text-[11px] text-amber-900 bg-amber-100/60 p-2 rounded-lg border border-amber-200 mt-2 font-medium">
+                                      {sch.leaveReason}
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* Actions */}
+                                <div className="shrink-0 flex items-center gap-2">
+                                  {sch.status === 'overdue' && (
+                                    <button
+                                      onClick={() => {
+                                        setActiveTab('changes')
+                                        setSuccessBanner(`Opened substitute reassignment request for ${sch.studentName}.`)
+                                      }}
+                                      className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95 flex items-center gap-1.5"
+                                    >
+                                      <UserPlus className="h-3.5 w-3.5" />
+                                      Reassign Substitute
+                                    </button>
+                                  )}
+                                  {sch.status === 'live' && (
+                                    <button
+                                      onClick={() => alert(`Entering live classroom observer view for ${sch.studentName}...`)}
+                                      className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95 flex items-center gap-1.5"
+                                    >
+                                      <Video className="h-3.5 w-3.5" />
+                                      Join Class
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+
+                          {selectedTeacher.schedules.filter(sch => scheduleFilter === 'all' || sch.status === scheduleFilter).length === 0 && (
+                            <div className="bg-white border border-zinc-200 rounded-2xl p-8 text-center text-xs text-zinc-450 italic">
+                              No classes matching filter &ldquo;{scheduleFilter}&rdquo; for this teacher today.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                </div>
+
+              </div>
+
             </div>
           )}
 
