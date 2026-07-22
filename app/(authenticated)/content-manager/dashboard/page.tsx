@@ -789,16 +789,24 @@ export default function ContentManagerDashboard() {
   const handleSaveCourseOrder = async () => {
     setIsSavingCourseOrder(true)
     try {
-      const patches = courses.map((course, idx) => {
-        const orderVal = course.sortOrder !== undefined ? course.sortOrder : idx
-        return fetch('/api/content/courses', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: course.id, sortOrder: orderVal })
-        })
+      const items = courses.map((course, idx) => ({
+        id: course.id,
+        title: course.name,
+        program_type: course.category === 'Group' ? 'group' : '1:1',
+        sortOrder: course.sortOrder !== undefined ? course.sortOrder : idx
+      }))
+
+      const res = await fetch('/api/content/courses/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items })
       })
 
-      await Promise.all(patches)
+      if (!res.ok) {
+        const errData = await res.json()
+        throw new Error(errData.error || 'Failed to update course order')
+      }
+
       setHasUnsavedCourseOrder(false)
       triggerToast('Course order saved successfully! The updated course order is now live on the public website.')
       await fetchData()
