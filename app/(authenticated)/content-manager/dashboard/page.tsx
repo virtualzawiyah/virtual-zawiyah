@@ -430,12 +430,10 @@ export default function ContentManagerDashboard() {
       setProfileRequests(reqData.requests || [])
       setFeedbacks(feedbackData.feedbacks || [])
       
-      // Map Announcements (using home page 2026-06-30 fallback, or fallback to current time)
-      const referenceDate = new Date('2026-06-30T12:00:00')
+      // Map Announcements using real-time today date string
+      const todayStr = new Date().toISOString().split('T')[0]
       const mappedAnnouncements = annData.map((ann: any) => {
-        const start = new Date(ann.start_date + 'T00:00:00')
-        const end = new Date(ann.end_date + 'T23:59:59')
-        const isActive = referenceDate >= start && referenceDate <= end
+        const isActive = todayStr >= ann.start_date && todayStr <= ann.end_date
         
         let appliesTo: 'All' | '1:1 Only' | 'Group Only' = 'All'
         if (ann.applies_to === '1:1') appliesTo = '1:1 Only'
@@ -620,6 +618,27 @@ export default function ContentManagerDashboard() {
       await fetchData()
     } catch (err: any) {
       alert(`Error: ${err.message}`)
+    }
+  }
+
+  const handleDeleteAnnouncement = async (id: string, title: string) => {
+    if (!confirm(`Are you sure you want to delete the announcement "${title}"? This will permanently remove it.`)) return
+    try {
+      const res = await fetch('/api/content/announcements', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      })
+
+      if (!res.ok) {
+        const errData = await res.json()
+        throw new Error(errData.error || 'Failed to delete announcement')
+      }
+
+      triggerToast(`Announcement "${title}" deleted successfully.`)
+      await fetchData()
+    } catch (err: any) {
+      alert(`Error deleting announcement: ${err.message}`)
     }
   }
 
@@ -1257,6 +1276,14 @@ export default function ContentManagerDashboard() {
                       >
                         <Edit className="h-3 w-3" />
                         <span>Edit</span>
+                      </button>
+                      <button
+                        onClick={() => handleDeleteAnnouncement(ann.id, ann.title)}
+                        className="px-2.5 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 font-bold text-[9px] uppercase tracking-wider flex items-center gap-1 transition-all"
+                        title="Delete Announcement"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                        <span>Delete</span>
                       </button>
                     </div>
                   </div>
