@@ -181,7 +181,10 @@ export async function GET() {
             })
           })
         } else {
-          // Default assignment schedule line
+          // Default assignment schedule line (15:00 - 15:30 PST)
+          const defaultStartMins = 15 * 60 // 900 (15:00)
+          const defaultEndMins = 15 * 60 + 30 // 930 (15:30)
+
           const isAttended = (attendanceLogs || []).some(log => log.teacher_id === t.id && log.student_id === studentId)
           const lessonLog = (lessonLogs || []).find(log => log.teacher_id === t.id && log.student_id === studentId)
 
@@ -190,6 +193,12 @@ export async function GET() {
             itemStatus = 'leave'
           } else if (isAttended || lessonLog) {
             itemStatus = 'completed'
+          } else if (currentTotalMins >= defaultStartMins && currentTotalMins <= defaultEndMins) {
+            itemStatus = 'live'
+          } else if (currentTotalMins > defaultEndMins) {
+            itemStatus = 'overdue'
+          } else {
+            itemStatus = 'upcoming'
           }
 
           teacherScheduleItems.push({
@@ -199,7 +208,7 @@ export async function GET() {
             course: 'Quran & Islamic Studies',
             scheduledTime: '15:00 - 15:30 (PST)',
             rawStartTime: '15:00',
-            rawStartMins: 15 * 60,
+            rawStartMins: defaultStartMins,
             status: itemStatus,
             isToday: true,
             summary: lessonLog ? (lessonLog.lesson_notes || `Surah ${lessonLog.surah_name || 'Nazra'}`) : undefined,
