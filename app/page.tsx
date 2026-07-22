@@ -1013,18 +1013,14 @@ export default function Home() {
                 {activeAnnouncement.message}
               </p>
               
-              <div className="pt-4 border-t border-gray-100 flex items-center justify-between text-[10px] font-medium text-gray-505">
-                <div>
-                  <span className="block text-[9px] uppercase font-bold tracking-wider">Date Span</span>
-                  <span className="text-gray-700 font-mono font-bold">
-                    {activeAnnouncement.startDate} to {activeAnnouncement.endDate}
-                  </span>
+              {activeAnnouncement.appliesTo !== 'All' && (
+                <div className="pt-3 border-t border-gray-100 flex justify-end text-[10px] font-medium text-gray-500">
+                  <div className="text-right">
+                    <span className="block text-[9px] uppercase font-bold tracking-wider">Scope</span>
+                    <span className="text-gray-800 font-bold">{activeAnnouncement.appliesTo}</span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className="block text-[9px] uppercase font-bold tracking-wider">Scope</span>
-                  <span className="text-gray-800 font-bold">{activeAnnouncement.appliesTo}</span>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Actions */}

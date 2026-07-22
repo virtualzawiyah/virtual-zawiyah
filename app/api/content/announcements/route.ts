@@ -78,12 +78,16 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { title, content, applies_to, start_date, end_date } = body
 
-    if (!title || !content || !applies_to || !start_date || !end_date) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    if (!title || !content) {
+      return NextResponse.json({ error: 'Title and content are required' }, { status: 400 })
     }
 
+    const todayStr = new Date().toISOString().split('T')[0]
+    const finalStartDate = start_date || todayStr
+    const finalEndDate = end_date || '2099-12-31'
+
     // Map applies_to to lowercase check constraint ('all', '1:1', 'group')
-    let mappedAppliesTo = applies_to.toLowerCase()
+    let mappedAppliesTo = (applies_to || 'all').toLowerCase()
     if (mappedAppliesTo.includes('1:1')) mappedAppliesTo = '1:1'
     if (mappedAppliesTo.includes('group')) mappedAppliesTo = 'group'
     if (mappedAppliesTo.includes('all')) mappedAppliesTo = 'all'
@@ -94,8 +98,8 @@ export async function POST(request: Request) {
         title,
         content,
         applies_to: mappedAppliesTo,
-        start_date,
-        end_date,
+        start_date: finalStartDate,
+        end_date: finalEndDate,
         published_by: userId
       })
       .select()

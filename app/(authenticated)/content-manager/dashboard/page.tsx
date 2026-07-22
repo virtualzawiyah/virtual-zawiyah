@@ -501,16 +501,11 @@ export default function ContentManagerDashboard() {
 
   // --- Action Handlers: Announcements ---
   const openCreateAnnouncement = () => {
-    const today = new Date().toISOString().split('T')[0]
-    const thirtyDaysLater = new Date()
-    thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30)
-    const thirtyDaysLaterStr = thirtyDaysLater.toISOString().split('T')[0]
-
     setAnnTitle('')
     setAnnMessage('')
     setAnnAppliesTo('All')
-    setAnnStartDate(today)
-    setAnnEndDate(thirtyDaysLaterStr)
+    setAnnStartDate('')
+    setAnnEndDate('')
     setActiveModal('create-announcement')
   }
 
@@ -1247,10 +1242,13 @@ export default function ContentManagerDashboard() {
 
                     <div className="pt-3 border-t border-zinc-100 flex items-center justify-between text-[10px] font-medium">
                       <div className="space-y-0.5">
-                        <span className="text-zinc-500 block text-[9px] uppercase font-bold tracking-wider">Date Span</span>
-                        <span className="text-zinc-700 font-mono font-bold flex items-center gap-1">
+                        <span className="text-zinc-500 block text-[9px] uppercase font-bold tracking-wider">Validity Period</span>
+                        <span className="text-zinc-700 font-bold flex items-center gap-1">
                           <Calendar className="h-3 w-3 text-zinc-500" />
-                          {ann.startDate} to {ann.endDate}
+                          {ann.startDate && ann.endDate && ann.endDate !== '2099-12-31'
+                            ? `${ann.startDate} to ${ann.endDate}`
+                            : 'Active (Manual Control)'
+                          }
                         </span>
                       </div>
                       <div className="space-y-0.5 text-right">
@@ -1881,10 +1879,9 @@ export default function ContentManagerDashboard() {
 
                   {/* Start Date */}
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Start Date</label>
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Start Date (Optional)</label>
                     <input 
                       type="date"
-                      required
                       value={annStartDate}
                       onChange={(e) => setAnnStartDate(e.target.value)}
                       className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-medium bg-zinc-50 focus:bg-white"
@@ -1893,10 +1890,9 @@ export default function ContentManagerDashboard() {
 
                   {/* End Date */}
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">End Date</label>
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Expiration Date (Optional)</label>
                     <input 
                       type="date"
-                      required
                       value={annEndDate}
                       onChange={(e) => setAnnEndDate(e.target.value)}
                       className="w-full text-xs p-2.5 rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#1B6B3A]/20 focus:border-[#1B6B3A] text-zinc-800 font-mono font-medium bg-zinc-50 focus:bg-white"
