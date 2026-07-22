@@ -5,17 +5,31 @@ import { NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-function parseContentWithDisplayDate(rawContent: string) {
+function parseContentWithDates(rawContent: string) {
   let displayDate = ''
+  let customStartDate = ''
+  let customEndDate = ''
   let content = rawContent || ''
-  if (content.startsWith('__DATE:')) {
+
+  if (content.startsWith('__META_DATES:')) {
+    const endIdx = content.indexOf('__\n')
+    if (endIdx !== -1) {
+      const metaStr = content.substring(13, endIdx)
+      const parts = metaStr.split('|')
+      displayDate = parts[0] || ''
+      customStartDate = parts[1] || ''
+      customEndDate = parts[2] || ''
+      content = content.substring(endIdx + 3)
+    }
+  } else if (content.startsWith('__DATE:')) {
     const endIdx = content.indexOf('__\n')
     if (endIdx !== -1) {
       displayDate = content.substring(7, endIdx)
       content = content.substring(endIdx + 3)
     }
   }
-  return { displayDate, content }
+
+  return { displayDate, customStartDate, customEndDate, content }
 }
 
 export async function GET() {
@@ -34,11 +48,13 @@ export async function GET() {
     if (error) throw error
 
     const enriched = (data || []).map((ann: any) => {
-      const { displayDate, content } = parseContentWithDisplayDate(ann.content)
+      const { displayDate, customStartDate, customEndDate, content } = parseContentWithDates(ann.content)
       return {
         ...ann,
         content,
-        display_date: displayDate
+        display_date: displayDate,
+        custom_start_date: customStartDate,
+        custom_end_date: customEndDate
       }
     })
 

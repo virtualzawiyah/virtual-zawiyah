@@ -28,17 +28,42 @@ async function checkAuth(supabaseUserClient: any, supabaseAdmin: any) {
   return { authorized: true, userId: session.user.id }
 }
 
-function parseContentWithDisplayDate(rawContent: string) {
+function parseContentWithDates(rawContent: string) {
   let displayDate = ''
+  let customStartDate = ''
+  let customEndDate = ''
   let content = rawContent || ''
-  if (content.startsWith('__DATE:')) {
+
+  if (content.startsWith('__META_DATES:')) {
+    const endIdx = content.indexOf('__\n')
+    if (endIdx !== -1) {
+      const metaStr = content.substring(13, endIdx)
+      const parts = metaStr.split('|')
+      displayDate = parts[0] || ''
+      customStartDate = parts[1] || ''
+      customEndDate = parts[2] || ''
+      content = content.substring(endIdx + 3)
+    }
+  } else if (content.startsWith('__DATE:')) {
     const endIdx = content.indexOf('__\n')
     if (endIdx !== -1) {
       displayDate = content.substring(7, endIdx)
       content = content.substring(endIdx + 3)
     }
   }
-  return { displayDate, content }
+
+  return { displayDate, customStartDate, customEndDate, content }
+}
+
+function buildContentWithDates(text: string, displayDate?: string, startDate?: string, endDate?: string) {
+  const cleanDisplay = (displayDate || '').trim()
+  const cleanStart = (startDate || '').trim()
+  const cleanEnd = (endDate || '').trim()
+
+  if (cleanDisplay || cleanStart || cleanEnd) {
+    return `__META_DATES:${cleanDisplay}|${cleanStart}|${cleanEnd}__\n${text}`
+  }
+  return text
 }
 
 export async function GET(request: Request) {
@@ -69,11 +94,13 @@ export async function GET(request: Request) {
     if (error) throw error
 
     const enriched = (data || []).map((ann: any) => {
-      const { displayDate, content } = parseContentWithDisplayDate(ann.content)
+      const { displayDate, customStartDate, customEndDate, content } = parseContentWithDates(ann.content)
       return {
         ...ann,
         content,
-        display_date: displayDate
+        display_date: displayDate,
+        custom_start_date: customStartDate,
+        custom_end_date: customEndDate
       }
     })
 
@@ -108,10 +135,7 @@ export async function POST(request: Request) {
     const finalStartDate = start_date || todayStr
     const finalEndDate = end_date || '2099-12-31'
 
-    let finalContent = content
-    if (display_date && display_date.trim()) {
-      finalContent = `__DATE:${display_date.trim()}__\n${content}`
-    }
+    const finalContent = buildContentWithDates(content, display_date, start_date, end_date)
 
     // Map applies_to to lowercase check constraint ('all', '1:1', 'group')
     let mappedAppliesTo = (applies_to || 'all').toLowerCase()
@@ -192,18 +216,16 @@ export async function PATCH(request: Request) {
     } else {
       // General edits
       if (title !== undefined) updates.title = title
-      if (content !== undefined || display_date !== undefined) {
+      if (content !== undefined || display_date !== undefined || start_date !== undefined || end_date !== undefined) {
         const { data: existing } = await supabaseAdmin.from('announcements').select('content').eq('id', id).single()
-        const parsed = parseContentWithDisplayDate(existing?.content || '')
+        const parsed = parseContentWithDates(existing?.content || '')
 
         const textPart = content !== undefined ? content : parsed.content
         const datePart = display_date !== undefined ? display_date : parsed.displayDate
+        const startPart = start_date !== undefined ? start_date : parsed.customStartDate
+        const endPart = end_date !== undefined ? end_date : parsed.customEndDate
 
-        if (datePart && datePart.trim()) {
-          updates.content = `__DATE:${datePart.trim()}__\n${textPart}`
-        } else {
-          updates.content = textPart
-        }
+        updates.content = buildContentWithDates(textPart, datePart, startPart, endPart)
       }
       if (applies_to !== undefined) {
         let mappedAppliesTo = applies_to.toLowerCase()
