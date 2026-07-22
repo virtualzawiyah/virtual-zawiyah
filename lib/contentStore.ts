@@ -11,6 +11,7 @@ export interface CourseMetadata {
   highlights: string[]
   duration: string
   freeTrial: boolean
+  sortOrder?: number
 }
 
 // Default metadata for the 8 standard courses
@@ -166,8 +167,54 @@ export function saveMetadata(data: Record<string, CourseMetadata>) {
   }
 }
 
-export function getCourseMetadata(title: string, programType: string): CourseMetadata {
-  const metadata = loadMetadata()
+export async function getMetadataFromSupabase(supabaseAdmin: any): Promise<Record<string, CourseMetadata>> {
+  try {
+    const { data } = await supabaseAdmin
+      .from('announcements')
+      .select('content')
+      .eq('title', '__course_metadata_json__')
+      .maybeSingle()
+    if (data && data.content) {
+      return JSON.parse(data.content)
+    }
+  } catch (err) {
+    console.error('Error loading metadata from Supabase:', err)
+  }
+  return loadMetadata()
+}
+
+export async function saveMetadataToSupabase(supabaseAdmin: any, data: Record<string, CourseMetadata>) {
+  try {
+    saveMetadata(data) // Cache to filesystem
+    const { data: existing } = await supabaseAdmin
+      .from('announcements')
+      .select('id')
+      .eq('title', '__course_metadata_json__')
+      .maybeSingle()
+
+    if (existing) {
+      await supabaseAdmin
+        .from('announcements')
+        .update({ content: JSON.stringify(data) })
+        .eq('id', existing.id)
+    } else {
+      await supabaseAdmin
+        .from('announcements')
+        .insert([{
+          title: '__course_metadata_json__',
+          content: JSON.stringify(data),
+          applies_to: 'all',
+          start_date: '2020-01-01',
+          end_date: '2030-12-31'
+        }])
+    }
+  } catch (err) {
+    console.error('Error saving metadata to Supabase:', err)
+  }
+}
+
+export function getCourseMetadata(title: string, programType: string, customMetadata?: Record<string, CourseMetadata>): CourseMetadata {
+  const metadata = customMetadata || loadMetadata()
   const rawKey = title.toLowerCase().trim()
   // Clean key by removing trailing parenthetical tags like (1:1) or (group)
   const cleanKey = rawKey.replace(/\s*\([^)]*\)/g, '').trim()
@@ -295,15 +342,24 @@ export function getCourseMetadata(title: string, programType: string): CourseMet
   }
 }
 
-export function updateCourseMetadata(title: string, updates: Partial<CourseMetadata>, programType: string) {
-  const metadata = loadMetadata()
+export function updateCourseMetadata(
+  title: string,
+  updates: Partial<CourseMetadata>,
+  programType: string,
+  customMetadata?: Record<string, CourseMetadata>
+): Record<string, CourseMetadata> {
+  const metadata = customMetadata || loadMetadata()
   const key = title.toLowerCase().trim()
-  const current = metadata[key] || getCourseMetadata(title, programType)
+  const current = metadata[key] || getCourseMetadata(title, programType, metadata)
   metadata[key] = {
     ...current,
     ...updates,
     ...(updates.highlights && { highlights: updates.highlights }),
-    ...(updates.icon && { icon: updates.icon })
+    ...(updates.icon && { icon: updates.icon }),
+    ...(updates.sortOrder !== undefined && { sortOrder: updates.sortOrder })
   }
-  saveMetadata(metadata)
+  if (!customMetadata) {
+    saveMetadata(metadata)
+  }
+  return metadata
 }

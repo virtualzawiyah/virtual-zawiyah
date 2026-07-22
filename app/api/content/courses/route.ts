@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { getCourseMetadata, updateCourseMetadata } from '@/lib/contentStore'
+import { getCourseMetadata, updateCourseMetadata, getMetadataFromSupabase, saveMetadataToSupabase } from '@/lib/contentStore'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -124,7 +124,6 @@ export async function GET(request: Request) {
       .from('courses')
       .select('*')
       .eq('active', true)
-      .order('created_at', { ascending: false })
 
     if (error) throw error
 
@@ -136,17 +135,29 @@ export async function GET(request: Request) {
 
     const finalCourses = academicRows.length > 0 ? academicRows : DEFAULT_ACADEMIC_COURSES
 
+    // Load Supabase-backed metadata asynchronously
+    const dbMetadata = await getMetadataFromSupabase(supabaseAdmin)
+
     // Enrich courses with metadata from contentStore
     const enrichedCourses = finalCourses.map(course => {
-      const meta = getCourseMetadata(course.title, course.program_type)
+      const meta = getCourseMetadata(course.title, course.program_type, dbMetadata)
       return {
         ...course,
         description: course.description || meta.description,
         icon: meta.icon,
         highlights: meta.highlights,
         duration: meta.duration,
-        freeTrial: meta.freeTrial
+        freeTrial: meta.freeTrial,
+        sortOrder: meta.sortOrder !== undefined ? meta.sortOrder : 999
       }
+    })
+
+    // Sort by sortOrder, then by created_at descending
+    enrichedCourses.sort((a, b) => {
+      const orderA = a.sortOrder !== undefined ? a.sortOrder : 999
+      const orderB = b.sortOrder !== undefined ? b.sortOrder : 999
+      if (orderA !== orderB) return orderA - orderB
+      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
     })
 
     return NextResponse.json(enrichedCourses)
@@ -170,7 +181,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { title, program_type, base_fee, duration_months, description, highlights, icon } = body
+    const { title, program_type, base_fee, duration_months, description, highlights, icon, sortOrder } = body
 
     if (!title || !program_type || base_fee === undefined) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -192,16 +203,18 @@ export async function POST(request: Request) {
 
     if (error) throw error
 
-    // Store metadata in contentStore
-    if (description || (highlights && Array.isArray(highlights)) || icon) {
-      updateCourseMetadata(title, {
-        ...(description && { description }),
-        ...(highlights && { highlights }),
-        ...(icon && { icon })
-      }, program_type)
-    }
+    // Load and update metadata in Supabase
+    const dbMetadata = await getMetadataFromSupabase(supabaseAdmin)
+    const updatedMetadata = updateCourseMetadata(title, {
+      ...(description !== undefined && { description }),
+      ...(highlights && { highlights }),
+      ...(icon !== undefined && { icon }),
+      ...(sortOrder !== undefined && { sortOrder: Number(sortOrder) })
+    }, program_type, dbMetadata)
 
-    const meta = getCourseMetadata(title, program_type)
+    await saveMetadataToSupabase(supabaseAdmin, updatedMetadata)
+
+    const meta = getCourseMetadata(title, program_type, updatedMetadata)
 
     return NextResponse.json({
       ...newCourse,
@@ -209,7 +222,8 @@ export async function POST(request: Request) {
       icon: meta.icon,
       highlights: meta.highlights,
       duration: meta.duration,
-      freeTrial: meta.freeTrial
+      freeTrial: meta.freeTrial,
+      sortOrder: meta.sortOrder
     })
   } catch (err: any) {
     console.error('Courses POST error:', err)
@@ -231,7 +245,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json()
-    const { id, title, program_type, base_fee, duration_months, description, highlights, icon, active } = body
+    const { id, title, program_type, base_fee, duration_months, description, highlights, icon, sortOrder, active } = body
 
     if (!id) {
       return NextResponse.json({ error: 'Missing course ID' }, { status: 400 })
@@ -264,23 +278,33 @@ export async function PATCH(request: Request) {
 
     if (error) throw error
 
-    // If description/highlights/icon changed or title changed, update metadata
+    // Load and update metadata in Supabase
+    const dbMetadata = await getMetadataFromSupabase(supabaseAdmin)
+
     const finalTitle = title !== undefined ? title : existingCourse.title
     const finalProgramType = program_type !== undefined ? program_type : existingCourse.program_type
 
-    if (description !== undefined || (highlights && Array.isArray(highlights)) || icon !== undefined) {
-      updateCourseMetadata(finalTitle, {
+    let updatedMetadata = dbMetadata
+    if (description !== undefined || (highlights && Array.isArray(highlights)) || icon !== undefined || sortOrder !== undefined) {
+      updatedMetadata = updateCourseMetadata(finalTitle, {
         ...(description !== undefined && { description }),
         ...(highlights && { highlights }),
-        ...(icon !== undefined && { icon })
-      }, finalProgramType)
+        ...(icon !== undefined && { icon }),
+        ...(sortOrder !== undefined && { sortOrder: Number(sortOrder) })
+      }, finalProgramType, dbMetadata)
+      await saveMetadataToSupabase(supabaseAdmin, updatedMetadata)
     } else if (title !== undefined && title.toLowerCase() !== existingCourse.title.toLowerCase()) {
-      // Transfer old metadata to the new title key in metadata
-      const oldMeta = getCourseMetadata(existingCourse.title, existingCourse.program_type)
-      updateCourseMetadata(finalTitle, { description: oldMeta.description, highlights: oldMeta.highlights, icon: oldMeta.icon }, finalProgramType)
+      const oldMeta = getCourseMetadata(existingCourse.title, existingCourse.program_type, dbMetadata)
+      updatedMetadata = updateCourseMetadata(finalTitle, { 
+        description: oldMeta.description, 
+        highlights: oldMeta.highlights, 
+        icon: oldMeta.icon,
+        sortOrder: oldMeta.sortOrder
+      }, finalProgramType, dbMetadata)
+      await saveMetadataToSupabase(supabaseAdmin, updatedMetadata)
     }
 
-    const meta = getCourseMetadata(finalTitle, finalProgramType)
+    const meta = getCourseMetadata(finalTitle, finalProgramType, updatedMetadata)
 
     return NextResponse.json({
       ...updatedCourse,
@@ -288,7 +312,8 @@ export async function PATCH(request: Request) {
       icon: meta.icon,
       highlights: meta.highlights,
       duration: meta.duration,
-      freeTrial: meta.freeTrial
+      freeTrial: meta.freeTrial,
+      sortOrder: meta.sortOrder
     })
   } catch (err: any) {
     console.error('Courses PATCH error:', err)

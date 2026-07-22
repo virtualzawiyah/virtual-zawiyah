@@ -46,6 +46,7 @@ interface Course {
   category: '1:1' | 'Group'
   highlights?: string[]
   icon?: string
+  sortOrder?: number
 }
 
 interface FeeCard {
@@ -458,8 +459,18 @@ export default function ContentManagerDashboard() {
           price: `$${Number(c.base_fee)}`,
           category: c.program_type === 'group' ? 'Group' : '1:1',
           highlights: c.highlights || [],
-          icon: c.icon || '📖'
+          icon: c.icon || '📖',
+          sortOrder: c.sortOrder !== undefined ? c.sortOrder : 999
         }))
+
+      // Sort by sortOrder, then by name
+      mappedCourses.sort((a: any, b: any) => {
+        const orderA = a.sortOrder !== undefined ? a.sortOrder : 999
+        const orderB = b.sortOrder !== undefined ? b.sortOrder : 999
+        if (orderA !== orderB) return orderA - orderB
+        return a.name.localeCompare(b.name)
+      })
+
       setCourses(mappedCourses)
       
       // Map Fee Cards
@@ -729,6 +740,80 @@ export default function ContentManagerDashboard() {
       return updated
     })
     setDraggedHighlightIdx(null)
+  }
+
+  const handleMoveCourseUp = async (course: Course) => {
+    const list = courses.filter(c => c.category === course.category)
+    const index = list.findIndex(c => c.id === course.id)
+    if (index <= 0) return
+    
+    const prevCourse = list[index - 1]
+    const currentOrder = courses.map((c, idx) => ({ id: c.id, order: c.sortOrder !== undefined ? c.sortOrder : idx }))
+    
+    const targetItem = currentOrder.find(o => o.id === course.id)
+    const prevItem = currentOrder.find(o => o.id === prevCourse.id)
+    
+    if (targetItem && prevItem) {
+      const temp = targetItem.order
+      targetItem.order = prevItem.order
+      prevItem.order = temp
+      
+      try {
+        await Promise.all([
+          fetch('/api/content/courses', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: course.id, sortOrder: targetItem.order })
+          }),
+          fetch('/api/content/courses', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: prevCourse.id, sortOrder: prevItem.order })
+          })
+        ])
+        triggerToast(`Reordered "${course.name}" above "${prevCourse.name}".`)
+        await fetchData()
+      } catch (err: any) {
+        alert(`Error reordering courses: ${err.message}`)
+      }
+    }
+  }
+
+  const handleMoveCourseDown = async (course: Course) => {
+    const list = courses.filter(c => c.category === course.category)
+    const index = list.findIndex(c => c.id === course.id)
+    if (index >= list.length - 1) return
+    
+    const nextCourse = list[index + 1]
+    const currentOrder = courses.map((c, idx) => ({ id: c.id, order: c.sortOrder !== undefined ? c.sortOrder : idx }))
+    
+    const targetItem = currentOrder.find(o => o.id === course.id)
+    const nextItem = currentOrder.find(o => o.id === nextCourse.id)
+    
+    if (targetItem && nextItem) {
+      const temp = targetItem.order
+      targetItem.order = nextItem.order
+      nextItem.order = temp
+      
+      try {
+        await Promise.all([
+          fetch('/api/content/courses', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: course.id, sortOrder: targetItem.order })
+          }),
+          fetch('/api/content/courses', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: nextCourse.id, sortOrder: nextItem.order })
+          })
+        ])
+        triggerToast(`Reordered "${course.name}" below "${nextCourse.name}".`)
+        await fetchData()
+      } catch (err: any) {
+        alert(`Error reordering courses: ${err.message}`)
+      }
+    }
   }
 
   const confirmRemoveCourse = (course: Course) => {
@@ -1208,36 +1293,70 @@ export default function ContentManagerDashboard() {
                   </div>
 
                   <div className="space-y-3">
-                    {courses.filter(c => c.category === '1:1').map(course => (
+                    {courses.filter(c => c.category === '1:1').map((course, idx, list) => (
                       <div 
                         key={course.id} 
                         className="bg-white border border-zinc-200 rounded-2xl p-4 flex justify-between items-start gap-4 hover:border-zinc-300 transition-colors shadow-2xs"
                       >
-                        <div className="space-y-1 min-w-0">
-                          <h5 className="text-xs font-bold text-zinc-950 truncate">{course.name}</h5>
-                          <p className="text-[11px] text-zinc-750 font-medium leading-relaxed font-sans line-clamp-2">
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{course.icon || '📖'}</span>
+                            <h5 className="text-xs font-bold text-zinc-950 truncate">{course.name}</h5>
+                          </div>
+                          <p className="text-[11px] text-zinc-750 font-medium leading-relaxed font-sans line-clamp-2 mt-1">
                             {course.description}
                           </p>
-                          <span className="inline-block text-[10px] text-[#1B6B3A] font-bold bg-[#1B6B3A]/5 px-2 py-0.5 rounded mt-2">
-                            {course.price} / Month
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                            <span className="inline-block text-[10px] text-[#1B6B3A] font-bold bg-[#1B6B3A]/5 px-2 py-0.5 rounded">
+                              {course.price} / Month
+                            </span>
+                            {course.highlights && course.highlights.length > 0 && (
+                              <span className="text-[9px] font-bold text-zinc-500 bg-zinc-100 border border-zinc-200 px-1.5 py-0.5 rounded">
+                                {course.highlights.length} Specialities
+                              </span>
+                            )}
+                          </div>
                         </div>
 
-                        <div className="flex flex-col gap-1 shrink-0">
-                          <button
-                            onClick={() => openEditCourse(course)}
-                            className="p-2 border border-zinc-200 hover:bg-zinc-50 text-zinc-700 rounded-xl transition-colors active:scale-95"
-                            title="Edit Course"
-                          >
-                            <Edit className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={() => confirmRemoveCourse(course)}
-                            className="p-2 border border-rose-100 hover:bg-rose-50 text-rose-600 rounded-xl transition-colors active:scale-95"
-                            title="Remove Course"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                        <div className="flex items-center gap-1 shrink-0 self-center">
+                          {/* Reorder Buttons */}
+                          <div className="flex flex-col gap-0.5">
+                            <button
+                              type="button"
+                              disabled={idx === 0}
+                              onClick={() => handleMoveCourseUp(course)}
+                              className="p-1 hover:bg-zinc-150 text-zinc-650 disabled:opacity-20 rounded-md transition-colors"
+                              title="Move Course Up"
+                            >
+                              <ChevronUp className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={idx === list.length - 1}
+                              onClick={() => handleMoveCourseDown(course)}
+                              className="p-1 hover:bg-zinc-150 text-zinc-650 disabled:opacity-20 rounded-md transition-colors"
+                              title="Move Course Down"
+                            >
+                              <ChevronDown className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="flex flex-col gap-1 ml-1.5">
+                            <button
+                              onClick={() => openEditCourse(course)}
+                              className="p-2 border border-zinc-200 hover:bg-zinc-50 text-zinc-700 rounded-xl transition-colors active:scale-95"
+                              title="Edit Course"
+                            >
+                              <Edit className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => confirmRemoveCourse(course)}
+                              className="p-2 border border-rose-100 hover:bg-rose-50 text-rose-600 rounded-xl transition-colors active:scale-95"
+                              title="Remove Course"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1256,36 +1375,70 @@ export default function ContentManagerDashboard() {
                   </div>
 
                   <div className="space-y-3">
-                    {courses.filter(c => c.category === 'Group').map(course => (
+                    {courses.filter(c => c.category === 'Group').map((course, idx, list) => (
                       <div 
                         key={course.id} 
                         className="bg-white border border-zinc-200 rounded-2xl p-4 flex justify-between items-start gap-4 hover:border-zinc-300 transition-colors shadow-2xs"
                       >
-                        <div className="space-y-1 min-w-0">
-                          <h5 className="text-xs font-bold text-zinc-950 truncate">{course.name}</h5>
-                          <p className="text-[11px] text-zinc-750 font-medium leading-relaxed font-sans line-clamp-2">
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{course.icon || '🕌'}</span>
+                            <h5 className="text-xs font-bold text-zinc-950 truncate">{course.name}</h5>
+                          </div>
+                          <p className="text-[11px] text-zinc-750 font-medium leading-relaxed font-sans line-clamp-2 mt-1">
                             {course.description}
                           </p>
-                          <span className="inline-block text-[10px] text-amber-700 font-bold bg-amber-50 border border-amber-100 px-2 py-0.5 rounded mt-2">
-                            {course.price} / Month
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                            <span className="inline-block text-[10px] text-amber-700 font-bold bg-amber-50 border border-amber-100 px-2 py-0.5 rounded">
+                              {course.price} / Month
+                            </span>
+                            {course.highlights && course.highlights.length > 0 && (
+                              <span className="text-[9px] font-bold text-zinc-500 bg-zinc-100 border border-zinc-200 px-1.5 py-0.5 rounded">
+                                {course.highlights.length} Specialities
+                              </span>
+                            )}
+                          </div>
                         </div>
 
-                        <div className="flex flex-col gap-1 shrink-0">
-                          <button
-                            onClick={() => openEditCourse(course)}
-                            className="p-2 border border-zinc-200 hover:bg-zinc-50 text-zinc-700 rounded-xl transition-colors active:scale-95"
-                            title="Edit Course"
-                          >
-                            <Edit className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={() => confirmRemoveCourse(course)}
-                            className="p-2 border border-rose-100 hover:bg-rose-50 text-rose-600 rounded-xl transition-colors active:scale-95"
-                            title="Remove Course"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                        <div className="flex items-center gap-1 shrink-0 self-center">
+                          {/* Reorder Buttons */}
+                          <div className="flex flex-col gap-0.5">
+                            <button
+                              type="button"
+                              disabled={idx === 0}
+                              onClick={() => handleMoveCourseUp(course)}
+                              className="p-1 hover:bg-zinc-150 text-zinc-650 disabled:opacity-20 rounded-md transition-colors"
+                              title="Move Course Up"
+                            >
+                              <ChevronUp className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={idx === list.length - 1}
+                              onClick={() => handleMoveCourseDown(course)}
+                              className="p-1 hover:bg-zinc-150 text-zinc-650 disabled:opacity-20 rounded-md transition-colors"
+                              title="Move Course Down"
+                            >
+                              <ChevronDown className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="flex flex-col gap-1 ml-1.5">
+                            <button
+                              onClick={() => openEditCourse(course)}
+                              className="p-2 border border-zinc-200 hover:bg-zinc-50 text-zinc-700 rounded-xl transition-colors active:scale-95"
+                              title="Edit Course"
+                            >
+                              <Edit className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => confirmRemoveCourse(course)}
+                              className="p-2 border border-rose-100 hover:bg-rose-50 text-rose-600 rounded-xl transition-colors active:scale-95"
+                              title="Remove Course"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}

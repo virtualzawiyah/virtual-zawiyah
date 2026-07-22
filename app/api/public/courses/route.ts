@@ -105,7 +105,7 @@ const ACADEMIC_COURSES = [
   }
 ]
 
-import { getCourseMetadata } from '@/lib/contentStore'
+import { getCourseMetadata, getMetadataFromSupabase } from '@/lib/contentStore'
 
 export async function GET() {
   try {
@@ -131,18 +131,31 @@ export async function GET() {
     })
 
     if (dbAcademicCourses.length > 0) {
+      // Load Supabase-backed metadata asynchronously
+      const dbMetadata = await getMetadataFromSupabase(supabaseAdmin)
+
       // Enrich database academic courses using contentStore
       const enriched = dbAcademicCourses.map(c => {
-        const meta = getCourseMetadata(c.title, c.program_type)
+        const meta = getCourseMetadata(c.title, c.program_type, dbMetadata)
         return {
           ...c,
           icon: meta.icon || '📖',
           description: c.description || meta.description,
           duration: meta.duration || '30 / 60 min per session',
           freeTrial: meta.freeTrial !== undefined ? meta.freeTrial : true,
-          highlights: meta.highlights || []
+          highlights: meta.highlights || [],
+          sortOrder: meta.sortOrder !== undefined ? meta.sortOrder : 999
         }
       })
+
+      // Sort by sortOrder, then by created_at descending
+      enriched.sort((a, b) => {
+        const orderA = a.sortOrder !== undefined ? a.sortOrder : 999
+        const orderB = b.sortOrder !== undefined ? b.sortOrder : 999
+        if (orderA !== orderB) return orderA - orderB
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+      })
+
       return NextResponse.json(enriched)
     }
 
