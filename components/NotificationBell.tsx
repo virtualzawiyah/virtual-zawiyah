@@ -130,7 +130,7 @@ export default function NotificationBell({ align = 'right' }: NotificationBellPr
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const markAsRead = async (id: string, link: string | null) => {
+  const markAsRead = async (id: string, link: string | null, title?: string) => {
     // Optimistic UI update
     setNotifications(prev =>
       prev.map(n => (n.id === id ? { ...n, is_read: true } : n))
@@ -147,8 +147,9 @@ export default function NotificationBell({ align = 'right' }: NotificationBellPr
       console.error('Failed to mark notification as read:', err)
     }
 
-    if (link) {
-      router.push(link)
+    const targetLink = link || (title === 'Profile Edit Request' ? '/content-manager/dashboard' : null)
+    if (targetLink) {
+      router.push(targetLink)
       setIsOpen(false)
     }
   }
@@ -230,7 +231,7 @@ export default function NotificationBell({ align = 'right' }: NotificationBellPr
               notifications.map(notif => (
                 <div
                   key={notif.id}
-                  onClick={() => markAsRead(notif.id, notif.link)}
+                  onClick={() => markAsRead(notif.id, notif.link, notif.title)}
                   className={`px-4 py-3.5 hover:bg-gray-50/85 transition-colors cursor-pointer relative ${
                     !notif.is_read ? 'bg-primary/[0.02]' : ''
                   }`}
@@ -246,7 +247,7 @@ export default function NotificationBell({ align = 'right' }: NotificationBellPr
                       {formatTimeAgo(notif.created_at)}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-650 leading-relaxed break-words whitespace-normal">
+                  <p className="text-xs text-zinc-600 font-medium leading-relaxed break-words whitespace-normal">
                     {notif.message}
                   </p>
                   {!notif.is_read && (

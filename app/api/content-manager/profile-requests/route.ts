@@ -131,7 +131,14 @@ export async function POST(request: Request) {
 
       if (requestUpdateErr) throw requestUpdateErr
 
-      // 3. Notify the teacher of approval
+      // 3. Mark Content Manager notifications for this request as read
+      await supabaseAdmin
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('role', 'content_manager')
+        .eq('title', 'Profile Edit Request')
+
+      // 4. Notify the teacher of approval
       try {
         await createNotification({
           user_id: reqRow.teacher_id,
@@ -152,7 +159,14 @@ export async function POST(request: Request) {
 
       if (requestUpdateErr) throw requestUpdateErr
 
-      // 2. Notify the teacher of rejection
+      // 2. Mark Content Manager notifications for this request as read
+      await supabaseAdmin
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('role', 'content_manager')
+        .eq('title', 'Profile Edit Request')
+
+      // 3. Notify the teacher of rejection
       try {
         await createNotification({
           user_id: reqRow.teacher_id,
