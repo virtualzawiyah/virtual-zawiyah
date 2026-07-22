@@ -5,6 +5,9 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { createNotification } from '@/lib/notifications'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 // Helper to verify if session has content_manager or founder role
 async function checkAuth(supabaseUserClient: any, supabaseAdmin: any) {
   const { data: { session }, error: sessionError } = await supabaseUserClient.auth.getSession()
