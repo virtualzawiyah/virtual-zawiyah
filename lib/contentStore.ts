@@ -193,20 +193,26 @@ export async function saveMetadataToSupabase(supabaseAdmin: any, data: Record<st
       .maybeSingle()
 
     if (existing) {
-      await supabaseAdmin
+      const { error } = await supabaseAdmin
         .from('announcements')
         .update({ content: JSON.stringify(data) })
         .eq('id', existing.id)
+      if (error) console.error('Error updating metadata in Supabase:', error.message)
     } else {
-      await supabaseAdmin
+      const { data: profile } = await supabaseAdmin.from('profiles').select('id').limit(1).single()
+      const profileId = profile ? profile.id : null
+
+      const { error } = await supabaseAdmin
         .from('announcements')
         .insert([{
           title: '__course_metadata_json__',
           content: JSON.stringify(data),
           applies_to: 'all',
           start_date: '2020-01-01',
-          end_date: '2030-12-31'
+          end_date: '2030-12-31',
+          published_by: profileId
         }])
+      if (error) console.error('Error inserting metadata in Supabase:', error.message)
     }
   } catch (err) {
     console.error('Error saving metadata to Supabase:', err)
